@@ -1,0 +1,3382 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование переговорных комнат</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ======== ДИЗАЙН (взято из второго файла) ======== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root{
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #111113;
+            --bg-card: #18181b;
+            --bg-tertiary: #1c1c1f;
+            --bg-hover: #232326;
+            --bg-input: #27272a;
+            --border-color: #2e2e32;
+            --border-hover: #3f3f46;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+        body{
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header{
+            background:linear-gradient(180deg, var(--bg-card) 0%, rgba(59,130,246,0.03) 100%);
+            border-bottom:1px solid var(--border-color);
+            padding:20px 32px;
+            position:sticky;
+            top:0;
+            z-index:100;
+            backdrop-filter:blur(20px);
+            box-shadow:0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+            transition:all .3s ease;
+        }
+        .header:hover{
+            box-shadow:0 8px 32px rgba(59,130,246,0.12), 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .header-content{
+            max-width:1600px;
+            margin:0 auto;
+            display:grid;
+            grid-template-columns:auto 1fr auto;
+            align-items:center;
+            gap:20px;
+        }
+        .logo{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            text-decoration:none;
+            color:var(--text-primary);
+            transition:all .3s ease;
+            padding:8px 12px;
+            border-radius:var(--radius-md);
+            flex-shrink:0;
+            white-space:nowrap;
+        }
+        .logo:hover{
+            transform:translateX(4px);
+            background:rgba(59,130,246,0.05);
+        }
+        .logo-icon{
+            width:48px;
+            height:48px;
+            background:var(--gradient-primary);
+            border-radius:var(--radius-md);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:22px;
+            box-shadow:0 4px 12px rgba(59,130,246,0.3);
+            transition:all .3s ease;
+            position:relative;
+            overflow:hidden;
+        }
+        .logo-icon::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:-100%;
+            width:100%;
+            height:100%;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition:left .5s ease;
+        }
+        .logo:hover .logo-icon::before{
+            left:100%;
+        }
+        .logo:hover .logo-icon{
+            transform:scale(1.05) rotate(5deg);
+            box-shadow:0 6px 20px rgba(59,130,246,0.4);
+        }
+        .logo-text{
+            font-size:19px;
+            font-weight:700;
+            background:linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            background-clip:text;
+            transition:all .3s ease;
+        }
+        .logo:hover .logo-text{
+            background:linear-gradient(135deg, var(--accent-primary) 0%, #8b5cf6 100%);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            background-clip:text;
+        }
+        .header-actions{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            flex-shrink:0;
+        }
+        
+        /* Header Search */
+        .header-search{
+            width:100%;
+            max-width:500px;
+            min-width:300px;
+            margin:0 auto;
+            position:relative;
+            justify-self:center;
+        }
+        .header-search-input{
+            width:100%;
+            padding:14px 20px;
+            padding-right:52px;
+            background:var(--bg-tertiary);
+            border:2px solid var(--border-color);
+            border-radius:var(--radius-lg);
+            color:var(--text-primary);
+            font-size:14px;
+            font-family:inherit;
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline:none;
+            box-shadow:0 2px 8px rgba(0,0,0,0.04);
+        }
+        .header-search-input:hover{
+            border-color:rgba(59,130,246,0.3);
+            background:var(--bg-hover);
+            box-shadow:0 4px 12px rgba(59,130,246,0.08);
+            transform:translateY(-1px);
+        }
+        .header-search-input:focus{
+            border-color:var(--accent-primary);
+            background:var(--bg-card);
+            box-shadow:0 0 0 4px rgba(59,130,246,0.15), 0 6px 20px rgba(59,130,246,0.1);
+            transform:translateY(-2px);
+        }
+        .header-search-icon{
+            position:absolute;
+            right:18px;
+            top:50%;
+            transform:translateY(-50%);
+            color:var(--text-secondary);
+            font-size:18px;
+            pointer-events:none;
+            transition:all .3s ease;
+        }
+        .header-search-input:focus + .header-search-icon{
+            color:var(--accent-primary);
+            transform:translateY(-50%) scale(1.1);
+        }
+        @media (max-width:1200px){
+            .header-search{
+                max-width:400px;
+                min-width:250px;
+            }
+            .logo-text{
+                font-size:16px;
+            }
+        }
+        @media (max-width:1024px){
+            .header-search{
+                max-width:350px;
+                min-width:200px;
+            }
+            .header-content{
+                gap:16px;
+            }
+        }
+        @media (max-width:768px){
+            .header-search{
+                display:none;
+            }
+            .header-content{
+                gap:12px;
+            }
+            .logo-text{
+                font-size:15px;
+            }
+        }
+
+        /* Admin dropdown */
+        .admin-dropdown{
+            position:relative;
+            z-index:1000;
+        }
+        .admin-btn{
+            width:48px;
+            height:48px;
+            background:var(--bg-tertiary);
+            border:2px solid var(--border-color);
+            border-radius:var(--radius-md);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size:20px;
+            color:var(--text-primary);
+            box-shadow:0 2px 8px rgba(0,0,0,0.04);
+            position:relative;
+            overflow:hidden;
+        }
+        .admin-btn::before{
+            content:'';
+            position:absolute;
+            top:50%;
+            left:50%;
+            width:0;
+            height:0;
+            background:rgba(59,130,246,0.1);
+            border-radius:50%;
+            transform:translate(-50%, -50%);
+            transition:width .4s ease, height .4s ease;
+        }
+        .admin-btn:hover::before{
+            width:100%;
+            height:100%;
+        }
+        .admin-btn:hover{
+            background:var(--bg-hover);
+            border-color:var(--accent-primary);
+            transform:rotate(90deg) scale(1.05);
+            box-shadow:0 4px 16px rgba(59,130,246,0.2);
+        }
+        .admin-btn:active{
+            transform:rotate(90deg) scale(0.95);
+        }
+        .admin-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            min-width: 260px;
+            padding: 12px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(-6px);
+            transition: opacity .2s ease, transform .2s ease;
+            pointer-events: auto;
+            backdrop-filter: blur(20px);
+        }
+
+        .admin-dropdown::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 100%;
+            height: 18px; /* достаточная высота, чтобы перекрыть зазор */
+            background: transparent;
+            pointer-events: auto; /* важно — чтобы pointer оставался в пределах контейнера при переходе */
+        }
+        .admin-dropdown:hover .admin-menu{
+            animation:fadeInMenu .3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes fadeInMenu{
+            from{
+                opacity:0;
+                transform:translateY(-10px) scale(0.95);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0) scale(1);
+            }
+        }
+        .admin-menu a{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:14px 16px;
+            color:var(--text-secondary);
+            text-decoration:none;
+            border-radius:var(--radius-md);
+            font-size:14px;
+            font-weight:500;
+            transition:all .2s ease;
+            position:relative;
+            margin:2px 0;
+        }
+        .admin-menu a::before{
+            content:'';
+            position:absolute;
+            left:0;
+            top:50%;
+            transform:translateY(-50%);
+            width:3px;
+            height:0;
+            background:var(--gradient-primary);
+            border-radius:0 3px 3px 0;
+            transition:height .2s ease;
+        }
+        .admin-menu a:hover::before{
+            height:60%;
+        }
+        .admin-menu a:hover{
+            background:linear-gradient(90deg, rgba(59,130,246,0.1) 0%, transparent 100%);
+            color:var(--text-primary);
+            transform:translateX(4px);
+            border-left:3px solid transparent;
+        }
+        .admin-menu-divider{
+            height:1px;
+            background:linear-gradient(90deg, transparent, var(--border-color), transparent);
+            margin:10px 0;
+        }
+
+        /* User Profile Dropdown */
+        .user-profile-dropdown{
+            position:relative;
+            z-index:1000;
+        }
+        .user-profile-btn{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:10px 16px;
+            background:var(--bg-tertiary);
+            border:2px solid var(--border-color);
+            border-radius:var(--radius-md);
+            cursor:pointer;
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow:0 2px 8px rgba(0,0,0,0.04);
+            position:relative;
+            overflow:hidden;
+        }
+        .user-profile-btn::before{
+            content:'';
+            position:absolute;
+            top:50%;
+            left:50%;
+            width:0;
+            height:0;
+            background:rgba(59,130,246,0.1);
+            border-radius:50%;
+            transform:translate(-50%, -50%);
+            transition:width .4s ease, height .4s ease;
+        }
+        .user-profile-btn:hover::before{
+            width:100%;
+            height:100%;
+        }
+        .user-profile-btn:hover{
+            background:var(--bg-hover);
+            border-color:var(--accent-primary);
+            transform:translateY(-2px);
+            box-shadow:0 4px 16px rgba(59,130,246,0.2);
+        }
+        .user-profile-avatar{
+            width:36px;
+            height:36px;
+            border-radius:50%;
+            background:var(--gradient-primary);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-weight:600;
+            font-size:16px;
+            flex-shrink:0;
+            box-shadow:0 2px 8px rgba(59,130,246,0.3);
+        }
+        .user-profile-avatar svg{
+            width:20px;
+            height:20px;
+        }
+        .user-profile-info{
+            display:flex;
+            flex-direction:column;
+            align-items:flex-start;
+            min-width:0;
+        }
+        .user-profile-name{
+            font-size:14px;
+            font-weight:600;
+            color:var(--text-primary);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            max-width:120px;
+        }
+        .user-profile-role{
+            font-size:11px;
+            color:var(--text-muted);
+            white-space:nowrap;
+        }
+        .user-profile-menu{
+            display:none;
+            position:absolute;
+            right:0;
+            top:calc(100% + 8px);
+            background:var(--bg-card);
+            border:2px solid var(--border-color);
+            border-radius:var(--radius-lg);
+            min-width:320px;
+            max-width:400px;
+            max-height:600px;
+            box-shadow:0 12px 48px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.1);
+            opacity:0;
+            transform:translateY(-6px);
+            transition:opacity .2s ease, transform .2s ease;
+            pointer-events:auto;
+            backdrop-filter:blur(20px);
+            overflow:hidden;
+        }
+        .user-profile-dropdown::after{
+            content:'';
+            position:absolute;
+            top:100%;
+            right:0;
+            width:100%;
+            height:18px;
+            background:transparent;
+            pointer-events:auto;
+        }
+        .user-profile-dropdown:hover .user-profile-menu{
+            animation:fadeInMenu .3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .user-profile-menu-header{
+            padding:20px;
+            background:linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(139,92,246,0.1) 100%);
+            border-bottom:1px solid var(--border-color);
+        }
+        .user-profile-menu-user{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+        .user-profile-menu-avatar{
+            width:48px;
+            height:48px;
+            border-radius:50%;
+            background:var(--gradient-primary);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-weight:600;
+            font-size:18px;
+            flex-shrink:0;
+            box-shadow:0 4px 12px rgba(59,130,246,0.3);
+        }
+        .user-profile-menu-avatar svg{
+            width:24px;
+            height:24px;
+        }
+        .user-profile-menu-user-info{
+            flex:1;
+            min-width:0;
+        }
+        .user-profile-menu-user-name{
+            font-size:16px;
+            font-weight:600;
+            color:var(--text-primary);
+            margin-bottom:4px;
+        }
+        .user-profile-menu-user-role{
+            font-size:12px;
+            color:var(--text-muted);
+        }
+        .user-profile-menu-content{
+            padding:16px;
+            max-height:400px;
+            overflow-y:auto;
+        }
+        .user-profile-menu-section{
+            margin-bottom:20px;
+        }
+        .user-profile-menu-section-title{
+            font-size:12px;
+            font-weight:600;
+            color:var(--text-secondary);
+            text-transform:uppercase;
+            letter-spacing:0.5px;
+            margin-bottom:12px;
+            padding-bottom:8px;
+            border-bottom:1px solid var(--border-color);
+        }
+        .user-profile-menu-item{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:12px;
+            color:var(--text-secondary);
+            text-decoration:none;
+            border-radius:var(--radius-md);
+            font-size:14px;
+            font-weight:500;
+            transition:all .2s ease;
+            position:relative;
+            margin:2px 0;
+        }
+        .user-profile-menu-item::before{
+            content:'';
+            position:absolute;
+            left:0;
+            top:50%;
+            transform:translateY(-50%);
+            width:3px;
+            height:0;
+            background:var(--gradient-primary);
+            border-radius:0 3px 3px 0;
+            transition:height .2s ease;
+        }
+        .user-profile-menu-item:hover::before{
+            height:60%;
+        }
+        .user-profile-menu-item:hover{
+            background:linear-gradient(90deg, rgba(59,130,246,0.1) 0%, transparent 100%);
+            color:var(--text-primary);
+            transform:translateX(4px);
+        }
+        .user-profile-menu-item.logout{
+            color:var(--accent-danger);
+        }
+        .user-profile-menu-item.logout:hover{
+            background:linear-gradient(90deg, rgba(239,68,68,0.1) 0%, transparent 100%);
+        }
+        .user-profile-menu-item.logout::before{
+            background:linear-gradient(135deg, rgba(239,68,68,0.8) 0%, rgba(239,68,68,0.6) 100%);
+        }
+        .user-profile-menu-divider{
+            height:1px;
+            background:linear-gradient(90deg, transparent, var(--border-color), transparent);
+            margin:12px 0;
+        }
+        .user-profile-menu-bookings{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            max-height:200px;
+            overflow-y:auto;
+        }
+        .user-profile-menu-booking-item{
+            padding:10px;
+            background:var(--bg-tertiary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-md);
+            font-size:12px;
+            transition:all .2s ease;
+        }
+        .user-profile-menu-booking-item:hover{
+            background:var(--bg-hover);
+            border-color:var(--accent-primary);
+        }
+        .user-profile-menu-booking-room{
+            font-weight:600;
+            color:var(--text-primary);
+            margin-bottom:4px;
+        }
+        .user-profile-menu-booking-date{
+            color:var(--text-muted);
+            font-size:11px;
+        }
+        .user-profile-menu-booking-status{
+            display:inline-block;
+            padding:2px 8px;
+            border-radius:10px;
+            font-size:10px;
+            font-weight:600;
+            margin-top:4px;
+        }
+        .user-profile-menu-booking-status.pending{
+            background:rgba(245,158,11,0.1);
+            color:var(--accent-warning);
+        }
+        .user-profile-menu-booking-status.confirmed{
+            background:rgba(34,197,94,0.1);
+            color:var(--accent-success);
+        }
+        .user-profile-menu-booking-status.completed{
+            background:rgba(59,130,246,0.1);
+            color:var(--accent-primary);
+        }
+        .user-profile-menu-booking-status.cancelled{
+            background:rgba(239,68,68,0.1);
+            color:var(--accent-danger);
+        }
+        .user-profile-menu::-webkit-scrollbar{
+            width:6px;
+        }
+        .user-profile-menu::-webkit-scrollbar-track{
+            background:var(--bg-tertiary);
+            border-radius:3px;
+        }
+        .user-profile-menu::-webkit-scrollbar-thumb{
+            background:var(--border-color);
+            border-radius:3px;
+        }
+        .user-profile-menu::-webkit-scrollbar-thumb:hover{
+            background:var(--accent-primary);
+        }
+        .user-profile-menu-bookings::-webkit-scrollbar{
+            width:4px;
+        }
+        .user-profile-menu-bookings::-webkit-scrollbar-track{
+            background:transparent;
+        }
+        .user-profile-menu-bookings::-webkit-scrollbar-thumb{
+            background:var(--border-color);
+            border-radius:2px;
+        }
+        .user-profile-menu-bookings::-webkit-scrollbar-thumb:hover{
+            background:var(--accent-primary);
+        }
+
+        .logout-btn{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:12px 24px;
+            background:linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(239,68,68,0.05) 100%);
+            color:var(--accent-danger);
+            text-decoration:none;
+            border-radius:var(--radius-md);
+            border:2px solid rgba(239,68,68,0.2);
+            font-size:14px;
+            font-weight:600;
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow:0 2px 8px rgba(239,68,68,0.1);
+            position:relative;
+            overflow:hidden;
+        }
+        .logout-btn::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:-100%;
+            width:100%;
+            height:100%;
+            background:linear-gradient(90deg, transparent, rgba(239,68,68,0.1), transparent);
+            transition:left .5s ease;
+        }
+        .logout-btn:hover::before{
+            left:100%;
+        }
+        .logout-btn:hover{
+            background:linear-gradient(135deg, rgba(239,68,68,0.2) 0%, rgba(239,68,68,0.15) 100%);
+            border-color:rgba(239,68,68,0.4);
+            transform:translateY(-3px);
+            box-shadow:0 6px 20px rgba(239,68,68,0.2);
+        }
+        .logout-btn:active{
+            transform:translateY(-1px);
+        }
+
+        /* Добавляем стили для кнопок авторизации/регистрации */
+        .auth-btn{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:12px 24px;
+            text-decoration:none;
+            border-radius:var(--radius-md);
+            font-size:14px;
+            font-weight:600;
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            position:relative;
+            overflow:hidden;
+        }
+        .login-btn{
+            background:var(--gradient-primary);
+            color:white;
+            border:none;
+            box-shadow:0 4px 12px rgba(59,130,246,0.3);
+        }
+        .login-btn::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:-100%;
+            width:100%;
+            height:100%;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition:left .5s ease;
+        }
+        .login-btn:hover::before{
+            left:100%;
+        }
+        .login-btn:hover{
+            transform:translateY(-3px);
+            box-shadow:0 8px 24px rgba(59,130,246,0.4);
+        }
+        .login-btn:active{
+            transform:translateY(-1px);
+        }
+        .register-btn{
+            background:linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(34,197,94,0.05) 100%);
+            color:var(--accent-success);
+            border:2px solid rgba(34,197,94,0.2);
+            box-shadow:0 2px 8px rgba(34,197,94,0.1);
+        }
+        .register-btn:hover{
+            background:linear-gradient(135deg, rgba(34,197,94,0.2) 0%, rgba(34,197,94,0.15) 100%);
+            border-color:rgba(34,197,94,0.4);
+            transform:translateY(-3px);
+            box-shadow:0 6px 20px rgba(34,197,94,0.2);
+        }
+        .register-btn:active{
+            transform:translateY(-1px);
+        }
+
+        /* Main layout */
+        .main-container{
+            max-width:1600px;
+            margin:0 auto;
+            padding:32px;
+            background:linear-gradient(180deg, transparent 0%, rgba(59,130,246,0.02) 100%);
+            min-height:calc(100vh - 81px);
+        }
+        .main-layout{
+            display:flex;
+            gap:32px;
+            position:relative;
+        }
+
+        /* Sidebar (design from file 2) */
+        .sidebar{
+            width:88px;
+            flex-shrink:0;
+            transition:width .4s cubic-bezier(0.4, 0, 0.2, 1);
+            position:fixed;
+            top:120px;
+            left:32px;
+            height:fit-content;
+            z-index:50;
+        }
+        .sidebar:hover{
+            width:280px;
+            z-index:100;
+        }
+        .sidebar-content{
+            background:var(--bg-card);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-lg);
+            padding:16px;
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+            overflow:hidden;
+
+            box-shadow:0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+            backdrop-filter:blur(10px);
+            transition:all .4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar:hover .sidebar-content{
+            box-shadow:0 12px 48px rgba(59,130,246,0.15), 0 4px 16px rgba(0,0,0,0.1);
+            border-color:rgba(59,130,246,0.3);
+            margin-right: 15px;
+        }
+        .sidebar-item{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:14px 0;
+            background:transparent;
+            border:1px solid transparent;
+            border-radius:var(--radius-md);
+            color:var(--text-secondary);
+            text-decoration:none;
+            cursor:pointer;
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow:hidden;
+            white-space:nowrap;
+            position:relative;
+        }
+        .sidebar:hover .sidebar-item{
+            justify-content:flex-start;
+            padding:14px 16px;
+            gap:12px;
+        }
+        .sidebar-item::before{
+            content:'';
+            position:absolute;
+            left:0;
+            top:50%;
+            transform:translateY(-50%);
+            width:3px;
+            height:0;
+            background:var(--gradient-primary);
+            border-radius:0 3px 3px 0;
+            transition:height .3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-item:hover::before{
+            height:60%;
+        }
+        .sidebar-item:hover{
+            background:linear-gradient(90deg, rgba(59,130,246,0.08) 0%, transparent 100%);
+            border-color:rgba(59,130,246,0.2);
+            color:var(--text-primary);
+            transform:translateX(4px);
+        }
+        .sidebar-item .icon{font-size:20px;flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+        .sidebar-item-content{display:flex;flex-direction:column;min-width:0;opacity:0;width:0;overflow:hidden;transition:opacity .2s ease,width .3s ease;}
+        .sidebar:hover .sidebar-item-content{opacity:1;width:auto;}
+        .sidebar-item-title{font-size:14px;font-weight:500;color:var(--text-primary);}
+        .sidebar-item-desc{font-size:12px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;}
+        .user-section{
+            background:linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(139,92,246,0.12) 100%);
+            border-radius:var(--radius-md);
+            padding:12px 0;
+            margin-bottom:16px;
+            border:1px solid rgba(59,130,246,0.25);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration:none;
+            color:inherit;
+            cursor:pointer;
+            position:relative;
+            overflow:visible;
+            box-shadow:0 2px 8px rgba(59,130,246,0.1);
+        }
+        .user-section::before{
+            content:'';
+            position:absolute;
+            left:0;
+            top:0;
+            bottom:0;
+            width:4px;
+            background:var(--gradient-primary);
+            border-radius:0 4px 4px 0;
+            opacity:0;
+            transition:opacity .3s ease;
+        }
+        .user-section:hover::before{
+            opacity:1;
+        }
+        .user-section::after{
+            content:'';
+            position:absolute;
+            top:0;
+            left:0;
+            right:0;
+            bottom:0;
+            background:linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.08) 100%);
+            opacity:0;
+            transition:opacity .3s ease;
+        }
+        .user-section:hover::after{
+            opacity:1;
+        }
+        .user-section:hover{
+            background:linear-gradient(135deg, rgba(59,130,246,0.18) 0%, rgba(139,92,246,0.18) 100%);
+            border-color:rgba(59,130,246,0.4);
+            box-shadow:0 6px 20px rgba(59,130,246,0.2);
+            transform:translateX(4px);
+        }
+        .sidebar:hover .user-section{
+            padding:16px 20px;
+            justify-content:flex-start;
+        }
+        .user-main{
+            display:flex;
+            align-items:center;
+            gap:0;
+            width:100%;
+            justify-content:center;
+            position:relative;
+            z-index:1;
+        }
+        .sidebar:hover .user-main{
+            gap:14px;
+            justify-content:flex-start;
+        }
+        .user-avatar{
+            flex-shrink:0;
+            width:48px;
+            height:48px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:var(--gradient-primary);
+            border-radius:50%;
+            color:white;
+            box-shadow:0 4px 16px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            position:relative;
+            overflow:hidden;
+        }
+        .user-avatar::before{
+            content:'';
+            position:absolute;
+            top:-50%;
+            left:-50%;
+            width:200%;
+            height:200%;
+            background:linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform:rotate(45deg);
+            transition:transform .6s ease;
+        }
+        .user-section:hover .user-avatar::before{
+            transform:rotate(45deg) translate(100%, 100%);
+        }
+        .user-avatar svg{
+            width:24px;
+            height:24px;
+            position:relative;
+            z-index:1;
+            filter:drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+        }
+        .user-section:hover .user-avatar{
+            transform:scale(1.08) rotate(5deg);
+            box-shadow:0 8px 24px rgba(59,130,246,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        .user-info{
+            display:none;
+            flex-direction:column;
+            min-width:0;
+            gap:4px;
+        }
+        .sidebar:hover .user-info{
+            display:flex;
+            animation:fadeIn .3s ease;
+        }
+        @keyframes fadeIn{
+            from{opacity:0;transform:translateX(-8px);}
+            to{opacity:1;transform:translateX(0);}
+        }
+        .user-name{
+            font-size:15px;
+            font-weight:600;
+            color:var(--text-primary);
+            line-height:1.3;
+            white-space:nowrap;
+        }
+        .user-details{
+            font-size:12px;
+            color:var(--text-muted);
+            line-height:1.3;
+            white-space:nowrap;
+        }
+        .user-profile-label{
+            font-size:10px;
+            color:var(--text-secondary);
+            text-transform:uppercase;
+            letter-spacing:0.8px;
+            margin-top:2px;
+            white-space:nowrap;
+            font-weight:500;
+        }
+
+        /* Content Area & Filters */
+        .content-area{
+            flex:1;
+            min-width:0;
+            margin-left:120px; /* 88px sidebar + 32px gap */
+            animation:fadeInUp .5s ease;
+        }
+        @keyframes fadeInUp{
+            from{
+                opacity:0;
+                transform:translateY(20px);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+        .filters-card{
+            background:var(--bg-card);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-lg);
+            padding:28px;
+            margin-bottom:32px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow:visible;
+            position:relative;
+            z-index:1;
+        }
+        .filters-card::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:0;
+            right:0;
+            height:3px;
+            background:var(--gradient-primary);
+            border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+            opacity:0;
+            transition:opacity .3s ease;
+        }
+        .filters-card:hover::before{
+            opacity:1;
+        }
+        .filters-card:hover{
+            box-shadow:0 8px 32px rgba(59,130,246,0.12), 0 2px 8px rgba(0,0,0,0.08);
+            transform:translateY(-2px);
+            border-color:rgba(59,130,246,0.2);
+        }
+        .filters-card.collapsed{
+            padding:16px 24px;
+        }
+        .filters-card.collapsed .filters-grid{
+            max-height:0 !important;
+            opacity:0;
+            margin:0;
+            padding:0;
+            overflow:hidden;
+            pointer-events:none;
+        }
+        .filters-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:20px;
+        }
+        .filters-card.collapsed .filters-header{
+            margin-bottom:0;
+        }
+        .filters-title{
+            font-size:18px;
+            font-weight:700;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:var(--text-primary);
+        }
+        .filters-title::before{
+            content:'';
+            width:4px;
+            height:20px;
+            background:var(--gradient-primary);
+            border-radius:2px;
+        }
+        .filters-toggle-btn{
+            background:var(--bg-tertiary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-md);
+            padding:8px 12px;
+            cursor:pointer;
+            color:var(--text-secondary);
+            font-size:14px;
+            font-weight:500;
+            transition:all .2s ease;
+            display:flex;
+            align-items:center;
+            gap:6px;
+        }
+        .filters-toggle-btn:hover{
+            background:var(--bg-hover);
+            color:var(--text-primary);
+            border-color:var(--border-hover);
+        }
+        .filters-toggle-icon{
+            transition:transform .3s ease;
+            font-size:12px;
+        }
+        .filters-card.collapsed .filters-toggle-icon{
+            transform:rotate(180deg);
+        }
+        .filters-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+            gap:16px;
+            transition:max-height .3s ease, opacity .3s ease, margin .3s ease, padding .3s ease;
+            max-height:2000px;
+            opacity:1;
+            margin:0;
+            padding:0;
+            position:relative;
+            z-index:1;
+        }
+        .filter-group{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+        .price-filter-group{
+            position:relative;
+            z-index:10003;
+        }
+         .filter-group label{
+             font-size:11px;
+             color:var(--text-secondary);
+             font-weight:600;
+             text-transform:uppercase;
+             letter-spacing:0.5px;
+             margin-bottom:4px;
+             display:flex;
+             align-items:center;
+             justify-content:space-between;
+         }
+         .filter-reset-btn{
+             background:none;
+             border:none;
+             color:var(--text-secondary);
+             font-size:12px;
+             cursor:pointer;
+             padding:2px 6px;
+             border-radius:var(--radius-sm);
+             transition:all .2s ease;
+             opacity:0.6;
+             font-weight:400;
+         }
+         .filter-reset-btn:hover{
+             opacity:1;
+             color:var(--accent-danger);
+             background:rgba(239,68,68,0.1);
+         }
+        .filter-group input{
+            padding:12px 16px;
+            background:var(--bg-tertiary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-md);
+            color:var(--text-primary);
+            font-size:14px;
+            font-family:inherit;
+            transition:all .2s ease;
+            cursor:text;
+        }
+        .filter-group input:hover{
+            border-color:var(--border-hover);
+            background:var(--bg-hover);
+        }
+        .filter-group input:focus{
+            outline:none;
+            border-color:var(--accent-primary);
+            box-shadow:0 0 0 3px rgba(59,130,246,0.15);
+            background:var(--bg-card);
+        }
+        
+        /* Custom Dropdown Styles */
+        .custom-dropdown{
+            position:relative;
+            width:100%;
+            z-index:10001;
+        }
+        .custom-dropdown-btn{
+            width:100%;
+            padding:12px 16px;
+            padding-right:40px;
+            background:var(--bg-tertiary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-md);
+            color:var(--text-primary);
+            font-size:14px;
+            font-family:inherit;
+            transition:all .3s ease;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            text-align:left;
+            position:relative;
+        }
+        .custom-dropdown-btn:hover{
+            border-color:var(--accent-primary);
+            background:var(--bg-card);
+            box-shadow:0 2px 8px rgba(59,130,246,0.1);
+            transform:translateY(-1px);
+        }
+        .custom-dropdown-btn.active{
+            border-color:var(--accent-primary);
+            background:var(--bg-card);
+            box-shadow:0 0 0 3px rgba(59,130,246,0.15),0 4px 12px rgba(59,130,246,0.1);
+        }
+        .custom-dropdown-btn::after{
+            content:'';
+            position:absolute;
+            right:14px;
+            top:50%;
+            transform:translateY(-50%);
+            width:12px;
+            height:12px;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;
+            background-position:center;
+            background-size:contain;
+            transition:all .3s ease;
+        }
+        .custom-dropdown-btn:hover::after{
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233b82f6' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+        .custom-dropdown-btn.active::after{
+            transform:translateY(-50%) rotate(180deg);
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233b82f6' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+        .custom-dropdown-menu{
+            position:absolute;
+            top:calc(100% + 8px);
+            left:0;
+            right:0;
+            background:var(--bg-card);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-md);
+            box-shadow:0 8px 32px rgba(0,0,0,0.4);
+            z-index:10001;
+            max-height:300px;
+            overflow-y:auto;
+            opacity:0;
+            visibility:hidden;
+            transform:translateY(-10px);
+            transition:all .3s ease;
+            margin-top:4px;
+        }
+        .custom-dropdown-menu.active{
+            opacity:1;
+            visibility:visible;
+            transform:translateY(0);
+        }
+        .custom-dropdown-item{
+            padding:12px 16px;
+            color:var(--text-primary);
+            font-size:14px;
+            cursor:pointer;
+            transition:all .2s ease;
+            border-bottom:1px solid var(--border-color);
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .custom-dropdown-item:last-child{
+            border-bottom:none;
+        }
+        .custom-dropdown-item:hover{
+            background:var(--bg-hover);
+            color:var(--accent-primary);
+            padding-left:20px;
+        }
+        .custom-dropdown-item.selected{
+            background:linear-gradient(90deg, rgba(59,130,246,0.1) 0%, transparent 100%);
+            color:var(--accent-primary);
+            font-weight:600;
+            border-left:3px solid var(--accent-primary);
+        }
+         .custom-dropdown-item.selected:hover{
+             background:linear-gradient(90deg, rgba(59,130,246,0.15) 0%, var(--bg-hover) 100%);
+         }
+         /* Multi-select styles */
+         .custom-dropdown-item.multi-select{
+             position:relative;
+             padding-left:40px;
+         }
+         .custom-dropdown-item.multi-select::before{
+             content:'☐';
+             position:absolute;
+             left:16px;
+             font-size:16px;
+             color:var(--text-secondary);
+         }
+         .custom-dropdown-item.multi-select.selected::before{
+             content:'☑';
+             color:var(--accent-primary);
+         }
+         .custom-dropdown-btn.multi-select-btn{
+             padding-right:60px;
+         }
+         .custom-dropdown-btn .selected-count{
+             position:absolute;
+             right:40px;
+             font-size:11px;
+             color:var(--accent-primary);
+             font-weight:600;
+             background:rgba(59,130,246,0.1);
+             padding:2px 6px;
+             border-radius:10px;
+         }
+         .custom-dropdown-menu::-webkit-scrollbar{
+            width:6px;
+        }
+        .custom-dropdown-menu::-webkit-scrollbar-track{
+            background:var(--bg-tertiary);
+            border-radius:3px;
+        }
+        .custom-dropdown-menu::-webkit-scrollbar-thumb{
+            background:var(--border-color);
+            border-radius:3px;
+        }
+        .custom-dropdown-menu::-webkit-scrollbar-thumb:hover{
+            background:var(--accent-primary);
+        }
+        
+        /* Price Range Slider Styles */
+        .price-range-container{display:flex;flex-direction:column;gap:6px;}
+        .price-range-inputs{display:flex;flex-direction:column;gap:4px;position:relative;}
+        .price-slider{
+            width:100%;
+            height:5px;
+            border-radius:3px;
+            background:var(--bg-input);
+            outline:none;
+            -webkit-appearance:none;
+            appearance:none;
+        }
+        .price-slider::-webkit-slider-thumb{
+            -webkit-appearance:none;
+            appearance:none;
+            width:16px;
+            height:16px;
+            border-radius:50%;
+            background:var(--accent-primary);
+            cursor:pointer;
+            border:2px solid var(--bg-card);
+            box-shadow:0 2px 6px rgba(59,130,246,0.3);
+            transition:all .2s ease;
+        }
+        .price-slider::-webkit-slider-thumb:hover{
+            transform:scale(1.15);
+            box-shadow:0 4px 12px rgba(59,130,246,0.5);
+        }
+        .price-slider::-moz-range-thumb{
+            width:16px;
+            height:16px;
+            border-radius:50%;
+            background:var(--accent-primary);
+            cursor:pointer;
+            border:2px solid var(--bg-card);
+            box-shadow:0 2px 6px rgba(59,130,246,0.3);
+            transition:all .2s ease;
+        }
+        .price-slider::-moz-range-thumb:hover{
+            transform:scale(1.15);
+            box-shadow:0 4px 12px rgba(59,130,246,0.5);
+        }
+        .price-slider::-webkit-slider-runnable-track{
+            height:5px;
+            background:var(--bg-input);
+            border-radius:3px;
+        }
+        .price-slider::-moz-range-track{
+            height:5px;
+            background:var(--bg-input);
+            border-radius:3px;
+        }
+        .price-range-display{
+            text-align:center;
+            padding:6px 10px;
+            background:var(--bg-tertiary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-sm);
+            font-size:13px;
+            font-weight:600;
+            color:var(--accent-primary);
+        }
+        .filter-buttons{
+            display:flex;
+            gap:12px;
+            align-items:flex-end;
+        }
+        .filter-btn{
+            padding:12px 24px;
+            background:var(--bg-tertiary);
+            color:var(--text-secondary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-md);
+            cursor:pointer;
+            font-size:14px;
+            font-weight:500;
+            transition:all .2s ease;
+        }
+        .filter-btn:hover{
+            background:var(--bg-hover);
+            color:var(--text-primary);
+            transform:translateY(-2px);
+            box-shadow:0 4px 12px rgba(0,0,0,0.2);
+        }
+        .filter-btn-primary{background:var(--gradient-primary);color:white;border:none;font-weight:600;}
+        .filter-btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.3);}
+        
+        /* Price Filter Button */
+        .price-filter-btn{
+            width:100%;
+            padding:12px 16px;
+            background:var(--bg-tertiary);
+            color:var(--text-secondary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-md);
+            cursor:pointer;
+            font-size:14px;
+            font-weight:500;
+            transition:all .2s ease;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+        .price-filter-btn:hover{
+            background:var(--bg-hover);
+            color:var(--text-primary);
+            border-color:var(--border-hover);
+        }
+        .price-filter-icon{
+            font-size:10px;
+            transition:transform .2s ease;
+        }
+        .price-filter-btn.active .price-filter-icon{
+            transform:rotate(180deg);
+        }
+        
+        /* Price Modal */
+        .price-modal{
+            display:none;
+            position:absolute;
+            top:calc(100% + 8px);
+            left:0;
+            right:0;
+            background:var(--bg-card);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-md);
+            padding:20px;
+            box-shadow:0 8px 32px rgba(0,0,0,0.6);
+            z-index:10002;
+            min-width:280px;
+        }
+        .filter-group{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+        .price-filter-group{
+            position:relative;
+            z-index:10003;
+        }
+        .price-modal.active{
+            display:block;
+            animation:slideDown .2s ease;
+        }
+        @keyframes slideDown{
+            from{opacity:0;transform:translateY(-10px);}
+            to{opacity:1;transform:translateY(0);}
+        }
+        .price-modal-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:16px;
+        }
+        .price-modal-title{
+            font-size:16px;
+            font-weight:600;
+            color:var(--text-primary);
+        }
+        .price-modal-close{
+            background:none;
+            border:none;
+            color:var(--text-secondary);
+            font-size:20px;
+            cursor:pointer;
+            padding:4px 8px;
+            border-radius:var(--radius-sm);
+            transition:all .2s ease;
+        }
+        .price-modal-close:hover{
+            background:var(--bg-hover);
+            color:var(--text-primary);
+        }
+        .price-range-inputs{
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+        }
+        .price-input-group{
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+        .price-input-label{
+            font-size:13px;
+            color:var(--text-secondary);
+            font-weight:500;
+        }
+        .price-input-wrapper{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:10px 12px;
+            background:var(--bg-tertiary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-sm);
+        }
+        .price-number-input{
+            flex:1;
+            background:transparent;
+            border:none;
+            outline:none;
+            color:var(--text-primary);
+            font-size:14px;
+            font-weight:500;
+            width:100%;
+        }
+        .price-number-input::-webkit-inner-spin-button,
+        .price-number-input::-webkit-outer-spin-button{
+            -webkit-appearance:none;
+            margin:0;
+        }
+        .price-number-input[type=number]{
+            -moz-appearance:textfield;
+        }
+        .price-currency{
+            color:var(--text-secondary);
+            font-size:14px;
+            font-weight:500;
+        }
+        .price-slider{
+            width:100%;
+            height:6px;
+            border-radius:3px;
+            background:var(--bg-input);
+            outline:none;
+            -webkit-appearance:none;
+            appearance:none;
+            margin:12px 0;
+            cursor:pointer;
+        }
+        .price-slider::-webkit-slider-thumb{
+            -webkit-appearance:none;
+            appearance:none;
+            width:20px;
+            height:20px;
+            border-radius:50%;
+            background:var(--accent-primary);
+            cursor:pointer;
+            border:3px solid var(--bg-card);
+            box-shadow:0 2px 8px rgba(59,130,246,0.4);
+            transition:all .2s ease;
+            margin-top:-7px;
+        }
+        .price-slider::-webkit-slider-thumb:hover{
+            transform:scale(1.2);
+            box-shadow:0 4px 16px rgba(59,130,246,0.6);
+            background:#2563eb;
+        }
+        .price-slider::-webkit-slider-thumb:active{
+            transform:scale(1.1);
+        }
+        .price-slider::-moz-range-thumb{
+            width:20px;
+            height:20px;
+            border-radius:50%;
+            background:var(--accent-primary);
+            cursor:pointer;
+            border:3px solid var(--bg-card);
+            box-shadow:0 2px 8px rgba(59,130,246,0.4);
+            transition:all .2s ease;
+        }
+        .price-slider::-moz-range-thumb:hover{
+            transform:scale(1.2);
+            box-shadow:0 4px 16px rgba(59,130,246,0.6);
+            background:#2563eb;
+        }
+        .price-slider::-moz-range-thumb:active{
+            transform:scale(1.1);
+        }
+        .price-slider::-webkit-slider-runnable-track{
+            height:6px;
+            background:linear-gradient(to right, var(--bg-input) 0%, var(--accent-primary) 50%, var(--bg-input) 100%);
+            border-radius:3px;
+        }
+        .price-slider::-moz-range-track{
+            height:6px;
+            background:var(--bg-input);
+            border-radius:3px;
+        }
+        .price-value-display{
+            text-align:center;
+            padding:8px 12px;
+            background:var(--bg-tertiary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-sm);
+            font-size:14px;
+            font-weight:600;
+            color:var(--accent-primary);
+        }
+        .price-modal-apply{
+            width:100%;
+            margin-top:16px;
+            padding:12px;
+            background:var(--gradient-primary);
+            color:white;
+            border:none;
+            border-radius:var(--radius-md);
+            cursor:pointer;
+            font-size:14px;
+            font-weight:600;
+            transition:all .2s ease;
+        }
+         .price-modal-apply:hover{
+             transform:translateY(-2px);
+             box-shadow:0 6px 20px rgba(59,130,246,0.3);
+         }
+         
+         /* Capacity Modal (same as price modal) */
+         .capacity-modal{
+             display:none;
+             position:absolute;
+             top:calc(100% + 8px);
+             left:0;
+             right:0;
+             background:var(--bg-card);
+             border:1px solid var(--border-color);
+             border-radius:var(--radius-md);
+             padding:20px;
+             box-shadow:0 8px 32px rgba(0,0,0,0.6);
+             z-index:10002;
+             min-width:280px;
+         }
+         .capacity-modal.active{
+             display:block;
+             animation:slideDown .2s ease;
+         }
+         .capacity-filter-group{
+             position:relative;
+             z-index:10003;
+         }
+
+        /* Rooms Grid (design from file 2) */
+        .rooms-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+            gap:28px;
+            animation:fadeInUp .6s ease .1s both;
+        }
+        .room-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all .4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow:0 2px 12px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .room-card::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:0;
+            right:0;
+            height:4px;
+            background:var(--gradient-primary);
+            transform:scaleX(0);
+            transform-origin:left;
+            transition:transform .4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+        }
+        .room-card:hover::before{
+            transform:scaleX(1);
+        }
+        .room-card:hover{
+            transform:translateY(-8px) scale(1.02);
+            box-shadow:0 12px 40px rgba(59,130,246,0.15), 0 4px 16px rgba(0,0,0,0.1);
+            border-color:rgba(59,130,246,0.3);
+        }
+        .room-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+        }
+        .room-image{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            transition: transform .5s ease, opacity .3s ease;
+        }
+        .room-card:hover .room-image {
+            transform: scale(1.1);
+        }
+        .room-hover-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%);
+            opacity: 0;
+            transition: opacity .3s ease;
+            z-index: 1;
+            display: flex;
+            align-items: flex-end;
+            padding: 16px;
+        }
+        .room-card:hover .room-hover-overlay {
+            opacity: 1;
+        }
+        .room-hover-info {
+            color: white;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .room-hover-info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        .room-hover-info-item:last-child {
+            margin-bottom: 0;
+        }
+        .room-category-badge{
+            position:absolute;
+            top:12px;
+            left:12px;
+            padding:8px 16px;
+            border-radius:24px;
+            font-size:13px;
+            font-weight:700;
+            backdrop-filter:blur(12px);
+            z-index:4;
+            box-shadow:0 4px 12px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.2);
+            text-transform:uppercase;
+            letter-spacing:0.5px;
+            border:2px solid;
+            transition:all .3s ease;
+        }
+        .room-card:hover .room-category-badge{
+            transform:scale(1.05);
+            box-shadow:0 6px 16px rgba(0,0,0,0.4), 0 3px 8px rgba(0,0,0,0.3);
+        }
+        .badge-economy{
+            background:linear-gradient(135deg, rgba(34,197,94,0.95) 0%, rgba(22,163,74,0.95) 100%);
+            color:#ffffff;
+            border-color:rgba(34,197,94,1);
+            text-shadow:0 1px 2px rgba(0,0,0,0.2);
+        }
+        .badge-standard{
+            background:linear-gradient(135deg, rgba(59,130,246,0.95) 0%, rgba(37,99,235,0.95) 100%);
+            color:#ffffff;
+            border-color:rgba(59,130,246,1);
+            text-shadow:0 1px 2px rgba(0,0,0,0.2);
+        }
+        .badge-comfort{
+            background:linear-gradient(135deg, rgba(245,158,11,0.95) 0%, rgba(217,119,6,0.95) 100%);
+            color:#ffffff;
+            border-color:rgba(245,158,11,1);
+            text-shadow:0 1px 2px rgba(0,0,0,0.2);
+        }
+        .badge-vip{
+            background:linear-gradient(135deg, rgba(139,92,246,0.95) 0%, rgba(124,58,237,0.95) 100%);
+            color:#ffffff;
+            border-color:rgba(139,92,246,1);
+            text-shadow:0 1px 2px rgba(0,0,0,0.2);
+        }
+        .badge-luxury{
+            background:linear-gradient(135deg, rgba(239,68,68,0.95) 0%, rgba(220,38,38,0.95) 100%);
+            color:#ffffff;
+            border-color:rgba(239,68,68,1);
+            text-shadow:0 1px 2px rgba(0,0,0,0.2);
+        }
+        .room-status-badge{position:absolute;top:16px;right:16px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;backdrop-filter:blur(8px);}
+        .status-active{background:rgba(34,197,94,0.2);color:#4ade80;border:1px solid rgba(34,197,94,0.3);}
+        .status-hidden{background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.3);}
+
+        .room-content {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        }
+        .room-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+        .room-name{font-size:18px;font-weight:600;color:var(--text-primary);}
+.room-price {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    white-space: nowrap;
+    font-weight: 600;
+}
+        .room-price span{font-size:12px;font-weight:400;color:var(--text-muted);}
+        .room-location{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:13px;margin-bottom:16px;}
+        .room-features{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+        .room-feature{display:flex;align-items:center;gap:4px;padding:6px 12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary);}
+        .room-more-info {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(59,130,246,0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all .3s ease;
+            z-index: 3;
+            backdrop-filter: blur(8px);
+        }
+        .room-card:hover .room-more-info {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Empty state & messages */
+        .empty-state,.filter-results{ text-align:center;padding:60px 40px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);grid-column:1 / -1; }
+        .empty-state-icon{font-size:64px;margin-bottom:20px;}
+        .empty-state h3{font-size:20px;margin-bottom:8px;}
+        .empty-state p{color:var(--text-muted);}
+
+        .messages{position:fixed;top:100px;right:32px;z-index:1000;display:flex;flex-direction:column;gap:12px;}
+        .message{padding:16px 24px;border-radius:var(--radius-md);font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);animation:slideIn .3s ease;}
+        @keyframes slideIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+        .message-success{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:var(--accent-success);}
+        .message-error{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:var(--accent-danger);}
+        .message-warning{background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:var(--accent-warning);}
+
+        /* Responsive */
+        @media (max-width:1024px){ 
+            .sidebar{display:none;} 
+            .content-area{margin-left:0 !important;}
+            .main-container{padding:16px;} 
+        }
+        @media (max-width:768px){ 
+            .header{padding:12px 16px;} 
+            .rooms-grid{grid-template-columns:1fr;} 
+            .filters-grid{grid-template-columns:1fr;} 
+        }
+    </style>
+</head>
+<body>
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="{% url 'home' %}" class="logo">
+                <div class="logo-icon">🏢</div>
+                <span class="logo-text">Система бронирования переговоров</span>
+            </a>
+
+            <div class="header-search">
+                <input type="text" id="headerSearchInput" class="header-search-input" placeholder="Поиск комнат...">
+                <span class="header-search-icon">🔍</span>
+            </div>
+
+            <div class="header-actions">
+                <!-- Проверяем авторизован ли пользователь -->
+                {% if user.is_authenticated %}
+                    {% if user.role == 'admin' or user.role == 'manager' %}
+                    <div class="admin-dropdown">
+                        <button class="admin-btn">⚙</button>
+                        <div class="admin-menu">
+                            {% if user.role == 'admin' %}
+                            <a href="{% url 'admin_panel' %}">👥 Пользователи</a>
+                            <a href="{% url 'room_management_main' %}">🚪 Комнаты</a>
+                            <a href="{% url 'office_management' %}">🏢 Офисы</a>
+                            <a href="{% url 'database_backup' %}">💾 Резервное копирование</a>
+                            <div class="admin-menu-divider"></div>
+                            {% endif %}
+                            <a href="{% url 'manager_panel' %}">📋 Бронирования</a>
+                            <a href="{% url 'report_page' %}">📊 Отчёты бронирований</a>
+                            <a href="{% url 'users_report' %}">👥 Отчёты пользователей</a>
+                            <a href="{% url 'review_moderation' %}">⭐ Модерация отзывов</a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Dropdown профиля пользователя -->
+                    <div class="user-profile-dropdown">
+                        <button class="user-profile-btn">
+                            <div class="user-profile-avatar">
+                                {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                {% else %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="currentColor"/>
+                                    <path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" fill="currentColor"/>
+                                </svg>
+                                {% endif %}
+                            </div>
+                            <div class="user-profile-info">
+                                <span class="user-profile-name">{{ user.username }}</span>
+                                <span class="user-profile-role">{{ user.get_role_display }}</span>
+                            </div>
+                        </button>
+                        <div class="user-profile-menu">
+                            <div class="user-profile-menu-header">
+                                <div class="user-profile-menu-user">
+                                    <div class="user-profile-menu-avatar">
+                                        {% if user.avatar %}
+                                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                        {% else %}
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="currentColor"/>
+                                            <path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" fill="currentColor"/>
+                                        </svg>
+                                        {% endif %}
+                                    </div>
+                                    <div class="user-profile-menu-user-info">
+                                        <div class="user-profile-menu-user-name">{{ user.username }}</div>
+                                        <div class="user-profile-menu-user-role">{{ user.get_role_display }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="user-profile-menu-content">
+                                <div class="user-profile-menu-section">
+                                    <div class="user-profile-menu-section-title">Настройки</div>
+                                    <a href="{% url 'profile' %}" class="user-profile-menu-item">
+                                        <span>⚙️</span>
+                                        <span>Настройки профиля</span>
+                                    </a>
+                                </div>
+                                {% if recent_bookings %}
+                                <div class="user-profile-menu-section">
+                                    <div class="user-profile-menu-section-title">Последние бронирования</div>
+                                    <div class="user-profile-menu-bookings">
+                                        {% for booking in recent_bookings %}
+                                        <div class="user-profile-menu-booking-item">
+                                            <div class="user-profile-menu-booking-room">{{ booking.room.name }}</div>
+                                            <div class="user-profile-menu-booking-date">
+                                                {{ booking.start_time|date:"d.m.Y H:i" }} - {{ booking.end_time|date:"H:i" }}
+                                            </div>
+                                            <span class="user-profile-menu-booking-status {{ booking.status }}">
+                                                {% if booking.status == 'pending' %}⏳ Ожидает
+                                                {% elif booking.status == 'confirmed' %}✅ Подтверждено
+                                                {% elif booking.status == 'completed' %}✓ Завершено
+                                                {% elif booking.status == 'cancelled' %}❌ Отменено
+                                                {% else %}{{ booking.get_status_display }}{% endif %}
+                                            </span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <a href="{% url 'booking_history' %}" class="user-profile-menu-item" style="margin-top:8px;">
+                                        <span>📅</span>
+                                        <span>Все бронирования</span>
+                                    </a>
+                                </div>
+                                {% endif %}
+                                <div class="user-profile-menu-divider"></div>
+                                <a href="{% url 'logout' %}" class="user-profile-menu-item logout">
+                                    <span>🚪</span>
+                                    <span>Выйти</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Для гостей показываем кнопку входа -->
+                    <a href="{% url 'login' %}" class="auth-btn login-btn">
+                        🔐 Войти
+                    </a>
+                    <a href="{% url 'register' %}" class="auth-btn register-btn">
+                        📝 Регистрация
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-content">
+                    <!-- Секция пользователя (объединена с профилем) только для авторизованных - ПЕРВАЯ -->
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="user-section">
+                        <div class="user-main">
+                            <div class="user-avatar">
+                                {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                {% else %}
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="currentColor"/>
+                                    <path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" fill="currentColor"/>
+                                </svg>
+                                {% endif %}
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name">{{ user.username }}</span>
+                                <span class="user-details">{{ user.get_role_display }}</span>
+                                <span class="user-profile-label">Профиль</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endif %}
+
+                    <!-- Элементы для авторизованных пользователей -->
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'booking_history' %}" class="sidebar-item">
+                        <span class="icon">📅</span>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-item-title">Мои бронирования</span>
+                            <span class="sidebar-item-desc">История бронирований</span>
+                        </div>
+                    </a>
+                    <a href="{% url 'my_reviews' %}" class="sidebar-item">
+                        <span class="icon">⭐</span>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-item-title">Мои отзывы</span>
+                            <span class="sidebar-item-desc">Отзывы о комнатах</span>
+                        </div>
+                    </a>
+                    {% endif %}
+
+                    <a href="{% url 'offices' %}" class="sidebar-item">
+                        <span class="icon">🏢</span>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-item-title">Офисы</span>
+                            <span class="sidebar-item-desc">Карта и контакты</span>
+                        </div>
+                    </a>
+                    <a href="{% url 'support' %}" class="sidebar-item">
+                        <span class="icon">💬</span>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-item-title">Поддержка</span>
+                            <span class="sidebar-item-desc">FAQ и обращения</span>
+                        </div>
+                    </a>
+                    <a href="{% url 'info' %}" class="sidebar-item">
+                        <span class="icon">ℹ️</span>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-item-title">Информация</span>
+                            <span class="sidebar-item-desc">Правила и инструкции</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Filters -->
+                <div class="filters-card" id="filtersCard">
+                    <div class="filters-header">
+                        <div class="filters-title">🔍 Фильтры поиска</div>
+                        <button type="button" class="filters-toggle-btn" id="filtersToggleBtn">
+                            <span>Скрыть</span>
+                            <span class="filters-toggle-icon">▼</span>
+                        </button>
+                    </div>
+                     <div class="filters-grid" id="filtersGrid">
+                        <div class="filter-group">
+                            <label>
+                                Название комнаты
+                                <button type="button" class="filter-reset-btn" onclick="resetSearchFilter()" title="Сбросить">✕</button>
+                            </label>
+                            <input type="text" id="searchInput" placeholder="Введите название...">
+                        </div>
+
+                        <div class="filter-group">
+                            <label>
+                                Категория
+                                <button type="button" class="filter-reset-btn" onclick="resetCategoryFilter()" title="Сбросить">✕</button>
+                            </label>
+                            <div class="custom-dropdown">
+                                <button type="button" class="custom-dropdown-btn multi-select-btn" id="categoryFilterBtn">
+                                    <span>Все категории</span>
+                                    <span class="selected-count" id="categorySelectedCount" style="display:none;">0</span>
+                                </button>
+                                <div class="custom-dropdown-menu" id="categoryFilterMenu">
+                                    <div class="custom-dropdown-item multi-select selected" data-value="all">Все категории</div>
+                                    <div class="custom-dropdown-item multi-select" data-value="economy">🟢 Эконом</div>
+                                    <div class="custom-dropdown-item multi-select" data-value="standard">🔵 Стандарт</div>
+                                    <div class="custom-dropdown-item multi-select" data-value="comfort">🟡 Комфорт</div>
+                                    <div class="custom-dropdown-item multi-select" data-value="vip">🟣 VIP</div>
+                                    <div class="custom-dropdown-item multi-select" data-value="luxury">🔴 Люкс</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="filter-group price-filter-group">
+                            <label>
+                                Цена за час
+                                <button type="button" class="filter-reset-btn" onclick="resetPriceFilter()" title="Сбросить">✕</button>
+                            </label>
+                            <button type="button" id="priceFilterBtn" class="price-filter-btn">
+                                <span id="priceRangeDisplay">Любая цена</span>
+                                <span class="price-filter-icon">▼</span>
+                            </button>
+                            <div id="priceModal" class="price-modal">
+                                <div class="price-modal-header">
+                                    <span class="price-modal-title">Выберите диапазон цен</span>
+                                    <button type="button" class="price-modal-close" id="priceModalClose">×</button>
+                                </div>
+                                <div class="price-range-inputs">
+                                    <div class="price-input-group">
+                                        <label class="price-input-label">От:</label>
+                                        <div class="price-input-wrapper">
+                                            <input type="number" id="priceMinInput" min="0" max="10000" step="1" value="0" class="price-number-input" placeholder="0">
+                                            <span class="price-currency">₽</span>
+                                        </div>
+                                        <input type="range" id="priceMin" min="0" max="10000" step="1" value="0" class="price-slider">
+                                    </div>
+                                    <div class="price-input-group">
+                                        <label class="price-input-label">До:</label>
+                                        <div class="price-input-wrapper">
+                                            <input type="number" id="priceMaxInput" min="0" max="10000" step="1" value="10000" class="price-number-input" placeholder="10000">
+                                            <span class="price-currency">₽</span>
+                                        </div>
+                                        <input type="range" id="priceMax" min="0" max="10000" step="1" value="10000" class="price-slider">
+                                    </div>
+                                    <div class="price-value-display">
+                                        <span id="priceRangeModalDisplay">0 - 10000 ₽</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="price-modal-apply" id="priceModalApply">Применить</button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group capacity-filter-group">
+                            <label>
+                                Вместимость
+                                <button type="button" class="filter-reset-btn" onclick="resetCapacityFilter()" title="Сбросить">✕</button>
+                            </label>
+                            <button type="button" id="capacityFilterBtn" class="price-filter-btn">
+                                <span id="capacityRangeDisplay">Любая вместимость</span>
+                                <span class="price-filter-icon">▼</span>
+                            </button>
+                            <div id="capacityModal" class="capacity-modal">
+                                <div class="price-modal-header">
+                                    <span class="price-modal-title">Выберите диапазон вместимости</span>
+                                    <button type="button" class="price-modal-close" id="capacityModalClose">×</button>
+                                </div>
+                                <div class="price-range-inputs">
+                                    <div class="price-input-group">
+                                        <label class="price-input-label">От:</label>
+                                        <div class="price-input-wrapper">
+                                            <input type="number" id="capacityMinInput" min="2" max="20" step="1" value="1" class="price-number-input" placeholder="1">
+                                            <span class="price-currency">чел.</span>
+                                        </div>
+                                        <input type="range" id="capacityMin" min="2" max="20" step="1" value="1" class="price-slider">
+                                    </div>
+                                    <div class="price-input-group">
+                                        <label class="price-input-label">До:</label>
+                                        <div class="price-input-wrapper">
+                                            <input type="number" id="capacityMaxInput" min="2" max="20" step="1" value="100" class="price-number-input" placeholder="100">
+                                            <span class="price-currency">чел.</span>
+                                        </div>
+                                        <input type="range" id="capacityMax" min="2" max="20" step="1" value="100" class="price-slider">
+                                    </div>
+                                    <div class="price-value-display">
+                                        <span id="capacityRangeModalDisplay">2 - 20 чел.</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="price-modal-apply" id="capacityModalApply">Применить</button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>
+                                Офис
+                                <button type="button" class="filter-reset-btn" onclick="resetOfficeFilter()" title="Сбросить">✕</button>
+                            </label>
+                            <div class="custom-dropdown">
+                                <button type="button" class="custom-dropdown-btn multi-select-btn" id="officeFilterBtn">
+                                    <span>Все офисы</span>
+                                    <span class="selected-count" id="officeSelectedCount" style="display:none;">0</span>
+                                </button>
+                                <div class="custom-dropdown-menu" id="officeFilterMenu">
+                                    <div class="custom-dropdown-item multi-select selected" data-value="all">Все офисы</div>
+                                    {% for office in offices %}
+                                    <div class="custom-dropdown-item multi-select" data-value="{{ office.id }}">{{ office.name }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if user.is_authenticated and user.role == 'admin' or user.role == 'manager' %}
+                        <div class="filter-group">
+                            <label>
+                                Статус комнаты
+                                <button type="button" class="filter-reset-btn" onclick="resetStatusFilter()" title="Сбросить">✕</button>
+                            </label>
+                            <div class="custom-dropdown">
+                                <button type="button" class="custom-dropdown-btn multi-select-btn" id="statusFilterBtn">
+                                    <span>Все статусы</span>
+                                    <span class="selected-count" id="statusSelectedCount" style="display:none;">0</span>
+                                </button>
+                                <div class="custom-dropdown-menu" id="statusFilterMenu">
+                                    <div class="custom-dropdown-item multi-select selected" data-value="all">Все статусы</div>
+                                    <div class="custom-dropdown-item multi-select" data-value="active">✅ Активна</div>
+                                    <div class="custom-dropdown-item multi-select" data-value="hidden">🔒 Скрыта</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="filter-buttons">
+                            <button onclick="resetFilters()" class="filter-btn">Сбросить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rooms Grid -->
+                <div class="rooms-grid" id="roomsGrid">
+                    {% for room in rooms %}
+                    <a href="{% url 'room_detail' room.id %}" class="room-card"
+                         data-name="{{ room.name|lower }}"
+                         data-price="{{ room.price_per_hour|default:0 }}"
+                         data-capacity="{{ room.capacity|default:0 }}"
+                         data-category="{{ room.category|default:'' }}"
+                         data-office="{{ room.office.id|default:'' }}"
+                         data-status="{{ room.status|default:'active' }}">
+
+                        <div class="room-image-wrapper">
+                            {% if room.image %}
+                            <img src="{{ room.image.url }}" alt="{{ room.name }}" class="room-image">
+                            {% else %}
+                            <div class="room-image" style="display:flex;align-items:center;justify-content:center;font-size:48px;background:var(--bg-tertiary);">🚪</div>
+                            {% endif %}
+                            
+                            <div class="room-hover-overlay">
+                                <div class="room-hover-info">
+                                    {% if room.equipment %}
+                                    <div class="room-hover-info-item">
+                                        <span>🛠️</span>
+                                        <span>{{ room.equipment|truncatewords:10 }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if room.amenities %}
+                                    <div class="room-hover-info-item">
+                                        <span>✨</span>
+                                        <span>
+                                            {% for amenity in room.amenities|slice:":3" %}
+                                                {{ amenity }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                            {% if room.amenities|length > 3 %}...{% endif %}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="room-more-info">Подробнее →</div>
+                        </div>
+
+                        <span class="room-category-badge badge-{{ room.category }}">
+                            {% if room.category == 'economy' %}🟢 Эконом
+                            {% elif room.category == 'standard' %}🔵 Стандарт
+                            {% elif room.category == 'comfort' %}🟡 Комфорт
+                            {% elif room.category == 'vip' %}🟣 VIP
+                            {% elif room.category == 'luxury' %}🔴 Люкс
+                            {% endif %}
+                        </span>
+
+                        {% if user.is_authenticated and user.role == 'admin' or user.role == 'manager' %}
+                        <!-- Показываем только active/hidden (maintenance будет считаться hidden) -->
+                        <span class="room-status-badge status-{{ room.status }}">
+                            {% if room.status == 'active' %}✅ Активна{% else %}🔒 Скрыта{% endif %}
+                        </span>
+                        {% endif %}
+
+                        <div class="room-content">
+                            <div class="room-header">
+                                <h3 class="room-name">{{ room.name }}</h3>
+                                <div class="room-price">
+                                    {{ room.price_per_hour }} ₽ / час
+                                </div>
+                            </div>
+
+                            <div class="room-location">📍 {{ room.location }}</div>
+
+                            <div class="room-features">
+                                <div class="room-feature">👥 {{ room.capacity }} чел.</div>
+                                {% if room.equipment %}
+                                <div class="room-feature">🛠️ {{ room.equipment|truncatewords:3 }}</div>
+                                {% endif %}
+                                {% if room.office %}
+                                <div class="room-feature">🏢 {{ room.office.name }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <h3>Комнаты не найдены</h3>
+                        <p>Попробуйте изменить параметры фильтрации</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ===== JS: функционал (объединённый и адаптированный) =====
+        // Поведение: фильтрация по имени, категории, цене, вместимости, офису, статусу (admin/manager).
+        // ВАЖНО: статус 'maintenance' считается hidden (то есть как 'hidden') — по твоему выбору.
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const headerSearchInput = document.getElementById('headerSearchInput');
+            const categorySelect = document.getElementById('categoryFilter');
+            
+            // Синхронизация поиска в header с поиском в фильтрах
+            if (headerSearchInput && searchInput) {
+                // При вводе в header поиск обновляется в фильтрах
+                headerSearchInput.addEventListener('input', function() {
+                    searchInput.value = this.value;
+                    applyFilters();
+                });
+                
+                // При вводе в фильтрах поиск обновляется в header
+                searchInput.addEventListener('input', function() {
+                    headerSearchInput.value = this.value;
+                });
+                
+                // Поиск по Enter в header
+                headerSearchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        searchInput.value = this.value;
+                        applyFilters();
+                        // Прокрутка к результатам
+                        const filtersCard = document.getElementById('filtersCard');
+                        if (filtersCard) {
+                            filtersCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                });
+            }
+            const priceMin = document.getElementById('priceMin');
+            const priceMax = document.getElementById('priceMax');
+            const priceMinInput = document.getElementById('priceMinInput');
+            const priceMaxInput = document.getElementById('priceMaxInput');
+            const capacityMin = document.getElementById('capacityMin');
+            const capacityMax = document.getElementById('capacityMax');
+            const capacityMinInput = document.getElementById('capacityMinInput');
+            const capacityMaxInput = document.getElementById('capacityMaxInput');
+            const priceFilterBtn = document.getElementById('priceFilterBtn');
+            const priceModal = document.getElementById('priceModal');
+            const priceModalClose = document.getElementById('priceModalClose');
+            const priceModalApply = document.getElementById('priceModalApply');
+            const capacityFilterBtn = document.getElementById('capacityFilterBtn');
+            const capacityModal = document.getElementById('capacityModal');
+            const capacityModalClose = document.getElementById('capacityModalClose');
+            const capacityModalApply = document.getElementById('capacityModalApply');
+
+            if (searchInput) searchInput.addEventListener('input', applyFilters);
+
+            // Инициализация мультиселект dropdown
+            function initMultiSelectDropdown(btnId, menuId, countId) {
+                const btn = document.getElementById(btnId);
+                const menu = document.getElementById(menuId);
+                const countEl = document.getElementById(countId);
+                
+                if (!btn || !menu) return;
+                
+                // Открытие/закрытие меню
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Закрываем все другие dropdown и модальные окна
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(m => {
+                        if (m !== menu) {
+                            m.classList.remove('active');
+                            m.closest('.custom-dropdown')?.querySelector('.custom-dropdown-btn')?.classList.remove('active');
+                        }
+                    });
+                    document.querySelectorAll('.price-modal, .capacity-modal').forEach(m => m.classList.remove('active'));
+                    
+                    menu.classList.toggle('active');
+                    btn.classList.toggle('active');
+                });
+                
+                // Выбор опции (мультиселект)
+                menu.querySelectorAll('.custom-dropdown-item').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const value = this.dataset.value;
+                        
+                        // Если выбрано "Все", снимаем все остальные
+                        if (value === 'all') {
+                            menu.querySelectorAll('.custom-dropdown-item').forEach(i => {
+                                i.classList.remove('selected');
+                            });
+                            this.classList.add('selected');
+                            btn.querySelector('span:first-child').textContent = 'Все ' + (btnId.includes('category') ? 'категории' : btnId.includes('office') ? 'офисы' : 'статусы');
+                            if (countEl) countEl.style.display = 'none';
+                        } else {
+                            // Снимаем "Все"
+                            const allItem = menu.querySelector('.custom-dropdown-item[data-value="all"]');
+                            if (allItem) allItem.classList.remove('selected');
+                            
+                            // Переключаем выбранный элемент
+                            this.classList.toggle('selected');
+                            
+                            // Подсчитываем выбранные
+                            const selected = menu.querySelectorAll('.custom-dropdown-item.selected');
+                            const selectedCount = selected.length;
+                            
+                            if (selectedCount === 0) {
+                                // Если ничего не выбрано, выбираем "Все"
+                                if (allItem) {
+                                    allItem.classList.add('selected');
+                                    btn.querySelector('span:first-child').textContent = 'Все ' + (btnId.includes('category') ? 'категории' : btnId.includes('office') ? 'офисы' : 'статусы');
+                                    if (countEl) countEl.style.display = 'none';
+                                }
+                            } else {
+                                // Показываем количество выбранных
+                                if (countEl) {
+                                    countEl.textContent = selectedCount;
+                                    countEl.style.display = 'inline-block';
+                                }
+                                // Обновляем текст кнопки
+                                if (selectedCount === 1) {
+                                    btn.querySelector('span:first-child').textContent = selected[0].textContent.trim();
+                                } else {
+                                    btn.querySelector('span:first-child').textContent = 'Выбрано: ' + selectedCount;
+                                }
+                            }
+                        }
+                        
+                        // Применяем фильтры
+                        applyFilters();
+                    });
+                });
+            }
+            
+            // Инициализируем мультиселект dropdown
+            initMultiSelectDropdown('categoryFilterBtn', 'categoryFilterMenu', 'categorySelectedCount');
+            initMultiSelectDropdown('officeFilterBtn', 'officeFilterMenu', 'officeSelectedCount');
+            const statusFilterBtn = document.getElementById('statusFilterBtn');
+            const statusFilterMenu = document.getElementById('statusFilterMenu');
+            if (statusFilterBtn && statusFilterMenu) {
+                initMultiSelectDropdown('statusFilterBtn', 'statusFilterMenu', 'statusSelectedCount');
+            }
+            
+            // Закрытие dropdown при клике вне его
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.custom-dropdown') && !e.target.closest('.price-modal') && !e.target.closest('.capacity-modal')) {
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
+                        menu.classList.remove('active');
+                        menu.closest('.custom-dropdown')?.querySelector('.custom-dropdown-btn')?.classList.remove('active');
+                    });
+                }
+            });
+            
+            // Управление модальным окном вместимости
+            if (capacityFilterBtn && capacityModal) {
+                capacityFilterBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isOpening = !capacityModal.classList.contains('active');
+                    
+                    if (isOpening) {
+                        // При открытии синхронизируем все значения
+                        if (capacityMin && capacityMinInput) {
+                            capacityMinInput.value = capacityMin.value;
+                        }
+                        if (capacityMax && capacityMaxInput) {
+                            capacityMaxInput.value = capacityMax.value;
+                        }
+                        updateCapacityModalDisplay();
+                    }
+                    
+                    capacityModal.classList.toggle('active');
+                    capacityFilterBtn.classList.toggle('active');
+                });
+            }
+
+            if (capacityModalClose) {
+                capacityModalClose.addEventListener('click', function() {
+                    capacityModal.classList.remove('active');
+                    capacityFilterBtn.classList.remove('active');
+                });
+            }
+
+            // Закрытие модального окна вместимости при клике вне его
+            document.addEventListener('click', function(e) {
+                if (capacityModal && capacityFilterBtn && !capacityModal.contains(e.target) && !capacityFilterBtn.contains(e.target)) {
+                    capacityModal.classList.remove('active');
+                    capacityFilterBtn.classList.remove('active');
+                }
+            });
+            
+            // Синхронизация ползунков вместимости с input полями
+            if (capacityMin) {
+                capacityMin.addEventListener('input', function() {
+                    let value = parseInt(this.value) || 1;
+                    const maxValue = parseInt(capacityMax.value) || 100;
+                    
+                    if (value > maxValue) {
+                        value = maxValue;
+                        this.value = value;
+                    }
+                    
+                    if (capacityMinInput) {
+                        capacityMinInput.value = value;
+                    }
+                    
+                    updateCapacityModalDisplay();
+                });
+            }
+            if (capacityMax) {
+                capacityMax.addEventListener('input', function() {
+                    let value = parseInt(this.value) || 100;
+                    const minValue = parseInt(capacityMin.value) || 1;
+                    
+                    if (value < minValue) {
+                        value = minValue;
+                        this.value = value;
+                    }
+                    
+                    if (capacityMaxInput) {
+                        capacityMaxInput.value = value;
+                    }
+                    
+                    updateCapacityModalDisplay();
+                });
+            }
+
+            // Синхронизация input полей вместимости с ползунками
+            if (capacityMinInput) {
+                capacityMinInput.addEventListener('input', function() {
+                    let value = parseInt(this.value);
+                    
+                    if (isNaN(value)) return;
+                    
+                    if (value < 1) value = 1;
+                    if (value > 100) value = 100;
+                    
+                    const maxValue = parseInt(capacityMax.value) || 100;
+                    if (value > maxValue) {
+                        value = maxValue;
+                        this.value = value;
+                    }
+                    
+                    if (capacityMin) {
+                        capacityMin.value = value;
+                    }
+                    
+                    updateCapacityModalDisplay();
+                });
+                
+                capacityMinInput.addEventListener('blur', function() {
+                    let value = parseInt(this.value);
+                    
+                    if (isNaN(value)) value = 1;
+                    
+                    if (value < 1) value = 1;
+                    if (value > 100) value = 100;
+                    
+                    const maxValue = parseInt(capacityMax.value) || 100;
+                    if (value > maxValue) {
+                        value = maxValue;
+                    }
+                    
+                    this.value = value;
+                    if (capacityMin) {
+                        capacityMin.value = value;
+                    }
+                    
+                    updateCapacityModalDisplay();
+                });
+            }
+            
+            if (capacityMaxInput) {
+                capacityMaxInput.addEventListener('input', function() {
+                    let value = parseInt(this.value);
+                    
+                    if (isNaN(value)) return;
+                    
+                    if (value < 1) value = 1;
+                    if (value > 100) value = 100;
+                    
+                    const minValue = parseInt(capacityMin.value) || 1;
+                    if (value < minValue) {
+                        value = minValue;
+                        this.value = value;
+                    }
+                    
+                    if (capacityMax) {
+                        capacityMax.value = value;
+                    }
+                    
+                    updateCapacityModalDisplay();
+                });
+                
+                capacityMaxInput.addEventListener('blur', function() {
+                    let value = parseInt(this.value);
+                    
+                    if (isNaN(value)) value = 100;
+                    
+                    if (value < 1) value = 1;
+                    if (value > 100) value = 100;
+                    
+                    const minValue = parseInt(capacityMin.value) || 1;
+                    if (value < minValue) {
+                        value = minValue;
+                    }
+                    
+                    this.value = value;
+                    if (capacityMax) {
+                        capacityMax.value = value;
+                    }
+                    
+                    updateCapacityModalDisplay();
+                });
+            }
+
+            // Функция применения фильтра вместимости
+            function applyCapacityFilter() {
+                updateCapacityDisplay();
+                applyFilters();
+                capacityModal.classList.remove('active');
+                capacityFilterBtn.classList.remove('active');
+            }
+
+            // Применение фильтра вместимости по кнопке
+            if (capacityModalApply) {
+                capacityModalApply.addEventListener('click', applyCapacityFilter);
+            }
+
+            // Применение фильтра вместимости по Enter
+            if (capacityModal) {
+                capacityModal.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && capacityModal.classList.contains('active')) {
+                        e.preventDefault();
+                        applyCapacityFilter();
+                    }
+                });
+                
+                if (capacityMinInput) {
+                    capacityMinInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            applyCapacityFilter();
+                        }
+                    });
+                }
+                if (capacityMaxInput) {
+                    capacityMaxInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            applyCapacityFilter();
+                        }
+                    });
+                }
+            }
+
+            // Функция обновления отображения вместимости в модальном окне
+            function updateCapacityModalDisplay() {
+                const min = capacityMin ? parseInt(capacityMin.value) : 1;
+                const max = capacityMax ? parseInt(capacityMax.value) : 100;
+                const modalDisplay = document.getElementById('capacityRangeModalDisplay');
+                
+                if (modalDisplay) modalDisplay.textContent = `${min} - ${max} чел.`;
+            }
+
+            // Функция обновления отображения вместимости на кнопке
+            function updateCapacityDisplay() {
+                const min = capacityMin ? parseInt(capacityMin.value) : 1;
+                const max = capacityMax ? parseInt(capacityMax.value) : 100;
+                const display = document.getElementById('capacityRangeDisplay');
+                
+                if (display) {
+                    if (min === 1 && max === 100) {
+                        display.textContent = 'Любая вместимость';
+                    } else {
+                        display.textContent = `${min} - ${max} чел.`;
+                    }
+                }
+            }
+            
+            // Сохраняем функции глобально
+            window.updateCapacityDisplay = updateCapacityDisplay;
+            window.updateCapacityModalDisplay = updateCapacityModalDisplay;
+            
+            // Инициализация отображения вместимости
+            if (capacityMinInput && capacityMin) {
+                capacityMinInput.value = capacityMin.value;
+            }
+            if (capacityMaxInput && capacityMax) {
+                capacityMaxInput.value = capacityMax.value;
+            }
+            updateCapacityModalDisplay();
+            updateCapacityDisplay();
+
+            // Управление модальным окном цены
+            if (priceFilterBtn && priceModal) {
+                priceFilterBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isOpening = !priceModal.classList.contains('active');
+                    
+                    if (isOpening) {
+                        // При открытии синхронизируем все значения
+                        if (priceMin && priceMinInput) {
+                            priceMinInput.value = priceMin.value;
+                        }
+                        if (priceMax && priceMaxInput) {
+                            priceMaxInput.value = priceMax.value;
+                        }
+                        updatePriceModalDisplay();
+                    }
+                    
+                    priceModal.classList.toggle('active');
+                    priceFilterBtn.classList.toggle('active');
+                });
+            }
+
+            if (priceModalClose) {
+                priceModalClose.addEventListener('click', function() {
+                    priceModal.classList.remove('active');
+                    priceFilterBtn.classList.remove('active');
+                });
+            }
+
+            // Закрытие модального окна при клике вне его
+            document.addEventListener('click', function(e) {
+                if (priceModal && priceFilterBtn && !priceModal.contains(e.target) && !priceFilterBtn.contains(e.target)) {
+                    priceModal.classList.remove('active');
+                    priceFilterBtn.classList.remove('active');
+                }
+            });
+
+            // Синхронизация ползунков с input полями
+            if (priceMin) {
+                priceMin.addEventListener('input', function() {
+                    let value = parseInt(this.value) || 0;
+                    const maxValue = parseInt(priceMax.value) || 10000;
+                    
+                    // Ограничиваем значение максимумом
+                    if (value > maxValue) {
+                        value = maxValue;
+                        this.value = value;
+                    }
+                    
+                    // Обновляем input поле
+                    if (priceMinInput) {
+                        priceMinInput.value = value;
+                    }
+                    
+                    updatePriceModalDisplay();
+                });
+            }
+            if (priceMax) {
+                priceMax.addEventListener('input', function() {
+                    let value = parseInt(this.value) || 10000;
+                    const minValue = parseInt(priceMin.value) || 0;
+                    
+                    // Ограничиваем значение минимумом
+                    if (value < minValue) {
+                        value = minValue;
+                        this.value = value;
+                    }
+                    
+                    // Обновляем input поле
+                    if (priceMaxInput) {
+                        priceMaxInput.value = value;
+                    }
+                    
+                    updatePriceModalDisplay();
+                });
+            }
+
+            // Синхронизация input полей с ползунками
+            if (priceMinInput) {
+                priceMinInput.addEventListener('input', function() {
+                    let value = parseInt(this.value);
+                    
+                    // Если значение не число или пустое, оставляем текущее
+                    if (isNaN(value)) {
+                        return;
+                    }
+                    
+                    // Ограничиваем диапазон
+                    if (value < 0) value = 0;
+                    if (value > 10000) value = 10000;
+                    
+                    // Проверяем, что не больше максимума
+                    const maxValue = parseInt(priceMax.value) || 10000;
+                    if (value > maxValue) {
+                        value = maxValue;
+                        this.value = value;
+                    }
+                    
+                    // Обновляем слайдер
+                    if (priceMin) {
+                        priceMin.value = value;
+                    }
+                    
+                    updatePriceModalDisplay();
+                });
+                
+                priceMinInput.addEventListener('blur', function() {
+                    let value = parseInt(this.value);
+                    
+                    // Если значение не число, устанавливаем 0
+                    if (isNaN(value)) {
+                        value = 0;
+                    }
+                    
+                    // Ограничиваем диапазон
+                    if (value < 0) value = 0;
+                    if (value > 10000) value = 10000;
+                    
+                    // Проверяем, что не больше максимума
+                    const maxValue = parseInt(priceMax.value) || 10000;
+                    if (value > maxValue) {
+                        value = maxValue;
+                    }
+                    
+                    // Обновляем значения
+                    this.value = value;
+                    if (priceMin) {
+                        priceMin.value = value;
+                    }
+                    
+                    updatePriceModalDisplay();
+                });
+            }
+            
+            if (priceMaxInput) {
+                priceMaxInput.addEventListener('input', function() {
+                    let value = parseInt(this.value);
+                    
+                    // Если значение не число или пустое, оставляем текущее
+                    if (isNaN(value)) {
+                        return;
+                    }
+                    
+                    // Ограничиваем диапазон
+                    if (value < 0) value = 0;
+                    if (value > 10000) value = 10000;
+                    
+                    // Проверяем, что не меньше минимума
+                    const minValue = parseInt(priceMin.value) || 0;
+                    if (value < minValue) {
+                        value = minValue;
+                        this.value = value;
+                    }
+                    
+                    // Обновляем слайдер
+                    if (priceMax) {
+                        priceMax.value = value;
+                    }
+                    
+                    updatePriceModalDisplay();
+                });
+                
+                priceMaxInput.addEventListener('blur', function() {
+                    let value = parseInt(this.value);
+                    
+                    // Если значение не число, устанавливаем 10000
+                    if (isNaN(value)) {
+                        value = 10000;
+                    }
+                    
+                    // Ограничиваем диапазон
+                    if (value < 0) value = 0;
+                    if (value > 10000) value = 10000;
+                    
+                    // Проверяем, что не меньше минимума
+                    const minValue = parseInt(priceMin.value) || 0;
+                    if (value < minValue) {
+                        value = minValue;
+                    }
+                    
+                    // Обновляем значения
+                    this.value = value;
+                    if (priceMax) {
+                        priceMax.value = value;
+                    }
+                    
+                    updatePriceModalDisplay();
+                });
+            }
+
+            // Функция применения фильтра цены
+            function applyPriceFilter() {
+                updatePriceDisplay();
+                applyFilters();
+                priceModal.classList.remove('active');
+                priceFilterBtn.classList.remove('active');
+            }
+
+            // Применение фильтра цены по кнопке
+            if (priceModalApply) {
+                priceModalApply.addEventListener('click', applyPriceFilter);
+            }
+
+            // Применение фильтра цены по Enter в модальном окне
+            if (priceModal) {
+                priceModal.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && priceModal.classList.contains('active')) {
+                        e.preventDefault();
+                        applyPriceFilter();
+                    }
+                });
+                
+                // Также добавляем обработчики на input поля для Enter
+                if (priceMinInput) {
+                    priceMinInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            applyPriceFilter();
+                        }
+                    });
+                }
+                if (priceMaxInput) {
+                    priceMaxInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            applyPriceFilter();
+                        }
+                    });
+                }
+            }
+
+            // Функция обновления отображения цен в модальном окне
+            function updatePriceModalDisplay() {
+                const min = priceMin ? parseInt(priceMin.value) : 0;
+                const max = priceMax ? parseInt(priceMax.value) : 10000;
+                const modalDisplay = document.getElementById('priceRangeModalDisplay');
+                
+                if (modalDisplay) modalDisplay.textContent = `${min} - ${max} ₽`;
+            }
+
+            // Функция обновления отображения цен на кнопке
+            function updatePriceDisplay() {
+                const min = priceMin ? parseInt(priceMin.value) : 0;
+                const max = priceMax ? parseInt(priceMax.value) : 10000;
+                const display = document.getElementById('priceRangeDisplay');
+                
+                if (display) {
+                    if (min === 0 && max === 10000) {
+                        display.textContent = 'Любая цена';
+                    } else {
+                        display.textContent = `${min} - ${max} ₽`;
+                    }
+                }
+            }
+            
+            // Сохраняем функции глобально для использования в resetFilters
+            window.updatePriceDisplay = updatePriceDisplay;
+            window.updatePriceModalDisplay = updatePriceModalDisplay;
+            
+            // Инициализация отображения и синхронизация input полей
+            if (priceMinInput && priceMin) {
+                priceMinInput.value = priceMin.value;
+            }
+            if (priceMaxInput && priceMax) {
+                priceMaxInput.value = priceMax.value;
+            }
+            updatePriceModalDisplay();
+            updatePriceDisplay();
+
+            // initial apply to ensure any server-side rendered state is respected
+            applyFilters();
+
+            // Управление сворачиванием фильтров
+            const filtersToggleBtn = document.getElementById('filtersToggleBtn');
+            const filtersCard = document.getElementById('filtersCard');
+            if (filtersToggleBtn && filtersCard) {
+                filtersToggleBtn.addEventListener('click', function() {
+                    filtersCard.classList.toggle('collapsed');
+                    const toggleText = filtersToggleBtn.querySelector('span:first-child');
+                    if (toggleText) {
+                        toggleText.textContent = filtersCard.classList.contains('collapsed') ? 'Показать' : 'Скрыть';
+                    }
+                });
+            }
+        });
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Admin dropdown
+    const adminDropdown = document.querySelector(".admin-dropdown");
+    if (adminDropdown) {
+        const adminBtn = adminDropdown.querySelector(".admin-btn");
+        const adminMenu = adminDropdown.querySelector(".admin-menu");
+
+        if (adminBtn && adminMenu) {
+            adminMenu.style.display = adminMenu.style.display || "none";
+            adminMenu.style.opacity = adminMenu.style.opacity || "0";
+            adminMenu.style.transform = adminMenu.style.transform || "translateY(-6px)";
+            adminMenu.style.transition = adminMenu.style.transition || "opacity .15s ease, transform .15s ease";
+
+            let adminCloseTimer = null;
+            const CLOSE_DELAY_MS = 200;
+
+            function cancelAdminClose() {
+                if (adminCloseTimer) {
+                    clearTimeout(adminCloseTimer);
+                    adminCloseTimer = null;
+                }
+            }
+
+            function openAdminMenu() {
+                cancelAdminClose();
+                if (adminMenu.style.display !== "block") {
+                    adminMenu.style.display = "block";
+                    requestAnimationFrame(() => {
+                        adminMenu.style.opacity = "1";
+                        adminMenu.style.transform = "translateY(0)";
+                    });
+                }
+            }
+
+            function closeAdminMenuImmediate() {
+                cancelAdminClose();
+                adminMenu.style.opacity = "0";
+                adminMenu.style.transform = "translateY(-6px)";
+                setTimeout(() => {
+                    if (adminMenu.style.opacity === "0") adminMenu.style.display = "none";
+                }, 180);
+            }
+
+            function scheduleAdminClose() {
+                cancelAdminClose();
+                adminCloseTimer = setTimeout(() => {
+                    closeAdminMenuImmediate();
+                    adminCloseTimer = null;
+                }, CLOSE_DELAY_MS);
+            }
+
+            function isPointerMovingOutside(event) {
+                const rt = event.relatedTarget;
+                if (!rt) {
+                    if (typeof event.clientX === "number" && typeof event.clientY === "number") {
+                        const el = document.elementFromPoint(event.clientX, event.clientY);
+                        return !adminDropdown.contains(el);
+                    }
+                    return true;
+                }
+                return !adminDropdown.contains(rt);
+            }
+
+            adminDropdown.addEventListener("pointerenter", () => openAdminMenu());
+            adminDropdown.addEventListener("pointerleave", (e) => {
+                if (!isPointerMovingOutside(e)) {
+                    cancelAdminClose();
+                    return;
+                }
+                scheduleAdminClose();
+            });
+
+            adminMenu.addEventListener("pointerenter", () => openAdminMenu());
+            adminMenu.addEventListener("pointerleave", (e) => {
+                if (!isPointerMovingOutside(e)) { cancelAdminClose(); return; }
+                scheduleAdminClose();
+            });
+
+            document.addEventListener("pointerdown", (e) => {
+                if (!adminDropdown.contains(e.target)) {
+                    closeAdminMenuImmediate();
+                }
+            });
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") closeAdminMenuImmediate();
+            });
+        }
+    }
+
+    // User profile dropdown
+    const userProfileDropdown = document.querySelector(".user-profile-dropdown");
+    if (userProfileDropdown) {
+        const userProfileBtn = userProfileDropdown.querySelector(".user-profile-btn");
+        const userProfileMenu = userProfileDropdown.querySelector(".user-profile-menu");
+
+        if (userProfileBtn && userProfileMenu) {
+            userProfileMenu.style.display = userProfileMenu.style.display || "none";
+            userProfileMenu.style.opacity = userProfileMenu.style.opacity || "0";
+            userProfileMenu.style.transform = userProfileMenu.style.transform || "translateY(-6px)";
+            userProfileMenu.style.transition = userProfileMenu.style.transition || "opacity .15s ease, transform .15s ease";
+
+            let userCloseTimer = null;
+            const CLOSE_DELAY_MS = 200;
+
+            function cancelUserClose() {
+                if (userCloseTimer) {
+                    clearTimeout(userCloseTimer);
+                    userCloseTimer = null;
+                }
+            }
+
+            function openUserMenu() {
+                cancelUserClose();
+                if (userProfileMenu.style.display !== "block") {
+                    userProfileMenu.style.display = "block";
+                    requestAnimationFrame(() => {
+                        userProfileMenu.style.opacity = "1";
+                        userProfileMenu.style.transform = "translateY(0)";
+                    });
+                }
+            }
+
+            function closeUserMenuImmediate() {
+                cancelUserClose();
+                userProfileMenu.style.opacity = "0";
+                userProfileMenu.style.transform = "translateY(-6px)";
+                setTimeout(() => {
+                    if (userProfileMenu.style.opacity === "0") userProfileMenu.style.display = "none";
+                }, 180);
+            }
+
+            function scheduleUserClose() {
+                cancelUserClose();
+                userCloseTimer = setTimeout(() => {
+                    closeUserMenuImmediate();
+                    userCloseTimer = null;
+                }, CLOSE_DELAY_MS);
+            }
+
+            function isPointerMovingOutsideUser(event) {
+                const rt = event.relatedTarget;
+                if (!rt) {
+                    if (typeof event.clientX === "number" && typeof event.clientY === "number") {
+                        const el = document.elementFromPoint(event.clientX, event.clientY);
+                        return !userProfileDropdown.contains(el);
+                    }
+                    return true;
+                }
+                return !userProfileDropdown.contains(rt);
+            }
+
+            userProfileDropdown.addEventListener("pointerenter", () => openUserMenu());
+            userProfileDropdown.addEventListener("pointerleave", (e) => {
+                if (!isPointerMovingOutsideUser(e)) {
+                    cancelUserClose();
+                    return;
+                }
+                scheduleUserClose();
+            });
+
+            userProfileMenu.addEventListener("pointerenter", () => openUserMenu());
+            userProfileMenu.addEventListener("pointerleave", (e) => {
+                if (!isPointerMovingOutsideUser(e)) { cancelUserClose(); return; }
+                scheduleUserClose();
+            });
+
+            document.addEventListener("pointerdown", (e) => {
+                if (!userProfileDropdown.contains(e.target)) {
+                    closeUserMenuImmediate();
+                }
+            });
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") closeUserMenuImmediate();
+            });
+        }
+    }
+});
+        function applyFilters() {
+            const searchText = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const priceMin = document.getElementById('priceMin') ? parseInt(document.getElementById('priceMin').value) : 0;
+            const priceMax = document.getElementById('priceMax') ? parseInt(document.getElementById('priceMax').value) : 10000;
+            const capacityMin = document.getElementById('capacityMin') ? parseInt(document.getElementById('capacityMin').value) : 1;
+            const capacityMax = document.getElementById('capacityMax') ? parseInt(document.getElementById('capacityMax').value) : 100;
+            
+            // Получаем выбранные категории
+            const categoryMenu = document.getElementById('categoryFilterMenu');
+            const selectedCategories = categoryMenu ? Array.from(categoryMenu.querySelectorAll('.custom-dropdown-item.selected'))
+                .map(item => item.dataset.value)
+                .filter(val => val !== 'all') : [];
+            const allCategoriesSelected = categoryMenu ? categoryMenu.querySelector('.custom-dropdown-item[data-value="all"]')?.classList.contains('selected') : true;
+            
+            // Получаем выбранные офисы
+            const officeMenu = document.getElementById('officeFilterMenu');
+            const selectedOffices = officeMenu ? Array.from(officeMenu.querySelectorAll('.custom-dropdown-item.selected'))
+                .map(item => item.dataset.value)
+                .filter(val => val !== 'all') : [];
+            const allOfficesSelected = officeMenu ? officeMenu.querySelector('.custom-dropdown-item[data-value="all"]')?.classList.contains('selected') : true;
+            
+            // Получаем выбранные статусы
+            const statusMenu = document.getElementById('statusFilterMenu');
+            const selectedStatuses = statusMenu ? Array.from(statusMenu.querySelectorAll('.custom-dropdown-item.selected'))
+                .map(item => item.dataset.value)
+                .filter(val => val !== 'all') : [];
+            const allStatusesSelected = statusMenu ? statusMenu.querySelector('.custom-dropdown-item[data-value="all"]')?.classList.contains('selected') : true;
+
+            const roomCards = document.querySelectorAll('.room-card');
+            let visibleCount = 0;
+
+            roomCards.forEach(card => {
+                const roomName = card.dataset.name || '';
+                const roomPrice = parseFloat(card.dataset.price) || 0;
+                const roomCapacity = parseInt(card.dataset.capacity) || 0;
+                const roomCategory = card.dataset.category || '';
+                const roomOffice = String(card.dataset.office || '');
+                let roomStatusRaw = String(card.dataset.status || 'active');
+                let roomStatus = (roomStatusRaw === 'maintenance') ? 'hidden' : roomStatusRaw;
+
+                const matchesSearch = roomName.includes(searchText);
+                const matchesCategory = allCategoriesSelected || selectedCategories.length === 0 || selectedCategories.includes(roomCategory);
+                const matchesPrice = (roomPrice >= priceMin && roomPrice <= priceMax);
+                const matchesCapacity = (roomCapacity >= capacityMin && roomCapacity <= capacityMax);
+                const matchesOffice = allOfficesSelected || selectedOffices.length === 0 || selectedOffices.includes(roomOffice);
+                const matchesStatus = allStatusesSelected || selectedStatuses.length === 0 || selectedStatuses.includes(roomStatus);
+
+                if (matchesSearch && matchesCategory && matchesPrice && matchesCapacity && matchesOffice && matchesStatus) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+
+                const statusBadge = card.querySelector('.room-status-badge');
+                if (statusBadge) {
+                    if (roomStatus === 'active') {
+                        statusBadge.classList.remove('status-hidden');
+                        statusBadge.classList.add('status-active');
+                        statusBadge.textContent = '✅ Активна';
+                    } else {
+                        statusBadge.classList.remove('status-active');
+                        statusBadge.classList.add('status-hidden');
+                        statusBadge.textContent = '🔒 Скрыта';
+                    }
+                }
+            });
+
+            showFilterResults(visibleCount);
+        }
+
+        // Функции сброса отдельных фильтров
+        function resetSearchFilter() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.value = '';
+            applyFilters();
+        }
+        
+        function resetCategoryFilter() {
+            const menu = document.getElementById('categoryFilterMenu');
+            const btn = document.getElementById('categoryFilterBtn');
+            const countEl = document.getElementById('categorySelectedCount');
+            if (menu && btn) {
+                menu.querySelectorAll('.custom-dropdown-item').forEach(i => i.classList.remove('selected'));
+                const allItem = menu.querySelector('.custom-dropdown-item[data-value="all"]');
+                if (allItem) {
+                    allItem.classList.add('selected');
+                    btn.querySelector('span:first-child').textContent = 'Все категории';
+                    if (countEl) countEl.style.display = 'none';
+                }
+                menu.classList.remove('active');
+                btn.classList.remove('active');
+            }
+            applyFilters();
+        }
+        
+        function resetPriceFilter() {
+            const priceMin = document.getElementById('priceMin');
+            const priceMax = document.getElementById('priceMax');
+            const priceMinInput = document.getElementById('priceMinInput');
+            const priceMaxInput = document.getElementById('priceMaxInput');
+            if (priceMin) priceMin.value = 0;
+            if (priceMax) priceMax.value = 10000;
+            if (priceMinInput) priceMinInput.value = 0;
+            if (priceMaxInput) priceMaxInput.value = 10000;
+            if (window.updatePriceDisplay) window.updatePriceDisplay();
+            if (window.updatePriceModalDisplay) window.updatePriceModalDisplay();
+            applyFilters();
+        }
+        
+        function resetCapacityFilter() {
+            const capacityMin = document.getElementById('capacityMin');
+            const capacityMax = document.getElementById('capacityMax');
+            const capacityMinInput = document.getElementById('capacityMinInput');
+            const capacityMaxInput = document.getElementById('capacityMaxInput');
+            if (capacityMin) capacityMin.value = 1;
+            if (capacityMax) capacityMax.value = 100;
+            if (capacityMinInput) capacityMinInput.value = 1;
+            if (capacityMaxInput) capacityMaxInput.value = 100;
+            if (window.updateCapacityDisplay) window.updateCapacityDisplay();
+            if (window.updateCapacityModalDisplay) window.updateCapacityModalDisplay();
+            applyFilters();
+        }
+        
+        function resetOfficeFilter() {
+            const menu = document.getElementById('officeFilterMenu');
+            const btn = document.getElementById('officeFilterBtn');
+            const countEl = document.getElementById('officeSelectedCount');
+            if (menu && btn) {
+                menu.querySelectorAll('.custom-dropdown-item').forEach(i => i.classList.remove('selected'));
+                const allItem = menu.querySelector('.custom-dropdown-item[data-value="all"]');
+                if (allItem) {
+                    allItem.classList.add('selected');
+                    btn.querySelector('span:first-child').textContent = 'Все офисы';
+                    if (countEl) countEl.style.display = 'none';
+                }
+                menu.classList.remove('active');
+                btn.classList.remove('active');
+            }
+            applyFilters();
+        }
+        
+        function resetStatusFilter() {
+            const menu = document.getElementById('statusFilterMenu');
+            const btn = document.getElementById('statusFilterBtn');
+            const countEl = document.getElementById('statusSelectedCount');
+            if (menu && btn) {
+                menu.querySelectorAll('.custom-dropdown-item').forEach(i => i.classList.remove('selected'));
+                const allItem = menu.querySelector('.custom-dropdown-item[data-value="all"]');
+                if (allItem) {
+                    allItem.classList.add('selected');
+                    btn.querySelector('span:first-child').textContent = 'Все статусы';
+                    if (countEl) countEl.style.display = 'none';
+                }
+                menu.classList.remove('active');
+                btn.classList.remove('active');
+            }
+            applyFilters();
+        }
+
+        function resetFilters() {
+            resetSearchFilter();
+            resetCategoryFilter();
+            resetPriceFilter();
+            resetCapacityFilter();
+            resetOfficeFilter();
+            resetStatusFilter();
+            
+            const roomCards = document.querySelectorAll('.room-card');
+            roomCards.forEach(card => { card.style.display = ''; });
+
+            const existingMessage = document.getElementById('filterResults');
+            if (existingMessage) existingMessage.remove();
+        }
+
+        function showFilterResults(visibleCount) {
+            const existingMessage = document.getElementById('filterResults');
+            if (existingMessage) existingMessage.remove();
+
+            if (visibleCount === 0) {
+                const roomsGrid = document.getElementById('roomsGrid');
+                const message = document.createElement('div');
+                message.id = 'filterResults';
+                message.className = 'empty-state filter-results-error';
+                message.innerHTML = `
+                    <div class="empty-state-icon">🔍</div>
+                    <h3>Ничего не найдено</h3>
+                    <p>По вашему запросу комнаты не найдены. Попробуйте изменить параметры фильтрации.</p>
+                `;
+                roomsGrid.appendChild(message);
+            }
+        }
+
+        // Авто-скрытие сообщений (как было)
+        setTimeout(() => {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(msg => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateX(20px)';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

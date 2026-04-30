@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель менеджера</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #1c1c1f;
+            --bg-tertiary: #18181b;
+            --bg-input: #232326;
+            --border-color: #27272a;
+            --border-hover: #3f3f46;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-info: #06b6d4;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(-4px);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: auto;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-select:hover {
+            border-color: var(--border-hover);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .filter-select option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        /* Booking Card */
+        .booking-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .booking-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+        }
+
+        .booking-card.expanded {
+            background: var(--bg-tertiary);
+        }
+
+        .booking-preview {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .booking-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .preview-info {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .preview-info div {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .booking-status {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .room-category {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .category-economy {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--accent-success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .category-standard {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .category-comfort {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .category-vip {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .category-luxury {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-confirmed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--accent-success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-completed {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-info);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .expand-icon {
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+
+        .booking-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Booking Details */
+        .booking-details {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .booking-card.expanded .booking-details {
+            display: block;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .details-grid p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .details-grid strong {
+            color: var(--text-primary);
+        }
+
+        .price-input {
+            width: 120px;
+            padding: 8px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .comment-display {
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            margin-top: 8px;
+            white-space: pre-wrap;
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 2px solid var(--accent-primary);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            margin-top: 8px;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Action Buttons */
+        .booking-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-confirm {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-cancel {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .btn-complete {
+            background: var(--accent-info);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-delete:hover {
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .booking-status {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-actions">
+            <button class="back-btn" onclick="window.history.back()">← Назад</button>
+            <h1 class="page-title">📋 Панель менеджера</h1>
+
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <select class="filter-select" id="statusFilter" onchange="filterBookings()">
+                <option value="all">Все статусы</option>
+                <option value="pending">⏳ Ожидание</option>
+                <option value="confirmed">✅ Подтверждено</option>
+                <option value="completed">🔵 Завершено</option>
+                <option value="cancelled">❌ Отменено</option>
+            </select>
+
+            <select class="filter-select" id="roomFilter" onchange="filterByRoom()">
+                <option value="all">Все комнаты</option>
+                {% for room in rooms %}
+                <option value="{{ room.id }}">{{ room.name }}</option>
+                {% endfor %}
+            </select>
+
+            <select class="filter-select" id="categoryFilter" onchange="filterByCategory()">
+                <option value="all">Все категории</option>
+                <option value="economy">🟢 Эконом</option>
+                <option value="standard">🔵 Стандарт</option>
+                <option value="comfort">🟡 Комфорт</option>
+                <option value="vip">🟣 VIP</option>
+                <option value="luxury">🔴 Люкс</option>
+            </select>
+        </div>
+
+        <!-- Bookings List -->
+        <div id="bookings-list">
+            {% for booking in bookings %}
+            <div class="booking-card"
+                 data-status="{{ booking.status }}"
+                 data-room="{{ booking.room.id }}"
+                 data-category="{{ booking.room.category }}"
+                 onclick="toggleBooking(this)">
+
+                <div class="booking-preview">
+                    <div class="booking-info">
+                        <h3>
+                            {% if booking.room.category == 'economy' %}🟢
+                            {% elif booking.room.category == 'standard' %}🔵
+                            {% elif booking.room.category == 'comfort' %}🟡
+                            {% elif booking.room.category == 'vip' %}🟣
+                            {% elif booking.room.category == 'luxury' %}🔴
+                            {% endif %}
+                            {{ booking.room.name }} | 👤 {{ booking.user.username }}
+                        </h3>
+                        <div class="preview-info">
+                            <div>📅 {{ booking.date_display }}</div>
+                            <div>⏰ {{ booking.time_display }}</div>
+                            <div>💰 {{ booking.total_price }} руб</div>
+                        </div>
+                    </div>
+                    <div class="booking-status">
+                        <span class="room-category category-{{ booking.room.category }}">
+                            {% if booking.room.category == 'economy' %}Эконом
+                            {% elif booking.room.category == 'standard' %}Стандарт
+                            {% elif booking.room.category == 'comfort' %}Комфорт
+                            {% elif booking.room.category == 'vip' %}VIP
+                            {% elif booking.room.category == 'luxury' %}Люкс
+                            {% endif %}
+                        </span>
+                        <span class="status-badge status-{{ booking.status }}">
+                            {{ booking.get_status_display }}
+                        </span>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+
+                <div class="booking-details">
+                    <div class="details-grid">
+                        <div>
+                            <p><strong>⏱️ Продолжительность:</strong> {{ booking.duration_hours }} часа</p>
+                            <p>
+                                <strong>💰 Стоимость:</strong>
+                                <input type="number" class="price-input" id="price-{{ booking.id }}"
+                                       value="{{ booking.total_price }}" onclick="event.stopPropagation()"> руб
+                            </p>
+                            <p><strong>📞 Контакты:</strong> {{ booking.user.phone|default:"Не указан" }} | {{ booking.user.email }}</p>
+                        </div>
+                        <div>
+                            <p style="margin-top: 16px;"><strong>💬 Комментарий:</strong></p>
+                            {% if booking.status == 'pending' %}
+                            <textarea class="comment-input" id="manager-comment-{{ booking.id }}"
+                                      onclick="event.stopPropagation()"
+                                      placeholder="Введите комментарий...">{{ booking.manager_comment|default:"" }}</textarea>
+                            {% else %}
+                            <div class="comment-display">
+                                {{ booking.manager_comment|default:"Комментарий отсутствует" }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="booking-actions">
+                        {% if booking.status == 'pending' %}
+                        <button class="btn btn-confirm" onclick="event.stopPropagation(); updateBookingStatus({{ booking.id }}, 'confirmed')">
+                            ✅ Подтвердить
+                        </button>
+                        <button class="btn btn-cancel" onclick="event.stopPropagation(); updateBookingStatus({{ booking.id }}, 'cancelled')">
+                            ❌ Отклонить
+                        </button>
+                        {% else %}
+                        <button class="btn btn-delete" onclick="event.stopPropagation(); deleteBooking({{ booking.id }})">
+                            🗑️ Удалить
+                        </button>
+                        {% if booking.status == 'confirmed' %}
+                        <button class="btn btn-complete" onclick="event.stopPropagation(); updateBookingStatus({{ booking.id }}, 'completed')">
+                            🔵 Завершить
+                        </button>
+                        <button class="btn btn-cancel" onclick="event.stopPropagation(); updateBookingStatus({{ booking.id }}, 'cancelled')">
+                            ❌ Отменить
+                        </button>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>Нет бронирований</h3>
+                <p style="color: var(--text-muted);">Бронирования появятся здесь</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleBooking(card) {
+            card.classList.toggle('expanded');
+        }
+
+        function filterBookings() {
+            const status = document.getElementById('statusFilter').value;
+            document.querySelectorAll('.booking-card').forEach(booking => {
+                booking.style.display = (status === 'all' || booking.dataset.status === status) ? 'flex' : 'none';
+            });
+        }
+
+        function filterByRoom() {
+            const roomId = document.getElementById('roomFilter').value;
+            document.querySelectorAll('.booking-card').forEach(booking => {
+                booking.style.display = (roomId === 'all' || booking.dataset.room === roomId) ? 'flex' : 'none';
+            });
+        }
+
+        function filterByCategory() {
+            const category = document.getElementById('categoryFilter').value;
+            document.querySelectorAll('.booking-card').forEach(booking => {
+                booking.style.display = (category === 'all' || booking.dataset.category === category) ? 'flex' : 'none';
+            });
+        }
+
+        function updateBookingStatus(bookingId, newStatus) {
+            const newPrice = document.getElementById(`price-${bookingId}`)?.value || null;
+            const managerComment = document.getElementById(`manager-comment-${bookingId}`)?.value || "";
+
+            fetch(`/api/update-booking-status/${bookingId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    status: newStatus,
+                    total_price: newPrice,
+                    manager_comment: managerComment
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            });
+        }
+
+        function deleteBooking(bookingId) {
+            if (!confirm('Удалить это бронирование?')) return;
+
+            fetch(`/api/delete-booking/${bookingId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            });
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.booking-card')) {
+                document.querySelectorAll('.booking-card.expanded').forEach(card => {
+                    card.classList.remove('expanded');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

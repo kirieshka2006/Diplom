@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация и правила</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #18181b;
+            --bg-tertiary: #1c1c1f;
+            --border-color: #2e2e32;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-info: #06b6d4;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 24px;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(-4px);
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+
+        h2 {
+            color: var(--accent-primary);
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .rule-item {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 12px 0;
+            border-left: 4px solid var(--accent-success);
+        }
+
+        .rule-item strong {
+            display: block;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .rule-item p {
+            margin: 0;
+            color: var(--text-muted);
+        }
+
+        ol {
+            color: var(--text-secondary);
+            line-height: 2;
+            padding-left: 24px;
+        }
+
+        ol li {
+            margin-bottom: 8px;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .contact-item {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--accent-info);
+        }
+
+        .contact-item strong {
+            display: block;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .contact-item p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="back-btn">← Назад на главную</a>
+
+        <div class="info-card">
+            <h1>ℹ️ Информация, правила и инструкции</h1>
+
+            <h2>📋 Общая информация</h2>
+            <p>Система бронирования переговоров предназначена для сотрудников компании, а также и для обычных людей, которым надо обсудить деловые вещи.
+            Здесь вы можете забронировать переговорку для встреч, презентаций и других мероприятий.</p>
+
+            <h2>📝 Правила бронирования</h2>
+            <div class="rule-item">
+                <strong>⏱️ Время бронирования</strong>
+                <p>Максимальное время бронирования - 4 часа подряд</p>
+            </div>
+            <div class="rule-item">
+                <strong>📅 Планирование</strong>
+                <p>Бронируйте комнаты минимум за 2 часа до начала встречи</p>
+            </div>
+            <div class="rule-item">
+                <strong>🔒 Ответственность</strong>
+                <p>Вы несете ответственность за сохранность оборудования в комнате</p>
+            </div>
+            <div class="rule-item">
+                <strong>❌ Отмена брони</strong>
+                <p>Отменяйте бронь как минимум за 2 часа до начала, если планы изменились</p>
+            </div>
+
+            <h2>📖 Инструкция по бронированию</h2>
+            <ol>
+                <li>Выберите подходящую переговорную комнату из списка</li>
+                <li>Нажмите "Забронировать" и выберите дату и время</li>
+                <li>Введите контактные данные и далее нажмите "Забронировать" </li>
+                <li>Ожидайте подтверждения от менеджера, вся информация придет на вашу почту</li>
+                <li>Приходите в назначенное время</li>
+            </ol>
+
+            <h2>📞 Контакты поддержки</h2>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <strong>📧 Email</strong>
+                    <p>testsite9356@gmail.com</p>
+                </div>
+                <div class="contact-item">
+                    <strong>📞 Телефон</strong>
+                    <p>+7 (993) 939-03-31</p>
+                </div>
+                <div class="contact-item">
+                    <strong>🕐 Время работы</strong>
+                    <p>Пн-Пт: 9:00-23:00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

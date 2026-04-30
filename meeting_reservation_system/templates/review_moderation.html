@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модерация отзывов</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #1c1c1f;
+            --bg-tertiary: #18181b;
+            --bg-input: #232326;
+            --border-color: #27272a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(-4px);
+        }
+
+        /* Добавлена кнопка для перехода ко всем отзывам */
+        .all-reviews-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .all-reviews-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 20px 24px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent-warning);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .review-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .review-card:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .review-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--bg-tertiary);
+        }
+
+        .user-avatar-placeholder {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .review-meta {
+            text-align: right;
+        }
+
+        .room-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .review-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .review-rating {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .star-filled {
+            color: var(--accent-warning);
+        }
+
+        .star-empty {
+            color: var(--text-muted);
+        }
+
+        .review-text {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--accent-warning);
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-approve {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-reject {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-reject:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .header-actions {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .header-left {
+                flex-direction: column;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+            }
+
+            .review-header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .review-meta {
+                text-align: left;
+            }
+
+            .review-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% csrf_token %}
+
+        <div class="header-actions">
+            <div class="header-left">
+                <a href="{% url 'home' %}" class="back-btn">← Назад</a>
+                <h1 class="page-title">Модерация отзывов</h1>
+            </div>
+            <!-- Добавлена кнопка для перехода ко всем отзывам -->
+            <a href="{% url 'all_reviews' %}" class="all-reviews-btn">
+                Все отзывы →
+            </a>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value">{{ pending_reviews.count }}</div>
+                <div class="stat-label">Отзывов на модерации</div>
+            </div>
+        </div>
+
+        <div id="reviews-container">
+            {% for review in pending_reviews %}
+            <div class="review-card" id="review-{{ review.id }}">
+                <div class="review-header">
+                    <div class="review-user">
+                        {% if review.user.avatar %}
+                        <img src="{{ review.user.avatar.url }}" alt="Avatar" class="user-avatar">
+                        {% else %}
+                        <div class="user-avatar-placeholder">👤</div>
+                        {% endif %}
+                        <div class="user-info">
+                            <h3>{{ review.user.username }}</h3>
+                            <p>{{ review.user.email|default:"Email не указан" }}</p>
+                        </div>
+                    </div>
+                    <div class="review-meta">
+                        <div class="room-badge">{{ review.room.name }}</div>
+                        <div class="review-date">{{ review.created_at|date:"d.m.Y H:i" }}</div>
+                    </div>
+                </div>
+
+                <div class="review-rating">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}
+                            <span class="star-filled">★</span>
+                        {% else %}
+                            <span class="star-empty">☆</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="review-text">
+                    {{ review.text }}
+                </div>
+
+                <div class="review-actions">
+                    <button class="btn btn-approve" onclick="approveReview({{ review.id }})">
+                        Одобрить
+                    </button>
+                    <button class="btn btn-reject" onclick="rejectReview({{ review.id }})">
+                        Отклонить
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">✨</div>
+                <h3>Нет отзывов на модерации</h3>
+                <p>Все отзывы проверены!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        function approveReview(reviewId) {
+            if (!confirm('Одобрить этот отзыв?')) return;
+
+            fetch(`/api/review/${reviewId}/approve/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`review-${reviewId}`).remove();
+                    updateCounter();
+                    checkEmpty();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            });
+        }
+
+        function rejectReview(reviewId) {
+            if (!confirm('Отклонить и удалить этот отзыв?')) return;
+
+            fetch(`/api/review/${reviewId}/reject/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`review-${reviewId}`).remove();
+                    updateCounter();
+                    checkEmpty();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            });
+        }
+
+        function updateCounter() {
+            const count = document.querySelectorAll('.review-card').length;
+            document.querySelector('.stat-value').textContent = count;
+        }
+
+        function checkEmpty() {
+            const container = document.getElementById('reviews-container');
+            if (container.querySelectorAll('.review-card').length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✨</div>
+                        <h3>Нет отзывов на модерации</h3>
+                        <p>Все отзывы проверены!</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

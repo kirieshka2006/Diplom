@@ -1,0 +1,195 @@
+<div class="ticket-detail">
+    <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 24px;">{{ ticket.subject }}</h3>
+
+    <div class="ticket-info" style="margin-bottom: 24px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+            <div style="color: var(--text-secondary, #a1a1aa);">
+                <strong style="color: var(--text-primary, #fafafa);">👤 Автор:</strong> {{ ticket.user.username }}
+            </div>
+            <div style="color: var(--text-secondary, #a1a1aa);">
+                <strong style="color: var(--text-primary, #fafafa);">📅 Создан:</strong> {{ ticket.created_at|date:"d.m.Y H:i" }}
+            </div>
+            <div>
+                <strong style="color: var(--text-primary, #fafafa);">🔄 Статус:</strong>
+                <span style="
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    {% if ticket.status == 'open' %}
+                    background: rgba(245, 158, 11, 0.1);
+                    color: #f59e0b;
+                    border: 1px solid rgba(245, 158, 11, 0.3);
+                    {% elif ticket.status == 'in_progress' %}
+                    background: rgba(59, 130, 246, 0.1);
+                    color: #3b82f6;
+                    border: 1px solid rgba(59, 130, 246, 0.3);
+                    {% else %}
+                    background: rgba(34, 197, 94, 0.1);
+                    color: #22c55e;
+                    border: 1px solid rgba(34, 197, 94, 0.3);
+                    {% endif %}
+                ">{{ ticket.get_status_display }}</span>
+            </div>
+        </div>
+
+        {% if ticket.status == 'in_progress' %}
+        <div style="color: var(--text-muted, #71717a); font-size: 12px;">
+            ⏰ Будет автоматически закрыт через 3 дня без ответа пользователя
+        </div>
+        {% elif ticket.status == 'closed' %}
+        <div style="color: #22c55e; font-size: 12px;">
+            🟢 Тикет закрыт
+        </div>
+        {% endif %}
+
+        <div style="background: #18181b; padding: 20px; border-radius: 12px; margin-top: 16px; border-left: 4px solid #3b82f6;">
+            <strong style="color: var(--text-primary, #fafafa);">📋 Описание проблемы:</strong>
+            <div style="margin-top: 12px; color: var(--text-secondary, #a1a1aa); line-height: 1.7;">
+                {{ ticket.message|linebreaks }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Ответы -->
+    <div class="response-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h4 style="margin: 0; font-size: 16px;">💬 Ответы ({{ ticket.responses.count }})</h4>
+            {% if ticket.status != 'closed' %}
+                {% if user.role in 'admin manager' or user == ticket.user %}
+                <button onclick="window.parent.showResponseForm({{ ticket.id }}, '{{ ticket.subject|escapejs }}')"
+                        style="
+                            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                            color: white;
+                            padding: 10px 20px;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 13px;
+                            font-weight: 600;
+                            transition: all 0.2s ease;
+                        ">
+                    ✨ Ответить
+                </button>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <div class="responses-list" style="display: flex; flex-direction: column; gap: 16px;">
+            {% for response in ticket.responses.all %}
+            <div style="
+                background: #18181b;
+                padding: 16px;
+                border-radius: 12px;
+                border: 1px solid #27272a;
+            ">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <div style="
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 16px;
+                        color: white;
+                        {% if response.user.role in 'admin manager' %}
+                        background: #3b82f6;
+                        {% else %}
+                        background: #22c55e;
+                        {% endif %}
+                    ">
+                        {% if response.user.role in 'admin manager' %}🛠️{% else %}👤{% endif %}
+                    </div>
+                    <div>
+                        <strong style="color: var(--text-primary, #fafafa); font-size: 14px;">
+                            {% if response.user.role in 'admin manager' %}Поддержка{% else %}{{ response.user.username }}{% endif %}
+                        </strong>
+                        <div style="color: var(--text-muted, #71717a); font-size: 12px;">{{ response.created_at|date:"d.m.Y H:i" }}</div>
+                    </div>
+                </div>
+                <div style="
+                    padding: 14px;
+                    background: #232326;
+                    border-radius: 8px;
+                    color: var(--text-secondary, #a1a1aa);
+                    line-height: 1.6;
+                    font-size: 14px;
+                ">
+                    {{ response.message|linebreaks }}
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 40px; color: var(--text-muted, #71717a);">
+                <div style="font-size: 48px; margin-bottom: 12px;">💬</div>
+                <p>Пока нет ответов на это обращение</p>
+                {% if ticket.status != 'closed' %}
+                    {% if user.role in 'admin manager' or user == ticket.user %}
+                    <button onclick="window.parent.showResponseForm({{ ticket.id }}, '{{ ticket.subject|escapejs }}')"
+                            style="
+                                background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                                color: white;
+                                padding: 12px 24px;
+                                border: none;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-size: 14px;
+                                font-weight: 600;
+                                margin-top: 16px;
+                            ">
+                        💌 Написать первый ответ
+                    </button>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Кнопка закрытия для пользователя -->
+    {% if user == ticket.user and ticket.status != 'closed' %}
+    <div style="
+        margin-top: 32px;
+        padding: 24px;
+        background: #18181b;
+        border-radius: 12px;
+        border: 1px solid #27272a;
+        text-align: center;
+    ">
+        <h4 style="margin-bottom: 12px;">✅ Проблема решена?</h4>
+        <p style="color: var(--text-muted, #71717a); margin-bottom: 20px;">Если ваш вопрос решен, вы можете закрыть обращение</p>
+        <form method="POST" action="{% url 'close_ticket' ticket.id %}">
+            {% csrf_token %}
+            <button type="submit" style="
+                background: linear-gradient(135deg, #22c55e, #10b981);
+                color: white;
+                padding: 14px 32px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                transition: all 0.2s ease;
+            ">
+                ✅ Проблема решена - закрыть обращение
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Сообщение о закрыт��м тикете -->
+    {% if ticket.status == 'closed' %}
+    <div style="
+        margin-top: 32px;
+        padding: 24px;
+        background: #18181b;
+        border-radius: 12px;
+        border: 2px solid #22c55e;
+        text-align: center;
+    ">
+        <div style="font-size: 48px; margin-bottom: 12px;">🔒</div>
+        <h4 style="color: #22c55e; margin-bottom: 8px;">Тикет закрыт</h4>
+        <p style="color: var(--text-muted, #71717a);">Это обращение закрыто. Новые ответы не принимаются.</p>
+    </div>
+    {% endif %}
+</div>

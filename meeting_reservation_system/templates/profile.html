@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - {{ user.username }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #18181b;
+            --bg-tertiary: #1c1c1f;
+            --bg-input: #232326;
+            --border-color: #2e2e32;
+            --border-hover: #3f3f46;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 24px;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(-4px);
+        }
+
+        .profile-header {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex: 1;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid var(--accent-primary);
+            object-fit: cover;
+            background: var(--bg-tertiary);
+        }
+
+        .avatar-placeholder {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid var(--accent-primary);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .avatar-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid var(--bg-card);
+            transition: transform 0.2s ease;
+        }
+
+        .avatar-edit:hover {
+            transform: scale(1.1);
+        }
+
+        .profile-details h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: var(--bg-tertiary);
+            color: var(--accent-primary);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Profile Sections */
+        .profile-sections {
+            display: grid;
+            gap: 24px;
+        }
+
+        .section-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .edit-btn {
+            padding: 10px 20px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .edit-btn:hover {
+            background: var(--bg-input);
+            border-color: var(--accent-primary);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 15px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Edit Forms */
+        .edit-form {
+            display: none;
+            background: var(--bg-tertiary);
+            padding: 24px;
+            border-radius: var(--radius-md);
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .edit-form.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group select option {
+            background: var(--bg-input);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-cancel {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-save {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Email verification status */
+        .email-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .email-verified {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--accent-success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .email-unverified {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* Секция ввода кода подтверждения */
+        #codeGroup {
+            margin-top: 16px;
+            padding: 20px;
+            background: var(--bg-input);
+            border-radius: var(--radius-md);
+            border: 2px solid var(--accent-primary);
+        }
+
+        #codeGroup label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        #codeGroup input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 8px;
+            text-align: center;
+        }
+
+        #codeGroup input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Password Change */
+        .password-requirements {
+            background: var(--bg-input);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-warning);
+        }
+
+        .password-requirements ul {
+            margin-top: 8px;
+            padding-left: 20px;
+        }
+
+        .password-requirements li {
+            margin-bottom: 4px;
+        }
+
+        /* Messages */
+        .messages {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            padding: 16px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .message-success, .message.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: var(--accent-success);
+        }
+
+        .message-error, .message.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--accent-danger);
+        }
+
+        @media (max-width: 768px) {
+            .profile-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full-width {
+                grid-column: 1;
+            }
+        }
+
+        .profile-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .profile-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .profile-action-btn:hover {
+            background: var(--bg-input);
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+
+        .profile-action-btn.primary {
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+        }
+
+        .profile-action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .profile-header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .profile-actions {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .profile-action-btn {
+                flex: 1;
+                min-width: 150px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% else %}{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="container">
+        <a href="{% url 'home' %}" class="back-btn">← Назад на главную</a>
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-header-content">
+                <div class="profile-info">
+                    <div class="avatar-wrapper">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar">
+                        {% else %}
+                        <div class="avatar-placeholder">👤</div>
+                        {% endif %}
+                        <label for="avatar-input" class="avatar-edit">📷</label>
+                        <form id="avatarForm" method="POST" action="{% url 'update_avatar' %}" enctype="multipart/form-data" style="display: none;">
+                            {% csrf_token %}
+                            <input type="file" id="avatar-input" name="avatar" accept="image/*" onchange="this.form.submit()">
+                        </form>
+                    </div>
+                    <div class="profile-details">
+                        <h1>{{ user.username }}</h1>
+                        <span class="role-badge">{{ user.get_role_display }}</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="profile-sections">
+            <!-- Personal Info Section -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="section-title-text">
+                        <span>👤</span> Личная информация
+                    </div>
+                    <button class="edit-btn" onclick="toggleEditSection('personal')">✏️ Редактировать</button>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Имя пользователя</div>
+                        <div class="info-value">{{ user.username }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Имя</div>
+                        <div class="info-value">{{ user.first_name|default:"Не указано" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Фамилия</div>
+                        <div class="info-value">{{ user.last_name|default:"Не указано" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Отчество</div>
+                        <div class="info-value">{{ user.patronymic|default:"Не указано" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Дата рождения</div>
+                        <div class="info-value">{{ user.birth_date|date:"d.m.Y"|default:"Не указана" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Пол</div>
+                        <div class="info-value">
+                            {% if user.gender == 'M' %}Мужской
+                            {% elif user.gender == 'F' %}Женский
+                            {% else %}Не указан
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Телефон</div>
+                        <div class="info-value">{{ user.phone|default:"Не указан" }}</div>
+                    </div>
+                </div>
+
+                <!-- Edit Personal Form -->
+                <div class="edit-form" id="editPersonalForm">
+                    <form method="POST" action="{% url 'update_profile' %}">
+                        {% csrf_token %}
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Имя пользователя</label>
+                                <input type="text" name="username" value="{{ user.username }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Имя</label>
+                                <input type="text" name="first_name" value="{{ user.first_name }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Фамилия</label>
+                                <input type="text" name="last_name" value="{{ user.last_name }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Отчество</label>
+                                <input type="text" name="patronymic" value="{{ user.patronymic }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Дата рождения</label>
+                                <input type="date" name="birth_date" value="{{ user.birth_date|date:'Y-m-d' }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Пол</label>
+                                <select name="gender">
+                                    <option value="">Не указан</option>
+                                    <option value="M" {% if user.gender == 'M' %}selected{% endif %}>Мужской</option>
+                                    <option value="F" {% if user.gender == 'F' %}selected{% endif %}>Женский</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Телефон</label>
+                                <input type="tel" name="phone" id="phoneInput" value="{{ user.phone }}" placeholder="+7 (___) ___-__-__">
+                                <div class="validation-message" id="phoneError" style="display: none; color: #ef4444; font-size: 12px; margin-top: 4px;">
+                                    Введите корректный номер телефона
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-cancel" onclick="closeEditSection('personal')">Отмена</button>
+                            <button type="submit" class="btn btn-save" id="savePersonalBtn">💾 Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Email Section -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="section-title-text">
+                        <span>📧</span> Подтверждение email
+                    </div>
+                </div>
+
+                <div class="info-item" style="margin-bottom: 20px;">
+                    <div class="info-label">Текущий email</div>
+                    <div class="info-value">
+                        {% if user.email %}
+                            {{ user.email }}
+                            {% with confirmation=user.email_confirmations.last %}
+                                {% if confirmation and confirmation.confirmed_at %}
+                                    <span class="email-status email-verified">✅ Подтвержден</span>
+                                {% else %}
+                                    <span class="email-status email-unverified">❌ Не подтвержден</span>
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            Не указан
+                        {% endif %}
+                    </div>
+                </div>
+
+                <form method="post" action="{% url 'verify_email' %}">
+                    {% csrf_token %}
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Новый email:</label>
+                        <input type="email" name="email" id="emailInput" placeholder="Введите новый email"
+                               value="{{ request.session.pending_email|default:'' }}">
+                        <div class="validation-message" id="emailError" style="display: none; color: #ef4444; font-size: 12px; margin-top: 4px;">
+                            Введите корректный email адрес
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <button type="submit" name="send_code" id="sendCodeBtn" class="btn btn-primary" style="width: 100%;">
+                            📧 Отправить код подтверждения
+                        </button>
+                    </div>
+
+                    <!-- Поле для ввода кода - показывается после отправки -->
+                    <div id="codeGroup" {% if request.session.pending_email %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                        <label>Код подтверждения (6 цифр из письма):</label>
+                        <input type="text" name="confirmation_code" maxlength="6" placeholder="000000"
+                               pattern="[0-9]{6}" inputmode="numeric">
+
+                        {% if request.session.pending_email %}
+                        <div style="margin-top: 16px;">
+                            <button type="submit" class="btn btn-save" style="width: 100%;">
+                                ✅ Подтвердить email
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+
+            <!-- Password Section -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="section-title-text">
+                        <span>🔐</span> Безопасность
+                    </div>
+                    <button class="edit-btn" onclick="toggleEditSection('password')">🔑 Сменить пароль</button>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Пароль</div>
+                        <div class="info-value">••••••••</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Последний вход</div>
+                        <div class="info-value">{{ user.last_login|date:"d.m.Y H:i"|default:"Никогда" }}</div>
+                    </div>
+                </div>
+
+                <!-- Edit Password Form -->
+                <div class="edit-form" id="editPasswordForm">
+                    <form method="POST" action="{% url 'change_password' %}" id="passwordChangeForm">
+                        {% csrf_token %}
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label>Текущий пароль</label>
+                                <input type="password" name="old_password" id="old_password" required placeholder="Введите текущий пароль">
+                            </div>
+                            <div class="form-group">
+                                <label>Новый пароль</label>
+                                <input type="password" name="new_password" id="new_password" required placeholder="Введите новый пароль">
+                            </div>
+                            <div class="form-group">
+                                <label>Подтвердите новый пароль</label>
+                                <input type="password" name="confirm_password" id="confirm_password" required placeholder="Повторите новый пароль">
+                                <div class="error-tooltip" id="passwordMatchError" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--accent-danger); padding: 10px 12px; border-radius: 8px; margin-top: 8px; font-size: 12px;">
+                                    Пароли не совпадают
+                                </div>
+                            </div>
+                        </div>
+                        <div class="password-rules" id="passwordRules" style="background: var(--bg-input); padding: 16px; border-radius: var(--radius-md); margin-top: 12px; font-size: 13px; display: none; border: 1px solid var(--border-color);">
+                            <strong style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Требования к паролю:</strong>
+                            <div class="rule" id="ruleLength" style="padding: 4px 0; color: var(--text-muted); transition: color 0.2s ease;">• Не менее 8 символов</div>
+                            <div class="rule" id="ruleCommon" style="padding: 4px 0; color: var(--text-muted); transition: color 0.2s ease;">• Не слишком простой</div>
+                            <div class="rule" id="ruleNumeric" style="padding: 4px 0; color: var(--text-muted); transition: color 0.2s ease;">• Не только цифры</div>
+                            <div class="rule" id="ruleSimilar" style="padding: 4px 0; color: var(--text-muted); transition: color 0.2s ease;">• Не похож на логин</div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-cancel" onclick="closeEditSection('password')">Отмена</button>
+                            <button type="submit" class="btn btn-save" id="submitPasswordBtn">🔑 Сменить пароль</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function toggleEditSection(section) {
+            const formId = 'edit' + section.charAt(0).toUpperCase() + section.slice(1) + 'Form';
+            const form = document.getElementById(formId);
+            if (form) {
+                form.classList.toggle('active');
+            }
+        }
+
+        function closeEditSection(section) {
+            const formId = 'edit' + section.charAt(0).toUpperCase() + section.slice(1) + 'Form';
+            const form = document.getElementById(formId);
+            if (form) {
+                form.classList.remove('active');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameInput = document.querySelector('input[name="username"]');
+            const newPasswordInput = document.getElementById('new_password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
+            const passwordMatchError = document.getElementById('passwordMatchError');
+            const passwordRules = document.getElementById('passwordRules');
+            const submitBtn = document.getElementById('submitPasswordBtn');
+
+            const ruleLength = document.getElementById('ruleLength');
+            const ruleCommon = document.getElementById('ruleCommon');
+            const ruleNumeric = document.getElementById('ruleNumeric');
+            const ruleSimilar = document.getElementById('ruleSimilar');
+
+            function validatePassword() {
+                if (!newPasswordInput) return true;
+
+                const password = newPasswordInput.value;
+                let isValid = true;
+
+                if (password.length >= 8) {
+                    ruleLength.classList.add('valid');
+                    ruleLength.classList.remove('invalid');
+                    ruleLength.style.color = 'var(--accent-success)';
+                } else {
+                    ruleLength.classList.add('invalid');
+                    ruleLength.classList.remove('valid');
+                    ruleLength.style.color = 'var(--accent-danger)';
+                    isValid = false;
+                }
+
+                const commonPasswords = ['123456', 'password', 'qwerty', '12345678', 'password1'];
+                if (!commonPasswords.includes(password.toLowerCase())) {
+                    ruleCommon.classList.add('valid');
+                    ruleCommon.classList.remove('invalid');
+                    ruleCommon.style.color = 'var(--accent-success)';
+                } else {
+                    ruleCommon.classList.add('invalid');
+                    ruleCommon.classList.remove('valid');
+                    ruleCommon.style.color = 'var(--accent-danger)';
+                    isValid = false;
+                }
+
+                if (!/^\d+$/.test(password)) {
+                    ruleNumeric.classList.add('valid');
+                    ruleNumeric.classList.remove('invalid');
+                    ruleNumeric.style.color = 'var(--accent-success)';
+                } else {
+                    ruleNumeric.classList.add('invalid');
+                    ruleNumeric.classList.remove('valid');
+                    ruleNumeric.style.color = 'var(--accent-danger)';
+                    isValid = false;
+                }
+
+                const username = usernameInput ? usernameInput.value : '';
+                if (password.toLowerCase() !== username.toLowerCase() || password.length === 0) {
+                    ruleSimilar.classList.add('valid');
+                    ruleSimilar.classList.remove('invalid');
+                    ruleSimilar.style.color = 'var(--accent-success)';
+                } else {
+                    ruleSimilar.classList.add('invalid');
+                    ruleSimilar.classList.remove('valid');
+                    ruleSimilar.style.color = 'var(--accent-danger)';
+                    isValid = false;
+                }
+
+                if (password.length > 0) {
+                    passwordRules.style.display = 'block';
+                } else {
+                    passwordRules.style.display = 'none';
+                }
+
+                return isValid;
+            }
+
+            function validatePasswordMatch() {
+                if (!newPasswordInput || !confirmPasswordInput) return true;
+
+                const password1 = newPasswordInput.value;
+                const password2 = confirmPasswordInput.value;
+
+                if (password2.length === 0) {
+                    passwordMatchError.style.display = 'none';
+                    return false;
+                } else if (password1 === password2) {
+                    passwordMatchError.style.display = 'none';
+                    return true;
+                } else {
+                    passwordMatchError.style.display = 'block';
+                    return false;
+                }
+            }
+
+            function validatePasswordForm() {
+                const isPasswordValid = validatePassword();
+                const isPasswordMatchValid = validatePasswordMatch();
+                if (submitBtn) {
+                    submitBtn.disabled = !(isPasswordValid && isPasswordMatchValid);
+                }
+            }
+
+            if (newPasswordInput) {
+                newPasswordInput.addEventListener('input', validatePasswordForm);
+            }
+            if (confirmPasswordInput) {
+                confirmPasswordInput.addEventListener('input', validatePasswordForm);
+            }
+            if (usernameInput) {
+                usernameInput.addEventListener('input', validatePasswordForm);
+            }
+
+            // Показываем поле для кода при изменении email
+            const emailField = document.querySelector('input[name="email"]');
+            const codeGroup = document.getElementById('codeGroup');
+
+            if (emailField && codeGroup) {
+                emailField.addEventListener('input', function() {
+                    if (this.value.trim() !== '') {
+                        codeGroup.style.display = 'block';
+                    }
+                });
+            }
+
+            // Автоматическое скрытие сообщений
+            setTimeout(() => {
+                const messages = document.querySelectorAll('.message');
+                messages.forEach(msg => {
+                    msg.style.opacity = '0';
+                    msg.style.transform = 'translateX(20px)';
+                    setTimeout(() => msg.remove(), 300);
+                });
+            }, 5000);
+        });
+    </script>
+
+    <!-- Include phone and email validation script -->
+    {% include 'profile_validation_script.html' %}
+</body>
+</html>

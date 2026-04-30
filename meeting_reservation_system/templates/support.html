@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техподдержка</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #1c1c1f;
+            --bg-tertiary: #18181b;
+            --bg-input: #232326;
+            --border-color: #27272a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-purple: #8b5cf6;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .support-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(-4px);
+        }
+
+        .support-header {
+            background: var(--bg-card);
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .support-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .support-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .support-header p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 14px 24px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .tab:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
+        }
+
+        .tab.active {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--bg-card);
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* FAQ Styles */
+        .faq-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .faq-stat {
+            background: var(--gradient-primary);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .faq-stat.success { background: var(--gradient-success); }
+        .faq-stat.purple { background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); }
+        .faq-stat.orange { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); }
+
+        .faq-stat-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .faq-stat-value {
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+        }
+
+        .faq-stat-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .faq-search {
+            margin-bottom: 32px;
+        }
+
+        .faq-search input {
+            width: 100%;
+            padding: 16px 20px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .faq-search input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .faq-category {
+            margin-bottom: 32px;
+        }
+
+        .faq-category-title {
+            background: var(--gradient-primary);
+            padding: 16px 24px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            font-weight: 600;
+            font-size: 16px;
+            color: white;
+        }
+
+        .faq-category-title.success { background: var(--gradient-success); }
+        .faq-category-title.orange { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); }
+        .faq-category-title.purple { background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); }
+
+        .faq-item {
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            background: var(--bg-tertiary);
+            padding: 16px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .faq-question:hover {
+            background: var(--bg-input);
+        }
+
+        .faq-toggle {
+            color: var(--accent-primary);
+            transition: transform 0.2s ease;
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 20px;
+            background: var(--bg-card);
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .faq-item.active .faq-question {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(90deg);
+            color: white;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 140px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Ticket Styles */
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ticket-item {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ticket-item:hover {
+            background: var(--bg-input);
+            transform: translateX(8px);
+            border-color: var(--accent-primary);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .ticket-subject {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .ticket-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-in_progress {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-closed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--accent-success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .ticket-meta {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .ticket-message {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .no-tickets {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 48px;
+            font-style: italic;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            margin: 2% auto;
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+
+        .close:hover {
+            color: var(--text-primary);
+        }
+
+        .cta-block {
+            background: var(--bg-tertiary);
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--accent-primary);
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .cta-block h4 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .cta-block p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .btn-delete-small {
+            background: var(--accent-danger);
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete-small:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+
+            .faq-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="{% url 'home' %}" class="back-btn">← Назад на главную</a>
+
+    <div class="support-container">
+        <div class="support-header">
+            <h1>FAQ / Техподдержка</h1>
+            <p>Здесь вы можете найти ответы на частые вопросы или задать свой</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="faq" id="tab-faq">Частые вопросы</div>
+            {% if user.is_authenticated %}
+            <div class="tab" data-tab="new-ticket" id="tab-new-ticket">Новый вопрос</div>
+            <div class="tab" data-tab="my-tickets" id="tab-my-tickets">Мои обращения</div>
+            {% endif %}
+            {% if user.role in 'admin manager' %}
+            <div class="tab" data-tab="all-tickets" id="tab-all-tickets">Все обращения</div>
+            {% endif %}
+        </div>
+
+        <!-- FAQ -->
+        <div id="faq" class="tab-content active">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <h3 style="font-size: 22px; margin-bottom: 8px;">Часто задаваемые вопросы</h3>
+                <p style="color: var(--text-muted);">Всё что нужно знать о бронировании переговорных комнат</p>
+            </div>
+
+            <div class="faq-stats">
+                <div class="faq-stat">
+                    <div class="faq-stat-icon">🕒</div>
+                    <div class="faq-stat-value">24/7</div>
+                    <div class="faq-stat-label">Бронирование</div>
+                </div>
+                <div class="faq-stat success">
+                    <div class="faq-stat-icon">💰</div>
+                    <div class="faq-stat-value">От 500₽</div>
+                    <div class="faq-stat-label">Стоимость/час</div>
+                </div>
+                <div class="faq-stat purple">
+                    <div class="faq-stat-icon">👥</div>
+                    <div class="faq-stat-value">2-20 чел.</div>
+                    <div class="faq-stat-label">Вместимость</div>
+                </div>
+                <div class="faq-stat orange">
+                    <div class="faq-stat-icon">✅</div>
+                    <div class="faq-stat-value">Быстрое</div>
+                    <div class="faq-stat-label">Подтверждение</div>
+                </div>
+            </div>
+
+            <div class="faq-search">
+                <input type="text" id="faqSearch" placeholder="🔍 Поиск по вопросам...">
+            </div>
+
+            <!-- Категория: Бронирование -->
+            <div class="faq-category">
+                <div class="faq-category-title">📅 Процесс бронирования</div>
+                <div class="faq-items">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Как забронировать переговорную комнату?</span>
+                            <span class="faq-toggle">▶</span>
+                        </div>
+                        <div class="faq-answer">
+                            <strong>Процесс бронирования:</strong><br><br>
+                            1. Выберите комнату на главной странице<br>
+                            2. Нажмите "Забронировать"<br>
+                            3. Укажите дату, время и продолжительность<br>
+                            4. Введите свои контактные данные<br>
+                            5. Повторно нажмите на "Забронировать"<br><br>
+                            ✅ Бронирование подтверждается после ответа менеджера!
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>За сколько времени можно забронировать?</span>
+                            <span class="faq-toggle">▶</span>
+                        </div>
+                        <div class="faq-answer">
+                            <strong>Сроки бронирования:</strong><br><br>
+                            • <strong>Минимум</strong> - за 2 часа до начала<br>
+                            • <strong>Максимум</strong> - за 30 дней вперед<br>
+                            • <strong>Рекомендуем</strong> бронировать за 1-3 дня<br><br>
+                            В часы пик (10:00-12:00, 14:00-16:00) бронируйте заранее!
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Можно ли отменить бронирование?</span>
+                            <span class="faq-toggle">▶</span>
+                        </div>
+                        <div class="faq-answer">
+                            <strong>Политика отмены:</strong><br><br>
+                            ✅ <strong>Бесплатная отмена</strong> - за 2 часа до начала<br>
+                            Для отмены напишите в техподдержку или свяжитесь с менеджером по указанному номеру телефона
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Категория: Оплата -->
+            <div class="faq-category">
+                <div class="faq-category-title success">💳 Оплата и стоимость</div>
+                <div class="faq-items">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Как рассчитывается стоимость?</span>
+                            <span class="faq-toggle">▶</span>
+                        </div>
+                        <div class="faq-answer">
+                            <strong>Формирование стоимости:</strong><br><br>
+                            • <strong>Почасовая оплата</strong> - от 500₽/час<br>
+                            • <strong>Категория комнаты</strong> - эконом/стандарт/комфорт/VIP/Люкс<br>
+                            • <strong>Продолжительность</strong> - округление до 1 часа<br>
+                            • <strong>Доп. услуги</strong> - проектор, флипчарт и т.д.<br><br>
+                            Итоговая сумма показывается после подтверждения менеджером
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Какие способы оплаты доступны?</span>
+                            <span class="faq-toggle">▶</span>
+                        </div>
+                        <div class="faq-answer">
+                            <strong>Доступные способы оплаты:</strong><br><br>
+                            • 💳 Банковская карта (Visa, MasterCard, МИР)<br>
+                            • 📱 Электронные кошельки (ЮMoney, Qiwi)<br>
+                            • 📱 Перевод на номер телефона
+                            • 💰 Наличные <br>
+                            Оплата производится на месте, то есть, на ресепшене<br><br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Категория: Оборудование -->
+            <div class="faq-category">
+                <div class="faq-category-title orange">🛠️ Оборудование и возможности</div>
+                <div class="faq-items">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Какое оборудование есть в комнатах?</span>
+                            <span class="faq-toggle">▶</span>
+                        </div>
+                        <div class="faq-answer">
+                            <strong>Стандартное оборудование:</strong><br><br>
+                            • 🪑 Мебель - столы, эргономичные кресла<br>
+                            • 📺 Техника - проектор, экран, TV<br>
+                            • 📡 Интернет - Wi-Fi 100 Мбит/с<br>
+                            • ☕ Кулер - вода, чай, кофе<br>
+                            • 🖊️ Канцелярия - флипчарт, маркеры<br><br>
+                            Подробности в описании каждой комнаты
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Категория: Правила -->
+            <div class="faq-category">
+                <div class="faq-category-title purple">📋 Правила использования</div>
+                <div class="faq-items">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Что если я опоздаю на встречу?</span>
+                            <span class="faq-toggle">▶</span>
+                        </div>
+                        <div class="faq-answer">
+                            <strong>Политика опозданий:</strong><br><br>
+                            • ⏰ <strong>До 15 минут</strong> - комната сохраняется<br>
+                            • ⚠️ <strong>15-30 минут</strong> - время не продлевается<br>
+                            • ❌ <strong>Более 30 минут</strong> - бронь аннулируется<br><br>
+                            При опоздании предупредите администратора
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cta-block">
+                <h4>Не нашли ответ?</h4>
+                <p>Наша техподдержка ответит на любой ваш вопрос</p>
+                {% if user.is_authenticated %}
+                <button class="btn btn-primary" onclick="switchToTab('new-ticket')">
+                    Задать вопрос в техподдержку
+                </button>
+                {% else %}
+                <p style="color: var(--text-muted); margin-bottom: 16px;">Для отправки обращения необходимо войти в систему</p>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <a href="{% url 'login' %}" class="btn btn-primary" style="text-decoration: none;">
+                        Войти в систему
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-success" style="text-decoration: none;">
+                        Зарегистрироваться
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Форма нового вопроса -->
+        {% if user.is_authenticated %}
+        <div id="new-ticket" class="tab-content">
+            <h3 style="margin-bottom: 24px;">Задать новый вопрос</h3>
+            <form method="POST" action="{% url 'create_ticket' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Тема вопроса</label>
+                    <input type="text" name="subject" required placeholder="Опишите кратко суть проблемы">
+                </div>
+                <div class="form-group">
+                    <label>Подробное описание</label>
+                    <textarea name="message" required placeholder="Опишите вашу проблему подробно..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Отправить вопрос</button>
+            </form>
+        </div>
+
+        <!-- Мои обращения -->
+        <div id="my-tickets" class="tab-content">
+            <h3 style="margin-bottom: 24px;">Мои обращения</h3>
+            <div class="ticket-list">
+                {% for ticket in my_tickets %}
+                <div class="ticket-item" onclick="openTicket({{ ticket.id }})">
+                    <div class="ticket-header">
+                        <div class="ticket-subject">{{ ticket.subject }}</div>
+                        <div class="ticket-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</div>
+                    </div>
+                    <div class="ticket-meta">
+                        📅 {{ ticket.created_at|date:"d.m.Y H:i" }} |
+                        💬 Ответов: {{ ticket.responses.count }}
+                    </div>
+                    <div class="ticket-message">{{ ticket.message|truncatewords:30 }}</div>
+                </div>
+                {% empty %}
+                <div class="no-tickets">
+                    📭 У вас пока нет обращений в техподдержку
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if user.role in 'admin manager' %}
+        <!-- Все обращения -->
+        <div id="all-tickets" class="tab-content">
+            <h3 style="margin-bottom: 24px;">Все обращения пользователей</h3>
+            <div class="ticket-list">
+                {% for ticket in all_tickets %}
+                <div class="ticket-item">
+                    <div class="ticket-header">
+                        <div class="ticket-subject" style="flex: 1; cursor: pointer;" onclick="openTicket({{ ticket.id }})">
+                            👤 {{ ticket.user.username }}: {{ ticket.subject }}
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div class="ticket-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</div>
+                            {% if ticket.status != 'open' %}
+                            <button class="btn-delete-small" onclick="event.stopPropagation(); confirmDeleteFromList({{ ticket.id }})">
+                                🗑️ Удалить
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="cursor: pointer;" onclick="openTicket({{ ticket.id }})">
+                        <div class="ticket-meta">
+                            📅 {{ ticket.created_at|date:"d.m.Y H:i" }} |
+                            💬 Ответов: {{ ticket.responses.count }}
+                        </div>
+                        <div class="ticket-message">{{ ticket.message|truncatewords:30 }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-tickets">
+                    📭 Нет обращений от пользователей
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Модальное окно просмотра тикета -->
+    <div id="ticketModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeTicketModal()">&times;</span>
+            <div id="ticketModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для ответа -->
+    <div id="responseModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="margin: 0;">Ответ на обращение</h3>
+                <span class="close" onclick="closeResponseModal()" style="position: static;">&times;</span>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-md); margin-bottom: 25px; border: 1px solid var(--border-color);">
+                <strong>Обращение:</strong>
+                <div style="color: var(--text-muted); margin-top: 10px;" id="responseTicketSubject"></div>
+            </div>
+
+            <form method="POST" id="responseForm">
+                {% csrf_token %}
+                <input type="hidden" name="ticket_id" id="responseTicketId">
+                <div class="form-group">
+                    <label>Ваш ответ</label>
+                    <textarea name="response" required placeholder="Напишите подробный ответ пользователю..."></textarea>
+                </div>
+                <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                    <button type="button" class="btn" style="background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);" onclick="closeResponseModal()">
+                        Отмена
+                    </button>
+                    <button type="submit" class="btn btn-success">Отправить ответ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function switchToTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.remove('active');
+                c.style.display = 'none';
+            });
+
+            const tab = document.querySelector(`[data-tab="${tabName}"]`);
+            const content = document.getElementById(tabName);
+
+            if (tab && content) {
+                tab.classList.add('active');
+                content.classList.add('active');
+                content.style.display = 'block';
+            }
+
+            window.history.pushState(null, null, `#${tabName}`);
+        }
+
+        function toggleFAQ(element) {
+            const faqItem = element.parentElement;
+            const isActive = faqItem.classList.contains('active');
+
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+
+        document.getElementById('faqSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const faqItems = document.querySelectorAll('.faq-item');
+
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                item.style.display = question.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                switchToTab(tab.dataset.tab);
+            });
+        });
+
+        function openTicket(ticketId) {
+            fetch(`/support/ticket/${ticketId}/`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('ticketModalContent').innerHTML = html;
+                    document.getElementById('ticketModal').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
+        }
+
+        function closeTicketModal() {
+            document.getElementById('ticketModal').style.display = 'none';
+        }
+
+        function showResponseForm(ticketId, ticketSubject) {
+            fetch(`/support/ticket/${ticketId}/check-status/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'closed') {
+                        alert('Этот тикет уже закрыт. Новые ответы не принимаются.');
+                        return;
+                    }
+
+                    document.getElementById('responseTicketSubject').textContent = ticketSubject;
+                    document.getElementById('responseTicketId').value = ticketId;
+                    document.getElementById('responseForm').action = `/support/ticket/${ticketId}/`;
+                    document.getElementById('responseModal').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showNotification('Ошибка при удалении', 'error');
+                });
+        }
+
+        function closeResponseModal() {
+            document.getElementById('responseModal').style.display = 'none';
+        }
+
+        function confirmDeleteFromList(ticketId) {
+            if (confirm('Удалить этот тикет?\n\nЭто действие нельзя отменить!')) {
+                fetch(`/support/ticket/${ticketId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Тикет удален!', 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showNotification(data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showNotification('Ошибка при удалении', 'error');
+                });
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 10000;
+                ${type === 'success' ? 'background: #22c55e;' : 'background: #ef4444;'}
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        window.onclick = function(event) {
+            const ticketModal = document.getElementById('ticketModal');
+            const responseModal = document.getElementById('responseModal');
+            if (event.target === ticketModal) {
+                closeTicketModal();
+            }
+            if (event.target === responseModal) {
+                closeResponseModal();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            const activeTab = document.querySelector('.tab.active');
+            if (activeTab) {
+                const activeContent = document.getElementById(activeTab.dataset.tab);
+                if (activeContent) {
+                    activeContent.style.display = 'block';
+                }
+            }
+        });
+
+        document.getElementById('responseForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Отправка...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Ответ успешно отправлен!', 'success');
+                    closeResponseModal();
+                    closeTicketModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    throw new Error('Ошибка отправки');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showNotification('Ошибка при отправке ответа', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>

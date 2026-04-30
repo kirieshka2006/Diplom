@@ -1,0 +1,17 @@
+# Виртуальные окружения
+.venv/
+venv/
+ENV/
+
+# Docker артефакты
+*.tar
+*.tar.gz
+
+# Базы данных
+*.sqlite3
+*.db
+
+# Медиа и статика (они на GlusterFS)
+media/
+static/
+staticfiles/

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои отзывы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #1c1c1f;
+            --bg-tertiary: #18181b;
+            --border-color: #27272a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-info: #06b6d4;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 24px;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(-4px);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-item {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-value.primary { color: var(--accent-primary); }
+        .stat-value.success { color: var(--accent-success); }
+        .stat-value.warning { color: var(--accent-warning); }
+        .stat-value.danger { color: var(--accent-danger); }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Reviews Grid */
+        .reviews-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .review-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .review-card:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .review-room {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .review-room-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .review-room-name a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .review-room-name a:hover {
+            color: var(--accent-primary);
+        }
+
+        .review-date {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .review-rating {
+            display: flex;
+            gap: 4px;
+        }
+
+        .star {
+            font-size: 20px;
+            color: var(--border-color);
+        }
+
+        .star.filled {
+            color: #fbbf24;
+        }
+
+        .review-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .review-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-approved {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--accent-success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-view {
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .btn-view:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .review-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .review-footer {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="back-btn">← Назад на главную</a>
+
+        <h1 class="page-title">⭐ Мои отзывы</h1>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-value primary">{{ total_count }}</span>
+                <span class="stat-label">Всего отзывов</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value success">{{ approved_count }}</span>
+                <span class="stat-label">Опубликовано</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value warning">{{ pending_count }}</span>
+                <span class="stat-label">На модерации</span>
+            </div>
+
+        </div>
+
+        {% if reviews %}
+        <div class="reviews-grid">
+            {% for review in reviews %}
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="review-room">
+                        <span class="review-room-name">
+                            <a href="{% url 'room_detail' review.room.id %}">{{ review.room.name }}</a>
+                        </span>
+                        <span class="review-date">
+                            Создан: {{ review.created_at|date:"d.m.Y в H:i" }}
+                            {% if review.updated_at != review.created_at %}
+                            <br>Изменён: {{ review.updated_at|date:"d.m.Y в H:i" }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="review-rating">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                            <span class="star filled">★</span>
+                            {% else %}
+                            <span class="star">★</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="review-text">
+                    {{ review.text }}
+                </div>
+
+                <div class="review-footer">
+                    <span class="status-badge status-{{ review.status }}">
+                        {% if review.status == 'pending' %}
+                            ⏳ На модерации
+                        {% elif review.status == 'approved' %}
+                            ✓ Опубликован
+                        {% elif review.status == 'rejected' %}
+                            ✕ Отклонён
+                        {% endif %}
+                    </span>
+
+                    <div class="review-actions">
+                        <a href="{% url 'room_detail' review.room.id %}" class="btn-view">
+                            Перейти к комнате →
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <h3>У вас пока нет отзывов</h3>
+            <p>Вы можете оставить отзыв на странице любой комнаты, которую вы посещали</p>
+            <a href="{% url 'home' %}" class="btn-primary">🏢 Посмотреть комнаты</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

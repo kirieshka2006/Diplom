@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление офисами</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #1c1c1f;
+            --bg-tertiary: #18181b;
+            --bg-input: #232326;
+            --border-color: #27272a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-danger: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .management-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--bg-card);
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 32px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-card);
+            transform: translateX(-4px);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+        }
+
+        .actions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .actions-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .add-office-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: var(--gradient-success);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .add-office-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .offices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .office-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .office-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-danger), var(--accent-primary));
+        }
+
+        .office-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            border-color: var(--accent-primary);
+        }
+
+        .office-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .office-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .office-details {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .office-details div {
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .map-preview {
+            margin-top: 16px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            height: 200px;
+        }
+
+        .map-preview iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-edit,
+        .btn-delete {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-edit {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-edit:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .no-offices {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+        }
+
+        .no-offices-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            margin: 2% auto;
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-content h3 {
+            font-size: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+            grid-column: 1 / -1;
+        }
+
+        .btn-save {
+            flex: 1;
+            padding: 14px;
+            background: var(--gradient-success);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 14px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-cancel:hover {
+            background: var(--bg-input);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .offices-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full-width {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="management-container">
+        <div class="header">
+            <a href="{% url 'home' %}" class="back-btn">← Назад на главную</a>
+            <h1>🏢 Управление офисами</h1>
+            <p>Добавляйте, редактируйте и удаляйте информацию об офисах компании</p>
+        </div>
+
+        <div class="actions-header">
+            <h2>Список офисов</h2>
+            <button class="add-office-btn" onclick="openAddOfficeModal()">
+                ➕ Добавить новый офис
+            </button>
+        </div>
+
+        <div class="offices-grid">
+            {% for office in offices %}
+            <div class="office-card">
+                <div class="office-header">
+                    <div class="office-info">
+                        <h3>{{ office.name }}</h3>
+                        <div class="office-details">
+                            <div>📍 {{ office.address }}</div>
+                            <div>🕒 {{ office.work_hours|default:"Часы не указаны" }}</div>
+                            <div>📞 {{ office.phone|default:"Телефон не указан" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if office.latitude and office.longitude %}
+                <div class="map-preview">
+                    <iframe src="https://yandex.ru/map-widget/v1/?ll={{ office.longitude }}%2C{{ office.latitude }}&z=15&l=map"></iframe>
+                </div>
+                {% endif %}
+
+                <div class="action-buttons">
+                    <button class="btn-edit" onclick="editOffice({{ office.id }})">
+                        ✏️ Редактировать
+                    </button>
+                    <button class="btn-delete" onclick="deleteOffice({{ office.id }})">
+                        🗑️ Удалить
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-offices">
+                <div class="no-offices-icon">🏢</div>
+                <h3>Офисы не найдены</h3>
+                <p>Добавьте первый офис, нажав кнопку "Добавить новый офис"</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="officeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeOfficeModal()">&times;</span>
+            <h3 id="modalTitle">Добавление нового офиса</h3>
+
+            <form id="officeForm" onsubmit="saveOffice(event)">
+                {% csrf_token %}
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>🏢 Название офиса</label>
+                        <input type="text" name="name" required placeholder="Например: Центральный офис">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>📍 Адрес</label>
+                        <input type="text" name="address" required placeholder="Полный адрес офиса">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📞 Телефон</label>
+                        <input type="text" name="phone" placeholder="+7 (XXX) XXX-XX-XX">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🕒 Часы работы</label>
+                        <input type="text" name="work_hours" placeholder="Пн-Пт: 9:00-18:00">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🌐 Широта</label>
+                        <input type="number" step="any" name="latitude" required placeholder="52.286551">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🌐 Долгота</label>
+                        <input type="number" step="any" name="longitude" required placeholder="104.280586">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>🔗 Ссылка на Яндекс.Карты</label>
+                        <input type="url" name="yandex_map_url" placeholder="https://yandex.ru/maps/...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🚗 Парковка</label>
+                        <input type="text" name="parking" placeholder="Подземная, 50 мест">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🚌 Транспорт</label>
+                        <input type="text" name="transport" placeholder="Метро, автобусы">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>🎯 Удобства</label>
+                        <input type="text" name="amenities" placeholder="Wi-Fi, кондиционер, кухня">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeOfficeModal()">❌ Отмена</button>
+                    <button type="submit" class="btn-save">💾 Сохранить офис</button>
+                </div>
+
+                <input type="hidden" name="office_id" id="office_id" value="">
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openAddOfficeModal() {
+            document.getElementById('modalTitle').textContent = 'Добавление нового офиса';
+            document.getElementById('officeForm').reset();
+            document.getElementById('office_id').value = '';
+            document.getElementById('officeModal').style.display = 'block';
+            document.querySelector('.modal-content').scrollTop = 0;
+        }
+
+        function closeOfficeModal() {
+            document.getElementById('officeModal').style.display = 'none';
+        }
+
+        function editOffice(officeId) {
+            fetch(`/office-management/${officeId}/edit/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const office = data.office;
+                        document.getElementById('modalTitle').textContent = 'Редактирование офиса';
+                        document.getElementById('office_id').value = office.id;
+                        document.querySelector('input[name="name"]').value = office.name;
+                        document.querySelector('input[name="address"]').value = office.address;
+                        document.querySelector('input[name="phone"]').value = office.phone || '';
+                        document.querySelector('input[name="work_hours"]').value = office.work_hours || '';
+                        document.querySelector('input[name="latitude"]').value = office.latitude;
+                        document.querySelector('input[name="longitude"]').value = office.longitude;
+                        document.querySelector('input[name="yandex_map_url"]').value = office.yandex_map_url || '';
+                        document.querySelector('input[name="parking"]').value = office.parking || '';
+                        document.querySelector('input[name="transport"]').value = office.transport || '';
+                        document.querySelector('input[name="amenities"]').value = office.amenities || '';
+
+                        document.getElementById('officeModal').style.display = 'block';
+                        document.querySelector('.modal-content').scrollTop = 0;
+                    }
+                });
+        }
+
+        function saveOffice(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const officeId = document.getElementById('office_id').value;
+
+            const url = officeId ? `/office-management/${officeId}/edit/` : '/office-management/add/';
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeOfficeModal();
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            });
+        }
+
+        function deleteOffice(officeId) {
+            if (confirm('Вы уверены, что хотите удалить этот офис?')) {
+                fetch(`/office-management/${officeId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + data.error);
+                    }
+                });
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('officeModal');
+            if (event.target === modal) {
+                closeOfficeModal();
+            }
+        }
+    </script>
+</body>
+</html>

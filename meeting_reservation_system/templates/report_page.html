@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчёт по бронированиям</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #1c1c1f;
+            --bg-tertiary: #18181b;
+            --border-color: #27272a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-purple: #8b5cf6;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            margin-top: 20px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .filter-toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-toggle-btn:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .filter-toggle-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .filter-toggle-btn svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .filter-toggle-btn.active svg.chevron {
+            transform: rotate(180deg);
+        }
+
+        .filter-badge {
+            background: var(--accent-primary);
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
+
+        .filter-toggle-btn.active .filter-badge {
+            background: white;
+            color: var(--accent-primary);
+        }
+
+        .filters-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+
+        .filters-panel.open {
+            max-height: 500px;
+            opacity: 1;
+            margin-bottom: 24px;
+        }
+
+        .filters {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-section-title svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filters label {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .filters input:focus,
+        .filters select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filters select option {
+            background: var(--bg-tertiary);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-apply {
+            padding: 12px 28px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-reset {
+            padding: 12px 28px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
+        }
+
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .active-filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--accent-primary);
+        }
+
+        .active-filter-tag .remove {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .active-filter-tag .remove:hover {
+            opacity: 1;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .report-table th,
+        .report-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .report-table th {
+            background: var(--bg-tertiary);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .report-table tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-confirmed {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--accent-success);
+        }
+
+        .status-cancelled {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-danger);
+        }
+
+        .status-completed {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-primary);
+        }
+
+        .status-pending {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent-purple);
+        }
+
+        /* Добавлены стили для бейджа класса комнаты */
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .category-economy {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+
+        .category-standard {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+        }
+
+        .category-comfort {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .category-vip {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+        }
+
+        .category-luxury {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .export-buttons button {
+            padding: 14px 28px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .results-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .results-count {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .room-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .room-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Назад
+        </a>
+
+        <div class="page-header">
+            <h1 class="page-title">Отчёт по бронированиям</h1>
+
+            <button type="button" class="filter-toggle-btn" id="filterToggle">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Фильтры и сортировка
+                <span class="filter-badge" id="filterCount" style="display: none;">0</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+        </div>
+
+        <!-- Выдвижная панель фильтров -->
+        <div class="filters-panel" id="filtersPanel">
+            <form method="get" action="{% url 'report_page' %}" class="filters" id="filterForm">
+                <div class="filters-grid">
+                    <!-- Фильтрация по периоду -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Период
+                        </div>
+                        <div class="filter-group">
+                            <label>Начало периода</label>
+                            <input type="date" name="start_date" value="{{ request.GET.start_date }}">
+                        </div>
+                        <div class="filter-group" style="margin-top: 12px;">
+                            <label>Конец периода</label>
+                            <input type="date" name="end_date" value="{{ request.GET.end_date }}">
+                        </div>
+                    </div>
+
+                    <!-- Фильтрация по комнате -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            Комната
+                        </div>
+                        <div class="filter-group">
+                            <label>Выберите комнату</label>
+                            <select name="room">
+                                <option value="">Все комнаты</option>
+                                {% for room in rooms %}
+                                <option value="{{ room.id }}" {% if request.GET.room == room.id|stringformat:"s" %}selected{% endif %}>{{ room.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Фильтрация по классу комнаты -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            Класс комнаты
+                        </div>
+                        <div class="filter-group">
+                            <label>Выберите класс</label>
+                            <select name="category">
+                                <option value="">Все классы</option>
+                                <option value="economy" {% if request.GET.category == 'economy' %}selected{% endif %}>Эконом</option>
+                                <option value="standard" {% if request.GET.category == 'standard' %}selected{% endif %}>Стандарт</option>
+                                <option value="comfort" {% if request.GET.category == 'comfort' %}selected{% endif %}>Комфорт</option>
+                                <option value="vip" {% if request.GET.category == 'vip' %}selected{% endif %}>VIP</option>
+                                <option value="luxury" {% if request.GET.category == 'luxury' %}selected{% endif %}>Люкс</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Исправлен статус: completed вместо finished -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Статус
+                        </div>
+                        <div class="filter-group">
+                            <label>Выберите статус</label>
+                            <select name="status">
+                                <option value="">Все статусы</option>
+                                <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>В обработке</option>
+                                <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Подтверждён</option>
+                                <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Отменён</option>
+                                <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Завершён</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Сортировка -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="14" y2="15"/><line x1="4" y1="3" x2="8" y2="3"/><line x1="4" y1="21" x2="10" y2="21"/></svg>
+                            Сортировка
+                        </div>
+                        <div class="filter-group">
+                            <label>Сортировать по</label>
+                            <select name="sort_by">
+                                <option value="date_desc" {% if request.GET.sort_by == 'date_desc' or not request.GET.sort_by %}selected{% endif %}>Дата (сначала новые)</option>
+                                <option value="date_asc" {% if request.GET.sort_by == 'date_asc' %}selected{% endif %}>Дата (сначала старые)</option>
+                                <option value="time_asc" {% if request.GET.sort_by == 'time_asc' %}selected{% endif %}>Время начала (по возрастанию)</option>
+                                <option value="time_desc" {% if request.GET.sort_by == 'time_desc' %}selected{% endif %}>Время начала (по убыванию)</option>
+                                <option value="room" {% if request.GET.sort_by == 'room' %}selected{% endif %}>По комнате</option>
+                                <option value="user" {% if request.GET.sort_by == 'user' %}selected{% endif %}>По пользователю</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-apply">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Применить
+                    </button>
+                    <button type="button" class="btn-reset" id="resetFilters">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                        Сбросить
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Активные фильтры -->
+        <div class="active-filters" id="activeFilters"></div>
+
+        <div class="results-info">
+            <span>Найдено: <span class="results-count">{{ bookings|length }}</span> бронирований</span>
+        </div>
+
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Комната</th>
+                    <th>Класс</th>
+                    <th>Пользователь</th>
+                    <th>Начало</th>
+                    <th>Конец</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.start_time|date:"d.m.Y" }}</td>
+                    <td>
+                        <div class="room-name">{{ booking.room.name }}</div>
+                    </td>
+                    <!-- Добавлен класс комнаты -->
+                    <td>
+                        <span class="category-badge category-{{ booking.room.category }}">
+                            {% if booking.room.category == 'economy' %}Эконом
+                            {% elif booking.room.category == 'standard' %}Стандарт
+                            {% elif booking.room.category == 'comfort' %}Комфорт
+                            {% elif booking.room.category == 'vip' %}VIP
+                            {% elif booking.room.category == 'luxury' %}Люкс
+                            {% else %}{{ booking.room.category }}{% endif %}
+                        </span>
+                    </td>
+                    <td>{{ booking.user.username }}</td>
+                    <td>{{ booking.start_time|time:"H:i" }}</td>
+                    <td>{{ booking.end_time|time:"H:i" }}</td>
+                    <td>
+                        <!-- Исправлен класс статуса: completed вместо finished -->
+                        <span class="status-badge
+                            {% if booking.status == 'confirmed' %}status-confirmed
+                            {% elif booking.status == 'cancelled' %}status-cancelled
+                            {% elif booking.status == 'completed' %}status-completed
+                            {% else %}status-pending{% endif %}">
+                            {% if booking.status == 'confirmed' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Подтверждён
+                            {% elif booking.status == 'cancelled' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                Отменён
+                            {% elif booking.status == 'completed' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                Завершён
+                            {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                В обработке
+                            {% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        Бронирования не найдены
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Добавлены скрытые поля сортировки в форму экспорта -->
+        <div class="export-buttons">
+
+            <form method="get" action="{% url 'export_pdf' %}" style="display: inline;">
+                <input type="hidden" name="start_date" value="{{ request.GET.start_date }}">
+                <input type="hidden" name="end_date" value="{{ request.GET.end_date }}">
+                <input type="hidden" name="room" value="{{ request.GET.room }}">
+                <input type="hidden" name="category" value="{{ request.GET.category }}">
+                <input type="hidden" name="status" value="{{ request.GET.status }}">
+                <input type="hidden" name="sort_by" value="{{ request.GET.sort_by|default:'date_desc' }}">
+                <button type="submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    Экспорт в PDF
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterToggle = document.getElementById('filterToggle');
+            const filtersPanel = document.getElementById('filtersPanel');
+            const resetBtn = document.getElementById('resetFilters');
+            const filterForm = document.getElementById('filterForm');
+            const filterCount = document.getElementById('filterCount');
+            const activeFiltersContainer = document.getElementById('activeFilters');
+
+            // Подсчет активных фильтров
+            function countActiveFilters() {
+                const params = new URLSearchParams(window.location.search);
+                let count = 0;
+                const filters = [];
+
+                if (params.get('start_date')) {
+                    count++;
+                    filters.push({ key: 'start_date', label: 'С ' + params.get('start_date') });
+                }
+                if (params.get('end_date')) {
+                    count++;
+                    filters.push({ key: 'end_date', label: 'По ' + params.get('end_date') });
+                }
+                if (params.get('room')) {
+                    count++;
+                    const roomSelect = document.querySelector('select[name="room"]');
+                    const roomName = roomSelect.options[roomSelect.selectedIndex].text;
+                    filters.push({ key: 'room', label: 'Комната: ' + roomName });
+                }
+                if (params.get('category')) {
+                    count++;
+                    const categories = { economy: 'Эконом', standard: 'Стандарт', comfort: 'Комфорт', vip: 'VIP', luxury: 'Люкс' };
+                    filters.push({ key: 'category', label: 'Класс: ' + categories[params.get('category')] });
+                }
+                if (params.get('status')) {
+                    count++;
+                    const statuses = { pending: 'В обработке', confirmed: 'Подтверждён', cancelled: 'Отменён', completed: 'Завершён' };
+                    filters.push({ key: 'status', label: 'Статус: ' + statuses[params.get('status')] });
+                }
+                if (params.get('sort_by') && params.get('sort_by') !== 'date_desc') {
+                    count++;
+                    const sorts = {
+                        date_asc: 'Дата (старые)',
+                        time_asc: 'Время (возр.)',
+                        time_desc: 'Время (убыв.)',
+                        room: 'По комнате',
+                        user: 'По пользователю'
+                    };
+                    filters.push({ key: 'sort_by', label: 'Сортировка: ' + sorts[params.get('sort_by')] });
+                }
+
+                if (count > 0) {
+                    filterCount.textContent = count;
+                    filterCount.style.display = 'inline';
+                } else {
+                    filterCount.style.display = 'none';
+                }
+
+                // Отображение активных фильтров
+                activeFiltersContainer.innerHTML = filters.map(f => `
+                    <span class="active-filter-tag">
+                        ${f.label}
+                        <span class="remove" data-key="${f.key}">&times;</span>
+                    </span>
+                `).join('');
+
+                // Обработчики для удаления фильтров
+                activeFiltersContainer.querySelectorAll('.remove').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const key = this.dataset.key;
+                        const params = new URLSearchParams(window.location.search);
+                        params.delete(key);
+                        window.location.search = params.toString();
+                    });
+                });
+            }
+
+            countActiveFilters();
+
+            // Открытие/закрытие панели фильтров
+            filterToggle.addEventListener('click', function() {
+                this.classList.toggle('active');
+                filtersPanel.classList.toggle('open');
+            });
+
+            resetBtn.addEventListener('click', function() {
+                // Очищаем все поля формы
+                filterForm.querySelectorAll('input[type="date"]').forEach(input => input.value = '');
+                filterForm.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+
+                // Перезагружаем страницу без параметров
+                window.location.href = window.location.pathname;
+            });
+
+            // Если есть активные фильтры, открываем панель
+            const params = new URLSearchParams(window.location.search);
+            if (params.toString()) {
+                filterToggle.classList.add('active');
+                filtersPanel.classList.add('open');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  django:
+    image: django-test-image:v5
+    container_name: django-tests
+    network_mode: host
+    restart: always
+    volumes:
+      - /mnt/gluster/media:/app/media
+      - /mnt/gluster/static:/app/static
+    environment:
+      - DJANGO_SETTINGS_MODULE=bron.settings
+      - DEBUG=False
+    command: gunicorn --bind 127.0.0.1:8000 --timeout 120 bron.wsgi:application

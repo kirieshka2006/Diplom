@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# IDE / editor files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local database and generated app data
+db.sqlite3
+*.sqlite3
+media/
+staticfiles/
+backups/
+mnt/gluster/
+
+# Frontend build output
+node_modules/
+.next/
+out/
+
+# Logs and env files
+*.log
+.env
+.env.*
+
+# Deployment artifacts
+*.tar
+*.tar.gz
