@@ -1,4 +1,6 @@
 import os
+from functools import lru_cache
+from pathlib import Path
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
@@ -18,22 +20,233 @@ from django.utils.dateparse import parse_date
 from django.conf import settings
 import pandas as pd
 import io
-import pdfkit
 from django.utils.timezone import localtime
 from openpyxl import load_workbook
 import re
+from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
-# Настройка пути к wkhtmltopdf
-# PDFKIT_CONFIG = pdfkit.configuration(
-#     wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
-# )
 
 STATUS_CHOICES = dict(Booking.STATUS_CHOICES)
+
+PDF_PAGE_WIDTH = 1754
+PDF_PAGE_HEIGHT = 1240
+PDF_PAGE_MARGIN_X = 64
+PDF_PAGE_MARGIN_Y = 54
+PDF_CELL_PADDING_X = 12
+PDF_CELL_PADDING_Y = 10
+
+
+@lru_cache(maxsize=None)
+def _get_pdf_font(size, bold=False):
+    font_candidates = [
+        Path('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'),
+        Path('/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/dejavu/DejaVuSans.ttf'),
+        Path('/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf'),
+        settings.BASE_DIR / 'static' / 'fonts' / ('DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf'),
+    ]
+
+    for font_path in font_candidates:
+        if font_path.exists():
+            return ImageFont.truetype(str(font_path), size=size)
+
+    return ImageFont.load_default()
+
+
+def _text_width(draw, text, font):
+    return draw.textbbox((0, 0), text or '', font=font)[2]
+
+
+def _line_height(draw, font):
+    bbox = draw.textbbox((0, 0), 'Ag', font=font)
+    return (bbox[3] - bbox[1]) + 4
+
+
+def _split_long_word(draw, word, font, max_width):
+    parts = []
+    current = ''
+
+    for char in word:
+        candidate = f'{current}{char}'
+        if not current or _text_width(draw, candidate, font) <= max_width:
+            current = candidate
+            continue
+
+        parts.append(current)
+        current = char
+
+    if current:
+        parts.append(current)
+
+    return parts or ['']
+
+
+def _wrap_pdf_text(draw, text, font, max_width):
+    normalized = str(text or '—').replace('\n', ' ').strip()
+    if not normalized:
+        return ['—']
+
+    lines = []
+    current = ''
+
+    for raw_word in normalized.split():
+        word_parts = [raw_word]
+        if _text_width(draw, raw_word, font) > max_width:
+            word_parts = _split_long_word(draw, raw_word, font, max_width)
+
+        for word in word_parts:
+            candidate = word if not current else f'{current} {word}'
+            if current and _text_width(draw, candidate, font) > max_width:
+                lines.append(current)
+                current = word
+            else:
+                current = candidate
+
+    if current:
+        lines.append(current)
+
+    return lines or ['—']
+
+
+def _draw_pdf_table_header(draw, headers, column_widths, x_start, y_start, header_font):
+    line_height = _line_height(draw, header_font)
+    row_height = line_height + (PDF_CELL_PADDING_Y * 2)
+    x = x_start
+
+    for index, header in enumerate(headers):
+        width = column_widths[index]
+        draw.rectangle(
+            [x, y_start, x + width, y_start + row_height],
+            fill='#dce9d8',
+            outline='#9eaf9a',
+            width=2,
+        )
+        draw.text(
+            (x + PDF_CELL_PADDING_X, y_start + PDF_CELL_PADDING_Y),
+            str(header),
+            font=header_font,
+            fill='#223022',
+        )
+        x += width
+
+    return y_start + row_height
+
+
+def _build_table_pdf(title, headers, rows, filename, column_fractions):
+    title_font = _get_pdf_font(30, bold=True)
+    meta_font = _get_pdf_font(16)
+    header_font = _get_pdf_font(16, bold=True)
+    body_font = _get_pdf_font(15)
+
+    content_width = PDF_PAGE_WIDTH - (PDF_PAGE_MARGIN_X * 2)
+    column_widths = [int(content_width * fraction) for fraction in column_fractions]
+    column_widths[-1] += content_width - sum(column_widths)
+
+    pages = []
+
+    def start_page(page_number):
+        image = Image.new('RGB', (PDF_PAGE_WIDTH, PDF_PAGE_HEIGHT), 'white')
+        draw = ImageDraw.Draw(image)
+        y = PDF_PAGE_MARGIN_Y
+
+        draw.text((PDF_PAGE_MARGIN_X, y), title, font=title_font, fill='#1f2a1f')
+        meta_text = f'Сформировано: {timezone.localtime().strftime("%d.%m.%Y %H:%M")}'
+        meta_width = _text_width(draw, meta_text, meta_font)
+        draw.text(
+            (PDF_PAGE_WIDTH - PDF_PAGE_MARGIN_X - meta_width, y + 8),
+            meta_text,
+            font=meta_font,
+            fill='#5a6658',
+        )
+        y += _line_height(draw, title_font) + 18
+
+        if page_number > 1:
+            continuation = f'Страница {page_number}'
+            draw.text((PDF_PAGE_MARGIN_X, y), continuation, font=meta_font, fill='#5a6658')
+            y += _line_height(draw, meta_font) + 12
+
+        y = _draw_pdf_table_header(draw, headers, column_widths, PDF_PAGE_MARGIN_X, y, header_font)
+        return image, draw, y
+
+    current_page_number = 1
+    image, draw, y = start_page(current_page_number)
+    body_line_height = _line_height(draw, body_font)
+
+    if not rows:
+        empty_message = 'По выбранным фильтрам записи не найдены.'
+        draw.text(
+            (PDF_PAGE_MARGIN_X, y + 24),
+            empty_message,
+            font=body_font,
+            fill='#465245',
+        )
+        pages.append(image)
+    else:
+        for row_index, row in enumerate(rows):
+            wrapped_cells = []
+            row_height = 0
+
+            for column_index, cell in enumerate(row):
+                max_text_width = column_widths[column_index] - (PDF_CELL_PADDING_X * 2)
+                lines = _wrap_pdf_text(draw, cell, body_font, max_text_width)
+                wrapped_cells.append(lines)
+                row_height = max(
+                    row_height,
+                    (len(lines) * body_line_height) + (PDF_CELL_PADDING_Y * 2),
+                )
+
+            if y + row_height > PDF_PAGE_HEIGHT - PDF_PAGE_MARGIN_Y:
+                pages.append(image)
+                current_page_number += 1
+                image, draw, y = start_page(current_page_number)
+                body_line_height = _line_height(draw, body_font)
+
+            x = PDF_PAGE_MARGIN_X
+            row_fill = '#ffffff' if row_index % 2 == 0 else '#f7faf6'
+
+            for column_index, lines in enumerate(wrapped_cells):
+                width = column_widths[column_index]
+                draw.rectangle(
+                    [x, y, x + width, y + row_height],
+                    fill=row_fill,
+                    outline='#bcc7b8',
+                    width=1,
+                )
+
+                text_y = y + PDF_CELL_PADDING_Y
+                for line in lines:
+                    draw.text(
+                        (x + PDF_CELL_PADDING_X, text_y),
+                        line,
+                        font=body_font,
+                        fill='#1e1e1e',
+                    )
+                    text_y += body_line_height
+
+                x += width
+
+            y += row_height
+
+        pages.append(image)
+
+    pdf_buffer = io.BytesIO()
+    first_page, *other_pages = pages
+    first_page.save(
+        pdf_buffer,
+        format='PDF',
+        save_all=True,
+        append_images=other_pages,
+        resolution=150.0,
+    )
+    pdf_buffer.seek(0)
+
+    response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
 
 
 def get_filtered_users(request):
@@ -135,57 +348,30 @@ def users_export_pdf(request):
     sort_by = request.GET.get('sort_by', 'date_desc')
     users = apply_users_sorting(users, sort_by)
 
-    html_content = """
-    <!DOCTYPE html>
-    <html lang="ru">
-    <head>
-    <meta charset="UTF-8">
-    <style>
-        body { font-family: "Arial", "Times New Roman", sans-serif; font-size: 10px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #000; padding: 4px; text-align: left; }
-        th { background-color: #f2f2f2; font-size: 9px; }
-        h1 { font-size: 16px; }
-    </style>
-    </head>
-    <body>
-    <h1>Отчёт по пользователям</h1>
-    <table>
-    <tr>
-        <th>Логин</th>
-        <th>Email</th>
-        <th>ФИО</th>
-        <th>Телефон</th>
-        <th>Пол</th>
-        <th>Роль</th>
-        <th>Дата регистрации</th>
-        <th>Последний вход</th>
-    </tr>
-    """
-
+    rows = []
     for u in users:
         full_name = ' '.join(filter(None, [u.last_name, u.first_name])) or '—'
         gender_display = 'М' if u.gender == 'M' else ('Ж' if u.gender == 'F' else '—')
         last_login = u.last_login.strftime('%d.%m.%Y %H:%M') if u.last_login else 'Никогда'
 
-        html_content += f"""<tr>
-            <td>{u.username}</td>
-            <td>{u.email or '—'}</td>
-            <td>{full_name}</td>
-            <td>{u.phone or '—'}</td>
-            <td>{gender_display}</td>
-            <td>{u.get_role_display()}</td>
-            <td>{u.date_joined.strftime('%d.%m.%Y')}</td>
-            <td>{last_login}</td>
-        </tr>"""
+        rows.append([
+            u.username,
+            u.email or '—',
+            full_name,
+            u.phone or '—',
+            gender_display,
+            u.get_role_display(),
+            u.date_joined.strftime('%d.%m.%Y'),
+            last_login,
+        ])
 
-    html_content += "</table></body></html>"
-
-    pdf_file = pdfkit.from_string(html_content, False, configuration=PDFKIT_CONFIG)
-
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="users_report.pdf"'
-    return response
+    return _build_table_pdf(
+        title='Отчёт по пользователям',
+        headers=['Логин', 'Email', 'ФИО', 'Телефон', 'Пол', 'Роль', 'Дата регистрации', 'Последний вход'],
+        rows=rows,
+        filename='users_report.pdf',
+        column_fractions=[0.12, 0.19, 0.17, 0.14, 0.06, 0.10, 0.10, 0.12],
+    )
 
 
 # Вынесем фильтрацию в отдельную функцию
@@ -272,54 +458,28 @@ def export_pdf(request):
         'luxury': 'Люкс'
     }
 
-    # Создаем HTML с корректной кодировкой и шрифтами
-    html_content = """
-    <!DOCTYPE html>
-    <html lang="ru">
-    <head>
-    <meta charset="UTF-8">
-    <style>
-        body { font-family: "Arial", "Times New Roman", sans-serif; font-size: 12px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    </style>
-    </head>
-    <body>
-    <h1>Отчёт по бронированиям</h1>
-    <table>
-    <tr>
-        <th>Дата</th>
-        <th>Комната</th>
-        <th>Класс</th>
-        <th>Пользователь</th>
-        <th>Начало</th>
-        <th>Конец</th>
-        <th>Статус</th>
-    </tr>
-    """
-
+    rows = []
     for b in bookings:
         start_local = localtime(b.start_time).strftime('%H:%M')
         end_local = localtime(b.end_time).strftime('%H:%M')
         category_display = category_names.get(b.room.category, b.room.category)
-        html_content += (f"<tr>"
-                         f"<td>{b.start_time.strftime('%d.%m.%Y')}</td>"
-                         f"<td>{b.room.name}</td>"
-                         f"<td>{category_display}</td>"
-                         f"<td>{b.user.username}</td>"
-                         f"<td>{start_local}</td>"
-                         f"<td>{end_local}</td>"
-                         f"<td>{b.get_status_display()}</td></tr>")
+        rows.append([
+            b.start_time.strftime('%d.%m.%Y'),
+            b.room.name,
+            category_display,
+            b.user.username,
+            start_local,
+            end_local,
+            b.get_status_display(),
+        ])
 
-    html_content += "</table></body></html>"
-
-    # Генерация PDF через pdfkit с конфигурацией
-    pdf_file = pdfkit.from_string(html_content, False, configuration=PDFKIT_CONFIG)
-
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="bookings.pdf"'
-    return response
+    return _build_table_pdf(
+        title='Отчёт по бронированиям',
+        headers=['Дата', 'Комната', 'Класс', 'Пользователь', 'Начало', 'Конец', 'Статус'],
+        rows=rows,
+        filename='bookings.pdf',
+        column_fractions=[0.14, 0.24, 0.10, 0.18, 0.10, 0.10, 0.14],
+    )
 
 
 @login_required
@@ -1969,6 +2129,4 @@ def change_user_role(request, user_id):
 
     except User.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Пользователь не найден'})
-
-
 

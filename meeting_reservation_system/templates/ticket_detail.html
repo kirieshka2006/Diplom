@@ -43,7 +43,7 @@
         </div>
         {% endif %}
 
-        <div style="background: #18181b; padding: 20px; border-radius: 12px; margin-top: 16px; border-left: 4px solid #3b82f6;">
+        <div style="background: var(--surface-card-soft, var(--bg-tertiary)); padding: 20px; border-radius: 12px; margin-top: 16px; border-left: 4px solid var(--accent-primary, #3b82f6); border: 1px solid var(--border-color, #27272a);">
             <strong style="color: var(--text-primary, #fafafa);">📋 Описание проблемы:</strong>
             <div style="margin-top: 12px; color: var(--text-secondary, #a1a1aa); line-height: 1.7;">
                 {{ ticket.message|linebreaks }}
@@ -59,7 +59,7 @@
                 {% if user.role in 'admin manager' or user == ticket.user %}
                 <button onclick="window.parent.showResponseForm({{ ticket.id }}, '{{ ticket.subject|escapejs }}')"
                         style="
-                            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                            background: var(--gradient-primary, linear-gradient(135deg, #3b82f6, #8b5cf6));
                             color: white;
                             padding: 10px 20px;
                             border: none;
@@ -78,10 +78,10 @@
         <div class="responses-list" style="display: flex; flex-direction: column; gap: 16px;">
             {% for response in ticket.responses.all %}
             <div style="
-                background: #18181b;
+                background: var(--surface-card-soft, var(--bg-tertiary));
                 padding: 16px;
                 border-radius: 12px;
-                border: 1px solid #27272a;
+                border: 1px solid var(--border-color, #27272a);
             ">
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                     <div style="
@@ -94,9 +94,9 @@
                         font-size: 16px;
                         color: white;
                         {% if response.user.role in 'admin manager' %}
-                        background: #3b82f6;
+                        background: var(--accent-primary, #3b82f6);
                         {% else %}
-                        background: #22c55e;
+                        background: var(--accent-success, #22c55e);
                         {% endif %}
                     ">
                         {% if response.user.role in 'admin manager' %}🛠️{% else %}👤{% endif %}
@@ -110,11 +110,12 @@
                 </div>
                 <div style="
                     padding: 14px;
-                    background: #232326;
+                    background: var(--bg-input, #232326);
                     border-radius: 8px;
                     color: var(--text-secondary, #a1a1aa);
                     line-height: 1.6;
                     font-size: 14px;
+                    border: 1px solid var(--border-color, #27272a);
                 ">
                     {{ response.message|linebreaks }}
                 </div>
@@ -127,7 +128,7 @@
                     {% if user.role in 'admin manager' or user == ticket.user %}
                     <button onclick="window.parent.showResponseForm({{ ticket.id }}, '{{ ticket.subject|escapejs }}')"
                             style="
-                                background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                                background: var(--gradient-primary, linear-gradient(135deg, #3b82f6, #8b5cf6));
                                 color: white;
                                 padding: 12px 24px;
                                 border: none;
@@ -151,9 +152,9 @@
     <div style="
         margin-top: 32px;
         padding: 24px;
-        background: #18181b;
+        background: var(--surface-card-soft, var(--bg-tertiary));
         border-radius: 12px;
-        border: 1px solid #27272a;
+        border: 1px solid var(--border-color, #27272a);
         text-align: center;
     ">
         <h4 style="margin-bottom: 12px;">✅ Проблема решена?</h4>
@@ -161,7 +162,7 @@
         <form method="POST" action="{% url 'close_ticket' ticket.id %}">
             {% csrf_token %}
             <button type="submit" style="
-                background: linear-gradient(135deg, #22c55e, #10b981);
+                background: var(--gradient-success, linear-gradient(135deg, #22c55e, #10b981));
                 color: white;
                 padding: 14px 32px;
                 border: none;
@@ -182,13 +183,13 @@
     <div style="
         margin-top: 32px;
         padding: 24px;
-        background: #18181b;
+        background: var(--surface-card-soft, var(--bg-tertiary));
         border-radius: 12px;
-        border: 2px solid #22c55e;
+        border: 2px solid var(--accent-success, #22c55e);
         text-align: center;
     ">
         <div style="font-size: 48px; margin-bottom: 12px;">🔒</div>
-        <h4 style="color: #22c55e; margin-bottom: 8px;">Тикет закрыт</h4>
+        <h4 style="color: var(--accent-success, #22c55e); margin-bottom: 8px;">Тикет закрыт</h4>
         <p style="color: var(--text-muted, #71717a);">Это обращение закрыто. Новые ответы не принимаются.</p>
     </div>
     {% endif %}

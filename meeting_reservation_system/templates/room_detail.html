@@ -1049,6 +1049,7 @@
             }
         }
     </style>
+    {% include 'theme_setup.html' %}
 </head>
 <body>
     <a href="{% url 'home' %}" class="back-button">← Назад</a>
@@ -2287,5 +2288,6 @@
         });
     </script>
     {% endif %}
+    {% include 'theme_toggle.html' %}
 </body>
 </html>

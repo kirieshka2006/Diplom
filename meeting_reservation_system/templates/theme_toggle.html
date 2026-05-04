@@ -1,0 +1,57 @@
+<button
+    type="button"
+    class="theme-toggle"
+    id="themeToggle"
+    aria-label="Переключить тему"
+    title="Переключить тему"
+>
+    <span class="theme-toggle__thumb" id="themeToggleThumb" aria-hidden="true">🌙</span>
+    <span class="theme-toggle__content">
+        <span class="theme-toggle__caption">Тема интерфейса</span>
+        <span class="theme-toggle__label" id="themeToggleLabel">Тёмная</span>
+    </span>
+</button>
+
+<script>
+    (function () {
+        var root = document.documentElement;
+        var button = document.getElementById('themeToggle');
+        var thumb = document.getElementById('themeToggleThumb');
+        var label = document.getElementById('themeToggleLabel');
+
+        if (!button || !thumb || !label) {
+            return;
+        }
+
+        function getTheme() {
+            return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        }
+
+        function renderTheme(theme) {
+            root.setAttribute('data-theme', theme);
+            thumb.textContent = theme === 'light' ? '☀️' : '🌙';
+            label.textContent = theme === 'light' ? 'Светлая' : 'Тёмная';
+            button.setAttribute(
+                'aria-label',
+                theme === 'light' ? 'Включить тёмную тему' : 'Включить светлую тему'
+            );
+            button.setAttribute(
+                'title',
+                theme === 'light' ? 'Включить тёмную тему' : 'Включить светлую тему'
+            );
+        }
+
+        renderTheme(getTheme());
+
+        button.addEventListener('click', function () {
+            var nextTheme = getTheme() === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', nextTheme);
+            try {
+                localStorage.setItem('site-theme', nextTheme);
+            } catch (e) {
+                // Игнорируем, если localStorage недоступен.
+            }
+            renderTheme(nextTheme);
+        });
+    })();
+</script>

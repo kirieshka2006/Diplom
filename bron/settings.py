@@ -96,24 +96,25 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-#DATABASES = {
-#    'default': {
-#    'ENGINE': 'django.db.backends.sqlite3',
-#    'NAME': BASE_DIR / 'db.sqlite3',
-#    }
-#
-#}
-
+# Локальный режим для разработки на ноутбуке.
 DATABASES = {
     'default': {
-        'ENGINE': 'django_prometheus.db.backends.mysql',
-        'NAME': 'meeting_db',
-        'USER': 'dbuser',
-        'PASSWORD': 'kirieshka2006',
-        'HOST': '127.0.0.1',   # IP ноды или ProxySQL
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Боевой MySQL-конфиг.
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django_prometheus.db.backends.mysql',
+#         'NAME': 'meeting_db',
+#         'USER': 'dbuser',
+#         'PASSWORD': 'kirieshka2006',
+#         'HOST': '127.0.0.1',   # IP ноды или ProxySQL
+#         'PORT': '3306',
+#     }
+# }
 # DATABASES = {
 #      'default': {
 #          'ENGINE': 'django.db.backends.postgresql',

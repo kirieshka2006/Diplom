@@ -746,35 +746,41 @@
         }
         .main-layout{
             display:flex;
-            gap:32px;
+            gap:28px;
             position:relative;
+            align-items:flex-start;
         }
 
         /* Sidebar (design from file 2) */
         .sidebar{
-            width:88px;
+            width:96px;
             flex-shrink:0;
-            transition:width .4s cubic-bezier(0.4, 0, 0.2, 1);
-            position:fixed;
-            top:120px;
-            left:32px;
-            height:fit-content;
-            z-index:50;
+            transition:
+                width .38s cubic-bezier(0.4, 0, 0.2, 1),
+                transform .28s ease;
+            position:sticky;
+            top:108px;
+            align-self:flex-start;
+            height:auto;
+            z-index:20;
         }
         .sidebar:hover{
-            width:280px;
-            z-index:100;
+            width:244px;
+            transform:translateY(-2px);
+            z-index:40;
         }
         .sidebar-content{
+            width:100%;
             background:var(--bg-card);
             border:1px solid var(--border-color);
-            border-radius:var(--radius-lg);
-            padding:16px;
+            border-radius:28px;
+            padding:14px;
             display:flex;
             flex-direction:column;
-            gap:6px;
+            gap:8px;
             overflow:hidden;
-
+            position:relative;
+            isolation:isolate;
             box-shadow:0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
             backdrop-filter:blur(10px);
             transition:all .4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -782,16 +788,16 @@
         .sidebar:hover .sidebar-content{
             box-shadow:0 12px 48px rgba(59,130,246,0.15), 0 4px 16px rgba(0,0,0,0.1);
             border-color:rgba(59,130,246,0.3);
-            margin-right: 15px;
         }
         .sidebar-item{
             display:flex;
             align-items:center;
             justify-content:center;
-            padding:14px 0;
+            min-height:52px;
+            padding:12px 0;
             background:transparent;
             border:1px solid transparent;
-            border-radius:var(--radius-md);
+            border-radius:18px;
             color:var(--text-secondary);
             text-decoration:none;
             cursor:pointer;
@@ -802,29 +808,29 @@
         }
         .sidebar:hover .sidebar-item{
             justify-content:flex-start;
-            padding:14px 16px;
-            gap:12px;
+            padding:12px 14px;
+            gap:14px;
         }
         .sidebar-item::before{
             content:'';
             position:absolute;
-            left:0;
+            left:8px;
             top:50%;
             transform:translateY(-50%);
-            width:3px;
+            width:6px;
             height:0;
             background:var(--gradient-primary);
-            border-radius:0 3px 3px 0;
+            border-radius:999px;
             transition:height .3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .sidebar-item:hover::before{
-            height:60%;
+            height:56%;
         }
         .sidebar-item:hover{
             background:linear-gradient(90deg, rgba(59,130,246,0.08) 0%, transparent 100%);
             border-color:rgba(59,130,246,0.2);
             color:var(--text-primary);
-            transform:translateX(4px);
+            transform:translateX(2px);
         }
         .sidebar-item .icon{font-size:20px;flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
         .sidebar-item-content{display:flex;flex-direction:column;min-width:0;opacity:0;width:0;overflow:hidden;transition:opacity .2s ease,width .3s ease;}
@@ -833,9 +839,9 @@
         .sidebar-item-desc{font-size:12px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;}
         .user-section{
             background:linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(139,92,246,0.12) 100%);
-            border-radius:var(--radius-md);
-            padding:12px 0;
-            margin-bottom:16px;
+            border-radius:20px;
+            padding:10px 0;
+            margin-bottom:14px;
             border:1px solid rgba(59,130,246,0.25);
             display:flex;
             justify-content:center;
@@ -845,18 +851,18 @@
             color:inherit;
             cursor:pointer;
             position:relative;
-            overflow:visible;
+            overflow:hidden;
             box-shadow:0 2px 8px rgba(59,130,246,0.1);
         }
         .user-section::before{
             content:'';
             position:absolute;
-            left:0;
-            top:0;
-            bottom:0;
-            width:4px;
+            left:8px;
+            top:10px;
+            bottom:10px;
+            width:6px;
             background:var(--gradient-primary);
-            border-radius:0 4px 4px 0;
+            border-radius:999px;
             opacity:0;
             transition:opacity .3s ease;
         }
@@ -871,6 +877,7 @@
             right:0;
             bottom:0;
             background:linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.08) 100%);
+            border-radius:inherit;
             opacity:0;
             transition:opacity .3s ease;
         }
@@ -881,10 +888,10 @@
             background:linear-gradient(135deg, rgba(59,130,246,0.18) 0%, rgba(139,92,246,0.18) 100%);
             border-color:rgba(59,130,246,0.4);
             box-shadow:0 6px 20px rgba(59,130,246,0.2);
-            transform:translateX(4px);
+            transform:translateX(2px);
         }
         .sidebar:hover .user-section{
-            padding:16px 20px;
+            padding:14px 16px;
             justify-content:flex-start;
         }
         .user-main{
@@ -981,7 +988,6 @@
         .content-area{
             flex:1;
             min-width:0;
-            margin-left:120px; /* 88px sidebar + 32px gap */
             animation:fadeInUp .5s ease;
         }
         @keyframes fadeInUp{
@@ -1075,7 +1081,26 @@
             align-items:center;
             gap:6px;
         }
+        .filters-reset-main-btn{
+            background:var(--bg-tertiary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-md);
+            padding:8px 12px;
+            cursor:pointer;
+            color:var(--text-secondary);
+            font-size:14px;
+            font-weight:500;
+            transition:all .2s ease;
+            display:flex;
+            align-items:center;
+            gap:6px;
+        }
         .filters-toggle-btn:hover{
+            background:var(--bg-hover);
+            color:var(--text-primary);
+            border-color:var(--border-hover);
+        }
+        .filters-reset-main-btn:hover{
             background:var(--bg-hover);
             color:var(--text-primary);
             border-color:var(--border-hover);
@@ -1084,8 +1109,22 @@
             transition:transform .3s ease;
             font-size:12px;
         }
+        .filters-reset-icon{
+            font-size:13px;
+            line-height:1;
+        }
         .filters-card.collapsed .filters-toggle-icon{
             transform:rotate(180deg);
+        }
+        .filters-card.collapsed .filters-reset-main-btn{
+            opacity:0;
+            visibility:hidden;
+            pointer-events:none;
+            max-width:0;
+            padding:0;
+            border-width:0;
+            margin:0;
+            overflow:hidden;
         }
         .filters-grid{
             display:grid;
@@ -1636,10 +1675,260 @@
              display:block;
              animation:slideDown .2s ease;
          }
-         .capacity-filter-group{
-             position:relative;
-             z-index:10003;
-         }
+        .capacity-filter-group{
+            position:relative;
+            z-index:10003;
+        }
+
+        /* Filters Polish */
+        .filters-card{
+            padding:20px 20px 18px;
+            border-radius:24px;
+            background:var(--surface-card-gradient, var(--bg-card));
+            box-shadow:var(--shadow-md), 0 8px 20px rgba(0,0,0,0.04);
+            backdrop-filter:blur(18px);
+        }
+        .filters-header{
+            gap:12px;
+            margin-bottom:16px;
+            flex-wrap:wrap;
+        }
+        .filters-heading{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+            min-width:0;
+        }
+        .filters-subtitle{
+            font-size:12px;
+            color:var(--text-muted);
+            line-height:1.4;
+            max-width:640px;
+        }
+        .filters-header-actions{
+            margin-left:auto;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+        .filters-action-buttons{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            flex-wrap:wrap;
+        }
+        .filters-live-summary{
+            display:flex;
+            align-items:stretch;
+            gap:8px;
+            flex-wrap:wrap;
+        }
+        .filters-live-summary__item{
+            min-width:96px;
+            padding:8px 10px;
+            border-radius:14px;
+            background:var(--surface-card-soft, var(--bg-secondary));
+            border:1px solid rgba(var(--accent-primary-rgb) / 0.10);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .filters-live-summary__label{
+            display:block;
+            font-size:10px;
+            text-transform:uppercase;
+            letter-spacing:0.08em;
+            color:var(--text-muted);
+            margin-bottom:4px;
+            font-weight:700;
+        }
+        .filters-live-summary__value{
+            display:block;
+            font-size:16px;
+            line-height:1;
+            font-weight:700;
+            color:var(--text-primary);
+        }
+        .filters-grid{
+            grid-template-columns:minmax(180px,1.35fr) repeat(5,minmax(124px,0.96fr));
+            gap:12px;
+            align-items:end;
+        }
+        .filter-group{
+            padding:10px 12px;
+            background:var(--surface-card-soft, var(--bg-secondary));
+            border:1px solid rgba(var(--accent-primary-rgb) / 0.10);
+            border-radius:16px;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
+            transition:
+                transform .25s ease,
+                box-shadow .25s ease,
+                border-color .25s ease,
+                background .25s ease;
+            gap:6px;
+            min-width:0;
+        }
+        .filter-group:hover{
+            transform:translateY(-2px);
+            border-color:rgba(var(--accent-primary-rgb) / 0.18);
+            box-shadow:var(--shadow-sm);
+        }
+        .filter-group-search{
+            grid-column:span 1;
+        }
+        .filter-group label{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:8px;
+            margin-bottom:0;
+            font-size:12px;
+            font-weight:600;
+            line-height:1.2;
+            white-space:nowrap;
+        }
+        .filter-input-shell{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 10px;
+            min-height:40px;
+            border-radius:14px;
+            background:var(--surface-elevated, var(--bg-tertiary));
+            border:1px solid rgba(var(--accent-primary-rgb) / 0.10);
+            transition:
+                border-color .2s ease,
+                box-shadow .2s ease,
+                background .25s ease;
+        }
+        .filter-input-shell:focus-within{
+            border-color:var(--border-focus);
+            box-shadow:var(--focus-ring-shadow);
+        }
+        .filter-input-icon{
+            font-size:14px;
+            line-height:1;
+            color:var(--accent-primary);
+            opacity:0.9;
+        }
+        .filter-input-shell input{
+            padding:0;
+            border:none;
+            background:transparent;
+            border-radius:0;
+            box-shadow:none !important;
+            flex:1;
+            font-size:13px;
+            min-width:0;
+        }
+        .filter-input-shell input:hover,
+        .filter-input-shell input:focus{
+            background:transparent;
+            border:none;
+            outline:none;
+            transform:none;
+        }
+        .custom-dropdown-btn,
+        .price-filter-btn{
+            min-height:40px;
+            padding:9px 12px;
+            border-radius:14px;
+            background:var(--surface-elevated, var(--bg-tertiary));
+            border:1px solid rgba(var(--accent-primary-rgb) / 0.10);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
+            font-size:13px;
+            min-width:0;
+        }
+        .custom-dropdown-btn span:first-child,
+        .price-filter-btn span:first-child{
+            min-width:0;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+        }
+        .custom-dropdown-btn:hover,
+        .price-filter-btn:hover{
+            border-color:rgba(var(--accent-primary-rgb) / 0.22);
+            box-shadow:0 10px 22px rgba(0,0,0,0.08);
+            transform:translateY(-1px);
+        }
+        .custom-dropdown-btn.active,
+        .price-filter-btn.active{
+            border-color:var(--border-focus);
+            box-shadow:var(--focus-ring-shadow), 0 12px 26px rgba(0,0,0,0.08);
+        }
+        .custom-dropdown-menu,
+        .price-modal,
+        .capacity-modal{
+            border-radius:20px;
+            background:var(--surface-card-gradient, var(--bg-card));
+            border:1px solid rgba(var(--accent-primary-rgb) / 0.12);
+            box-shadow:var(--shadow-lg);
+        }
+        .custom-dropdown-item.selected{
+            background:linear-gradient(90deg, rgba(var(--accent-primary-rgb) / 0.14) 0%, rgba(var(--accent-secondary-rgb) / 0.08) 100%);
+            border-left-color:var(--accent-primary);
+        }
+        .custom-dropdown-item.selected:hover{
+            background:linear-gradient(90deg, rgba(var(--accent-primary-rgb) / 0.18) 0%, var(--bg-hover) 100%);
+        }
+        .custom-dropdown-btn .selected-count{
+            background:rgba(var(--accent-primary-rgb) / 0.12);
+            color:var(--accent-primary);
+            right:34px;
+            font-size:10px;
+            padding:1px 5px;
+        }
+        .price-modal-header{
+            margin-bottom:18px;
+        }
+        .price-modal-title{
+            font-size:15px;
+            letter-spacing:0.01em;
+        }
+        .price-input-wrapper,
+        .price-value-display{
+            background:var(--surface-elevated, var(--bg-tertiary));
+            border:1px solid rgba(var(--accent-primary-rgb) / 0.10);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .price-modal-apply,
+        .filter-btn-primary{
+            box-shadow:var(--accent-shadow);
+        }
+        .price-modal-apply:hover,
+        .filter-btn-primary:hover{
+            box-shadow:0 16px 34px rgba(var(--accent-primary-rgb) / 0.22);
+        }
+        @media (max-width: 1180px){
+            .filters-grid{
+                grid-template-columns:repeat(4,minmax(140px,1fr));
+            }
+            .filters-header-actions{
+                width:100%;
+                justify-content:space-between;
+            }
+        }
+        @media (max-width: 920px){
+            .filters-grid{
+                grid-template-columns:repeat(2,minmax(150px,1fr));
+            }
+        }
+        @media (max-width: 720px){
+            .filters-card{
+                padding:20px 18px 18px;
+                border-radius:24px;
+            }
+            .filters-grid{
+                grid-template-columns:1fr;
+            }
+            .filters-header-actions,
+            .filters-live-summary{
+                width:100%;
+            }
+            .filters-live-summary__item{
+                flex:1 1 120px;
+            }
+        }
 
         /* Rooms Grid (design from file 2) */
         .rooms-grid{
@@ -1849,6 +2138,7 @@
             .filters-grid{grid-template-columns:1fr;} 
         }
     </style>
+    {% include 'theme_setup.html' %}
 </head>
 <body>
     <!-- Messages -->
@@ -2065,22 +2355,46 @@
                 <!-- Filters -->
                 <div class="filters-card" id="filtersCard">
                     <div class="filters-header">
-                        <div class="filters-title">🔍 Фильтры поиска</div>
-                        <button type="button" class="filters-toggle-btn" id="filtersToggleBtn">
-                            <span>Скрыть</span>
-                            <span class="filters-toggle-icon">▼</span>
-                        </button>
+                        <div class="filters-heading">
+                            <div class="filters-title">🔍 Фильтры поиска</div>
+                            <p class="filters-subtitle">Подберите комнату по названию, категории, цене, вместимости, офису и статусу без лишних переходов.</p>
+                        </div>
+                        <div class="filters-header-actions">
+                            <div class="filters-live-summary">
+                                <div class="filters-live-summary__item filters-live-summary__item--results">
+                                    <span class="filters-live-summary__label">Найдено</span>
+                                    <span class="filters-live-summary__value" id="filtersResultsCount">{{ rooms|length }}</span>
+                                </div>
+                                <div class="filters-live-summary__item filters-live-summary__item--active">
+                                    <span class="filters-live-summary__label">Фильтров</span>
+                                    <span class="filters-live-summary__value" id="filtersActiveCount">0</span>
+                                </div>
+                            </div>
+                            <div class="filters-action-buttons">
+                                <button type="button" class="filters-reset-main-btn" id="filtersResetMainBtn" onclick="resetFilters()">
+                                    <span>Сбросить</span>
+                                    <span class="filters-reset-icon">↺</span>
+                                </button>
+                                <button type="button" class="filters-toggle-btn" id="filtersToggleBtn">
+                                    <span>Скрыть</span>
+                                    <span class="filters-toggle-icon">▼</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                      <div class="filters-grid" id="filtersGrid">
-                        <div class="filter-group">
+                        <div class="filter-group filter-group-search">
                             <label>
                                 Название комнаты
                                 <button type="button" class="filter-reset-btn" onclick="resetSearchFilter()" title="Сбросить">✕</button>
                             </label>
-                            <input type="text" id="searchInput" placeholder="Введите название...">
+                            <div class="filter-input-shell">
+                                <span class="filter-input-icon">🔎</span>
+                                <input type="text" id="searchInput" placeholder="Введите название комнаты">
+                            </div>
                         </div>
 
-                        <div class="filter-group">
+                        <div class="filter-group filter-group-category">
                             <label>
                                 Категория
                                 <button type="button" class="filter-reset-btn" onclick="resetCategoryFilter()" title="Сбросить">✕</button>
@@ -2101,7 +2415,7 @@
                             </div>
                         </div>
 
-                        <div class="filter-group price-filter-group">
+                        <div class="filter-group price-filter-group filter-group-price">
                             <label>
                                 Цена за час
                                 <button type="button" class="filter-reset-btn" onclick="resetPriceFilter()" title="Сбросить">✕</button>
@@ -2140,7 +2454,7 @@
                             </div>
                         </div>
 
-                        <div class="filter-group capacity-filter-group">
+                        <div class="filter-group capacity-filter-group filter-group-capacity">
                             <label>
                                 Вместимость
                                 <button type="button" class="filter-reset-btn" onclick="resetCapacityFilter()" title="Сбросить">✕</button>
@@ -2158,18 +2472,18 @@
                                     <div class="price-input-group">
                                         <label class="price-input-label">От:</label>
                                         <div class="price-input-wrapper">
-                                            <input type="number" id="capacityMinInput" min="2" max="20" step="1" value="1" class="price-number-input" placeholder="1">
+                                            <input type="number" id="capacityMinInput" min="2" max="20" step="1" value="2" class="price-number-input" placeholder="2">
                                             <span class="price-currency">чел.</span>
                                         </div>
-                                        <input type="range" id="capacityMin" min="2" max="20" step="1" value="1" class="price-slider">
+                                        <input type="range" id="capacityMin" min="2" max="20" step="1" value="2" class="price-slider">
                                     </div>
                                     <div class="price-input-group">
                                         <label class="price-input-label">До:</label>
                                         <div class="price-input-wrapper">
-                                            <input type="number" id="capacityMaxInput" min="2" max="20" step="1" value="100" class="price-number-input" placeholder="100">
+                                            <input type="number" id="capacityMaxInput" min="2" max="20" step="1" value="20" class="price-number-input" placeholder="20">
                                             <span class="price-currency">чел.</span>
                                         </div>
-                                        <input type="range" id="capacityMax" min="2" max="20" step="1" value="100" class="price-slider">
+                                        <input type="range" id="capacityMax" min="2" max="20" step="1" value="20" class="price-slider">
                                     </div>
                                     <div class="price-value-display">
                                         <span id="capacityRangeModalDisplay">2 - 20 чел.</span>
@@ -2179,7 +2493,7 @@
                             </div>
                         </div>
 
-                        <div class="filter-group">
+                        <div class="filter-group filter-group-office">
                             <label>
                                 Офис
                                 <button type="button" class="filter-reset-btn" onclick="resetOfficeFilter()" title="Сбросить">✕</button>
@@ -2199,7 +2513,7 @@
                         </div>
 
                         {% if user.is_authenticated and user.role == 'admin' or user.role == 'manager' %}
-                        <div class="filter-group">
+                        <div class="filter-group filter-group-status">
                             <label>
                                 Статус комнаты
                                 <button type="button" class="filter-reset-btn" onclick="resetStatusFilter()" title="Сбросить">✕</button>
@@ -2217,10 +2531,6 @@
                             </div>
                         </div>
                         {% endif %}
-
-                        <div class="filter-buttons">
-                            <button onclick="resetFilters()" class="filter-btn">Сбросить</button>
-                        </div>
                     </div>
                 </div>
 
@@ -2324,19 +2634,30 @@
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
             const headerSearchInput = document.getElementById('headerSearchInput');
-            const categorySelect = document.getElementById('categoryFilter');
+            let filterApplyTimer = null;
+
+            function scheduleApplyFilters(delay = 120) {
+                if (filterApplyTimer) {
+                    clearTimeout(filterApplyTimer);
+                }
+                filterApplyTimer = setTimeout(() => {
+                    filterApplyTimer = null;
+                    applyFilters();
+                }, delay);
+            }
             
             // Синхронизация поиска в header с поиском в фильтрах
             if (headerSearchInput && searchInput) {
                 // При вводе в header поиск обновляется в фильтрах
                 headerSearchInput.addEventListener('input', function() {
                     searchInput.value = this.value;
-                    applyFilters();
+                    scheduleApplyFilters();
                 });
                 
                 // При вводе в фильтрах поиск обновляется в header
                 searchInput.addEventListener('input', function() {
                     headerSearchInput.value = this.value;
+                    scheduleApplyFilters();
                 });
                 
                 // Поиск по Enter в header
@@ -2351,6 +2672,10 @@
                             filtersCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }
                     }
+                });
+            } else if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    scheduleApplyFilters();
                 });
             }
             const priceMin = document.getElementById('priceMin');
@@ -2370,7 +2695,28 @@
             const capacityModalClose = document.getElementById('capacityModalClose');
             const capacityModalApply = document.getElementById('capacityModalApply');
 
-            if (searchInput) searchInput.addEventListener('input', applyFilters);
+            function closeDropdownMenus() {
+                document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
+                    menu.classList.remove('active');
+                    menu.closest('.custom-dropdown')?.querySelector('.custom-dropdown-btn')?.classList.remove('active');
+                });
+            }
+
+            function closePriceModalPanel() {
+                if (priceModal) priceModal.classList.remove('active');
+                if (priceFilterBtn) priceFilterBtn.classList.remove('active');
+            }
+
+            function closeCapacityModalPanel() {
+                if (capacityModal) capacityModal.classList.remove('active');
+                if (capacityFilterBtn) capacityFilterBtn.classList.remove('active');
+            }
+
+            function closeAllFilterPanels() {
+                closeDropdownMenus();
+                closePriceModalPanel();
+                closeCapacityModalPanel();
+            }
 
             // Инициализация мультиселект dropdown
             function initMultiSelectDropdown(btnId, menuId, countId) {
@@ -2383,18 +2729,14 @@
                 // Открытие/закрытие меню
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    
-                    // Закрываем все другие dropdown и модальные окна
-                    document.querySelectorAll('.custom-dropdown-menu').forEach(m => {
-                        if (m !== menu) {
-                            m.classList.remove('active');
-                            m.closest('.custom-dropdown')?.querySelector('.custom-dropdown-btn')?.classList.remove('active');
-                        }
-                    });
-                    document.querySelectorAll('.price-modal, .capacity-modal').forEach(m => m.classList.remove('active'));
-                    
-                    menu.classList.toggle('active');
-                    btn.classList.toggle('active');
+
+                    const isOpening = !menu.classList.contains('active');
+                    closeAllFilterPanels();
+
+                    if (isOpening) {
+                        menu.classList.add('active');
+                        btn.classList.add('active');
+                    }
                 });
                 
                 // Выбор опции (мультиселект)
@@ -2463,10 +2805,7 @@
             // Закрытие dropdown при клике вне его
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.custom-dropdown') && !e.target.closest('.price-modal') && !e.target.closest('.capacity-modal')) {
-                    document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
-                        menu.classList.remove('active');
-                        menu.closest('.custom-dropdown')?.querySelector('.custom-dropdown-btn')?.classList.remove('active');
-                    });
+                    closeDropdownMenus();
                 }
             });
             
@@ -2475,7 +2814,9 @@
                 capacityFilterBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const isOpening = !capacityModal.classList.contains('active');
-                    
+
+                    closeAllFilterPanels();
+
                     if (isOpening) {
                         // При открытии синхронизируем все значения
                         if (capacityMin && capacityMinInput) {
@@ -2485,33 +2826,30 @@
                             capacityMaxInput.value = capacityMax.value;
                         }
                         updateCapacityModalDisplay();
+                        capacityModal.classList.add('active');
+                        capacityFilterBtn.classList.add('active');
                     }
-                    
-                    capacityModal.classList.toggle('active');
-                    capacityFilterBtn.classList.toggle('active');
                 });
             }
 
             if (capacityModalClose) {
                 capacityModalClose.addEventListener('click', function() {
-                    capacityModal.classList.remove('active');
-                    capacityFilterBtn.classList.remove('active');
+                    closeCapacityModalPanel();
                 });
             }
 
             // Закрытие модального окна вместимости при клике вне его
             document.addEventListener('click', function(e) {
                 if (capacityModal && capacityFilterBtn && !capacityModal.contains(e.target) && !capacityFilterBtn.contains(e.target)) {
-                    capacityModal.classList.remove('active');
-                    capacityFilterBtn.classList.remove('active');
+                    closeCapacityModalPanel();
                 }
             });
             
             // Синхронизация ползунков вместимости с input полями
             if (capacityMin) {
                 capacityMin.addEventListener('input', function() {
-                    let value = parseInt(this.value) || 1;
-                    const maxValue = parseInt(capacityMax.value) || 100;
+                    let value = parseInt(this.value) || 2;
+                    const maxValue = parseInt(capacityMax.value) || 20;
                     
                     if (value > maxValue) {
                         value = maxValue;
@@ -2527,8 +2865,8 @@
             }
             if (capacityMax) {
                 capacityMax.addEventListener('input', function() {
-                    let value = parseInt(this.value) || 100;
-                    const minValue = parseInt(capacityMin.value) || 1;
+                    let value = parseInt(this.value) || 20;
+                    const minValue = parseInt(capacityMin.value) || 2;
                     
                     if (value < minValue) {
                         value = minValue;
@@ -2550,10 +2888,10 @@
                     
                     if (isNaN(value)) return;
                     
-                    if (value < 1) value = 1;
-                    if (value > 100) value = 100;
+                    if (value < 2) value = 2;
+                    if (value > 20) value = 20;
                     
-                    const maxValue = parseInt(capacityMax.value) || 100;
+                    const maxValue = parseInt(capacityMax.value) || 20;
                     if (value > maxValue) {
                         value = maxValue;
                         this.value = value;
@@ -2569,12 +2907,12 @@
                 capacityMinInput.addEventListener('blur', function() {
                     let value = parseInt(this.value);
                     
-                    if (isNaN(value)) value = 1;
+                    if (isNaN(value)) value = 2;
                     
-                    if (value < 1) value = 1;
-                    if (value > 100) value = 100;
+                    if (value < 2) value = 2;
+                    if (value > 20) value = 20;
                     
-                    const maxValue = parseInt(capacityMax.value) || 100;
+                    const maxValue = parseInt(capacityMax.value) || 20;
                     if (value > maxValue) {
                         value = maxValue;
                     }
@@ -2594,10 +2932,10 @@
                     
                     if (isNaN(value)) return;
                     
-                    if (value < 1) value = 1;
-                    if (value > 100) value = 100;
+                    if (value < 2) value = 2;
+                    if (value > 20) value = 20;
                     
-                    const minValue = parseInt(capacityMin.value) || 1;
+                    const minValue = parseInt(capacityMin.value) || 2;
                     if (value < minValue) {
                         value = minValue;
                         this.value = value;
@@ -2613,12 +2951,12 @@
                 capacityMaxInput.addEventListener('blur', function() {
                     let value = parseInt(this.value);
                     
-                    if (isNaN(value)) value = 100;
+                    if (isNaN(value)) value = 20;
                     
-                    if (value < 1) value = 1;
-                    if (value > 100) value = 100;
+                    if (value < 2) value = 2;
+                    if (value > 20) value = 20;
                     
-                    const minValue = parseInt(capacityMin.value) || 1;
+                    const minValue = parseInt(capacityMin.value) || 2;
                     if (value < minValue) {
                         value = minValue;
                     }
@@ -2636,8 +2974,7 @@
             function applyCapacityFilter() {
                 updateCapacityDisplay();
                 applyFilters();
-                capacityModal.classList.remove('active');
-                capacityFilterBtn.classList.remove('active');
+                closeCapacityModalPanel();
             }
 
             // Применение фильтра вместимости по кнопке
@@ -2674,8 +3011,8 @@
 
             // Функция обновления отображения вместимости в модальном окне
             function updateCapacityModalDisplay() {
-                const min = capacityMin ? parseInt(capacityMin.value) : 1;
-                const max = capacityMax ? parseInt(capacityMax.value) : 100;
+                const min = capacityMin ? parseInt(capacityMin.value) : 2;
+                const max = capacityMax ? parseInt(capacityMax.value) : 20;
                 const modalDisplay = document.getElementById('capacityRangeModalDisplay');
                 
                 if (modalDisplay) modalDisplay.textContent = `${min} - ${max} чел.`;
@@ -2683,12 +3020,12 @@
 
             // Функция обновления отображения вместимости на кнопке
             function updateCapacityDisplay() {
-                const min = capacityMin ? parseInt(capacityMin.value) : 1;
-                const max = capacityMax ? parseInt(capacityMax.value) : 100;
+                const min = capacityMin ? parseInt(capacityMin.value) : 2;
+                const max = capacityMax ? parseInt(capacityMax.value) : 20;
                 const display = document.getElementById('capacityRangeDisplay');
                 
                 if (display) {
-                    if (min === 1 && max === 100) {
+                    if (min === 2 && max === 20) {
                         display.textContent = 'Любая вместимость';
                     } else {
                         display.textContent = `${min} - ${max} чел.`;
@@ -2715,7 +3052,9 @@
                 priceFilterBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const isOpening = !priceModal.classList.contains('active');
-                    
+
+                    closeAllFilterPanels();
+
                     if (isOpening) {
                         // При открытии синхронизируем все значения
                         if (priceMin && priceMinInput) {
@@ -2725,25 +3064,22 @@
                             priceMaxInput.value = priceMax.value;
                         }
                         updatePriceModalDisplay();
+                        priceModal.classList.add('active');
+                        priceFilterBtn.classList.add('active');
                     }
-                    
-                    priceModal.classList.toggle('active');
-                    priceFilterBtn.classList.toggle('active');
                 });
             }
 
             if (priceModalClose) {
                 priceModalClose.addEventListener('click', function() {
-                    priceModal.classList.remove('active');
-                    priceFilterBtn.classList.remove('active');
+                    closePriceModalPanel();
                 });
             }
 
             // Закрытие модального окна при клике вне его
             document.addEventListener('click', function(e) {
                 if (priceModal && priceFilterBtn && !priceModal.contains(e.target) && !priceFilterBtn.contains(e.target)) {
-                    priceModal.classList.remove('active');
-                    priceFilterBtn.classList.remove('active');
+                    closePriceModalPanel();
                 }
             });
 
@@ -2904,8 +3240,7 @@
             function applyPriceFilter() {
                 updatePriceDisplay();
                 applyFilters();
-                priceModal.classList.remove('active');
-                priceFilterBtn.classList.remove('active');
+                closePriceModalPanel();
             }
 
             // Применение фильтра цены по кнопке
@@ -3175,63 +3510,98 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 });
+        let roomFilterEntriesCache = null;
+
+        function getRoomFilterEntries() {
+            if (roomFilterEntriesCache) {
+                return roomFilterEntriesCache;
+            }
+
+            roomFilterEntriesCache = Array.from(document.querySelectorAll('.room-card')).map(card => {
+                const roomStatusRaw = String(card.dataset.status || 'active');
+
+                return {
+                    card,
+                    roomName: card.dataset.name || '',
+                    roomPrice: parseFloat(card.dataset.price) || 0,
+                    roomCapacity: parseInt(card.dataset.capacity) || 0,
+                    roomCategory: card.dataset.category || '',
+                    roomOffice: String(card.dataset.office || ''),
+                    roomStatus: roomStatusRaw === 'maintenance' ? 'hidden' : roomStatusRaw,
+                    statusBadge: card.querySelector('.room-status-badge'),
+                };
+            });
+
+            return roomFilterEntriesCache;
+        }
+
+        function updateFiltersOverview(visibleCount, activeFilterCount) {
+            const resultsCountEl = document.getElementById('filtersResultsCount');
+            const activeCountEl = document.getElementById('filtersActiveCount');
+
+            if (resultsCountEl) {
+                resultsCountEl.textContent = visibleCount;
+            }
+
+            if (activeCountEl) {
+                activeCountEl.textContent = activeFilterCount;
+            }
+        }
+
         function applyFilters() {
             const searchText = document.getElementById('searchInput')?.value.toLowerCase() || '';
             const priceMin = document.getElementById('priceMin') ? parseInt(document.getElementById('priceMin').value) : 0;
             const priceMax = document.getElementById('priceMax') ? parseInt(document.getElementById('priceMax').value) : 10000;
-            const capacityMin = document.getElementById('capacityMin') ? parseInt(document.getElementById('capacityMin').value) : 1;
-            const capacityMax = document.getElementById('capacityMax') ? parseInt(document.getElementById('capacityMax').value) : 100;
+            const capacityMin = document.getElementById('capacityMin') ? parseInt(document.getElementById('capacityMin').value) : 2;
+            const capacityMax = document.getElementById('capacityMax') ? parseInt(document.getElementById('capacityMax').value) : 20;
             
-            // Получаем выбранные категории
             const categoryMenu = document.getElementById('categoryFilterMenu');
             const selectedCategories = categoryMenu ? Array.from(categoryMenu.querySelectorAll('.custom-dropdown-item.selected'))
                 .map(item => item.dataset.value)
                 .filter(val => val !== 'all') : [];
             const allCategoriesSelected = categoryMenu ? categoryMenu.querySelector('.custom-dropdown-item[data-value="all"]')?.classList.contains('selected') : true;
             
-            // Получаем выбранные офисы
             const officeMenu = document.getElementById('officeFilterMenu');
             const selectedOffices = officeMenu ? Array.from(officeMenu.querySelectorAll('.custom-dropdown-item.selected'))
                 .map(item => item.dataset.value)
                 .filter(val => val !== 'all') : [];
             const allOfficesSelected = officeMenu ? officeMenu.querySelector('.custom-dropdown-item[data-value="all"]')?.classList.contains('selected') : true;
             
-            // Получаем выбранные статусы
             const statusMenu = document.getElementById('statusFilterMenu');
             const selectedStatuses = statusMenu ? Array.from(statusMenu.querySelectorAll('.custom-dropdown-item.selected'))
                 .map(item => item.dataset.value)
                 .filter(val => val !== 'all') : [];
             const allStatusesSelected = statusMenu ? statusMenu.querySelector('.custom-dropdown-item[data-value="all"]')?.classList.contains('selected') : true;
 
-            const roomCards = document.querySelectorAll('.room-card');
+            const roomEntries = getRoomFilterEntries();
             let visibleCount = 0;
+            const activeFilterCount = [
+                searchText.trim().length > 0,
+                !allCategoriesSelected && selectedCategories.length > 0,
+                priceMin !== 0 || priceMax !== 10000,
+                capacityMin !== 2 || capacityMax !== 20,
+                !allOfficesSelected && selectedOffices.length > 0,
+                !allStatusesSelected && selectedStatuses.length > 0,
+            ].filter(Boolean).length;
 
-            roomCards.forEach(card => {
-                const roomName = card.dataset.name || '';
-                const roomPrice = parseFloat(card.dataset.price) || 0;
-                const roomCapacity = parseInt(card.dataset.capacity) || 0;
-                const roomCategory = card.dataset.category || '';
-                const roomOffice = String(card.dataset.office || '');
-                let roomStatusRaw = String(card.dataset.status || 'active');
-                let roomStatus = (roomStatusRaw === 'maintenance') ? 'hidden' : roomStatusRaw;
-
-                const matchesSearch = roomName.includes(searchText);
-                const matchesCategory = allCategoriesSelected || selectedCategories.length === 0 || selectedCategories.includes(roomCategory);
-                const matchesPrice = (roomPrice >= priceMin && roomPrice <= priceMax);
-                const matchesCapacity = (roomCapacity >= capacityMin && roomCapacity <= capacityMax);
-                const matchesOffice = allOfficesSelected || selectedOffices.length === 0 || selectedOffices.includes(roomOffice);
-                const matchesStatus = allStatusesSelected || selectedStatuses.length === 0 || selectedStatuses.includes(roomStatus);
-
+            roomEntries.forEach(entry => {
+                const matchesSearch = entry.roomName.includes(searchText);
+                const matchesCategory = allCategoriesSelected || selectedCategories.length === 0 || selectedCategories.includes(entry.roomCategory);
+                const matchesPrice = (entry.roomPrice >= priceMin && entry.roomPrice <= priceMax);
+                const matchesCapacity = (entry.roomCapacity >= capacityMin && entry.roomCapacity <= capacityMax);
+                const matchesOffice = allOfficesSelected || selectedOffices.length === 0 || selectedOffices.includes(entry.roomOffice);
+                const matchesStatus = allStatusesSelected || selectedStatuses.length === 0 || selectedStatuses.includes(entry.roomStatus);
+                
                 if (matchesSearch && matchesCategory && matchesPrice && matchesCapacity && matchesOffice && matchesStatus) {
-                    card.style.display = '';
+                    entry.card.style.display = '';
                     visibleCount++;
                 } else {
-                    card.style.display = 'none';
+                    entry.card.style.display = 'none';
                 }
 
-                const statusBadge = card.querySelector('.room-status-badge');
+                const statusBadge = entry.statusBadge;
                 if (statusBadge) {
-                    if (roomStatus === 'active') {
+                    if (entry.roomStatus === 'active') {
                         statusBadge.classList.remove('status-hidden');
                         statusBadge.classList.add('status-active');
                         statusBadge.textContent = '✅ Активна';
@@ -3243,13 +3613,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
+            updateFiltersOverview(visibleCount, activeFilterCount);
             showFilterResults(visibleCount);
         }
 
         // Функции сброса отдельных фильтров
         function resetSearchFilter() {
             const searchInput = document.getElementById('searchInput');
+            const headerSearchInput = document.getElementById('headerSearchInput');
             if (searchInput) searchInput.value = '';
+            if (headerSearchInput) headerSearchInput.value = '';
             applyFilters();
         }
         
@@ -3290,10 +3663,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const capacityMax = document.getElementById('capacityMax');
             const capacityMinInput = document.getElementById('capacityMinInput');
             const capacityMaxInput = document.getElementById('capacityMaxInput');
-            if (capacityMin) capacityMin.value = 1;
-            if (capacityMax) capacityMax.value = 100;
-            if (capacityMinInput) capacityMinInput.value = 1;
-            if (capacityMaxInput) capacityMaxInput.value = 100;
+            if (capacityMin) capacityMin.value = 2;
+            if (capacityMax) capacityMax.value = 20;
+            if (capacityMinInput) capacityMinInput.value = 2;
+            if (capacityMaxInput) capacityMaxInput.value = 20;
             if (window.updateCapacityDisplay) window.updateCapacityDisplay();
             if (window.updateCapacityModalDisplay) window.updateCapacityModalDisplay();
             applyFilters();
@@ -3336,35 +3709,103 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         function resetFilters() {
-            resetSearchFilter();
-            resetCategoryFilter();
-            resetPriceFilter();
-            resetCapacityFilter();
-            resetOfficeFilter();
-            resetStatusFilter();
-            
-            const roomCards = document.querySelectorAll('.room-card');
-            roomCards.forEach(card => { card.style.display = ''; });
+            const searchInput = document.getElementById('searchInput');
+            const headerSearchInput = document.getElementById('headerSearchInput');
+            if (searchInput) searchInput.value = '';
+            if (headerSearchInput) headerSearchInput.value = '';
+
+            const categoryMenu = document.getElementById('categoryFilterMenu');
+            const categoryBtn = document.getElementById('categoryFilterBtn');
+            const categoryCount = document.getElementById('categorySelectedCount');
+            if (categoryMenu && categoryBtn) {
+                categoryMenu.querySelectorAll('.custom-dropdown-item').forEach(i => i.classList.remove('selected'));
+                const allItem = categoryMenu.querySelector('.custom-dropdown-item[data-value="all"]');
+                if (allItem) allItem.classList.add('selected');
+                categoryBtn.querySelector('span:first-child').textContent = 'Все категории';
+                if (categoryCount) categoryCount.style.display = 'none';
+                categoryMenu.classList.remove('active');
+                categoryBtn.classList.remove('active');
+            }
+
+            const officeMenu = document.getElementById('officeFilterMenu');
+            const officeBtn = document.getElementById('officeFilterBtn');
+            const officeCount = document.getElementById('officeSelectedCount');
+            if (officeMenu && officeBtn) {
+                officeMenu.querySelectorAll('.custom-dropdown-item').forEach(i => i.classList.remove('selected'));
+                const allItem = officeMenu.querySelector('.custom-dropdown-item[data-value="all"]');
+                if (allItem) allItem.classList.add('selected');
+                officeBtn.querySelector('span:first-child').textContent = 'Все офисы';
+                if (officeCount) officeCount.style.display = 'none';
+                officeMenu.classList.remove('active');
+                officeBtn.classList.remove('active');
+            }
+
+            const statusMenu = document.getElementById('statusFilterMenu');
+            const statusBtn = document.getElementById('statusFilterBtn');
+            const statusCount = document.getElementById('statusSelectedCount');
+            if (statusMenu && statusBtn) {
+                statusMenu.querySelectorAll('.custom-dropdown-item').forEach(i => i.classList.remove('selected'));
+                const allItem = statusMenu.querySelector('.custom-dropdown-item[data-value="all"]');
+                if (allItem) allItem.classList.add('selected');
+                statusBtn.querySelector('span:first-child').textContent = 'Все статусы';
+                if (statusCount) statusCount.style.display = 'none';
+                statusMenu.classList.remove('active');
+                statusBtn.classList.remove('active');
+            }
+
+            const priceMin = document.getElementById('priceMin');
+            const priceMax = document.getElementById('priceMax');
+            const priceMinInput = document.getElementById('priceMinInput');
+            const priceMaxInput = document.getElementById('priceMaxInput');
+            const priceModal = document.getElementById('priceModal');
+            const priceFilterBtn = document.getElementById('priceFilterBtn');
+            if (priceMin) priceMin.value = 0;
+            if (priceMax) priceMax.value = 10000;
+            if (priceMinInput) priceMinInput.value = 0;
+            if (priceMaxInput) priceMaxInput.value = 10000;
+            if (priceModal) priceModal.classList.remove('active');
+            if (priceFilterBtn) priceFilterBtn.classList.remove('active');
+            if (window.updatePriceDisplay) window.updatePriceDisplay();
+            if (window.updatePriceModalDisplay) window.updatePriceModalDisplay();
+
+            const capacityMin = document.getElementById('capacityMin');
+            const capacityMax = document.getElementById('capacityMax');
+            const capacityMinInput = document.getElementById('capacityMinInput');
+            const capacityMaxInput = document.getElementById('capacityMaxInput');
+            const capacityModal = document.getElementById('capacityModal');
+            const capacityFilterBtn = document.getElementById('capacityFilterBtn');
+            if (capacityMin) capacityMin.value = 2;
+            if (capacityMax) capacityMax.value = 20;
+            if (capacityMinInput) capacityMinInput.value = 2;
+            if (capacityMaxInput) capacityMaxInput.value = 20;
+            if (capacityModal) capacityModal.classList.remove('active');
+            if (capacityFilterBtn) capacityFilterBtn.classList.remove('active');
+            if (window.updateCapacityDisplay) window.updateCapacityDisplay();
+            if (window.updateCapacityModalDisplay) window.updateCapacityModalDisplay();
 
             const existingMessage = document.getElementById('filterResults');
             if (existingMessage) existingMessage.remove();
+
+            applyFilters();
         }
 
         function showFilterResults(visibleCount) {
-            const existingMessage = document.getElementById('filterResults');
-            if (existingMessage) existingMessage.remove();
-
+            let existingMessage = document.getElementById('filterResults');
             if (visibleCount === 0) {
                 const roomsGrid = document.getElementById('roomsGrid');
-                const message = document.createElement('div');
-                message.id = 'filterResults';
-                message.className = 'empty-state filter-results-error';
-                message.innerHTML = `
-                    <div class="empty-state-icon">🔍</div>
-                    <h3>Ничего не найдено</h3>
-                    <p>По вашему запросу комнаты не найдены. Попробуйте изменить параметры фильтрации.</p>
-                `;
-                roomsGrid.appendChild(message);
+                if (!existingMessage && roomsGrid) {
+                    const message = document.createElement('div');
+                    message.id = 'filterResults';
+                    message.className = 'empty-state filter-results-error';
+                    message.innerHTML = `
+                        <div class="empty-state-icon">🔍</div>
+                        <h3>Ничего не найдено</h3>
+                        <p>По вашему запросу комнаты не найдены. Попробуйте изменить параметры фильтрации.</p>
+                    `;
+                    roomsGrid.appendChild(message);
+                }
+            } else if (existingMessage) {
+                existingMessage.remove();
             }
         }
 
@@ -3378,5 +3819,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }, 5000);
     </script>
+    {% include 'theme_toggle.html' %}
 </body>
 </html>
