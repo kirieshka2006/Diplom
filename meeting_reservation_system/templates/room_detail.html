@@ -84,7 +84,7 @@
         }
 
         .booking-container {
-            max-width: 1600px;
+            max-width: 1320px;
             margin: 60px auto 0;
             position: relative;
             z-index: 1;
@@ -92,7 +92,24 @@
 
         /* Room Title */
         .room-title {
-            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+            width: min(100%, 1180px);
+            margin: 0 auto 24px;
+        }
+
+        .room-title--booking {
+            width: min(100%, 1080px);
+        }
+
+        .room-title__content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
         }
 
         .room-title h1 {
@@ -103,6 +120,66 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin: 0;
+        }
+
+        .room-title__subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.55;
+            margin: 0;
+            max-width: 760px;
+        }
+
+        .room-title__actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .room-title__price {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(59,130,246,0.2);
+            background: linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(139,92,246,0.12) 100%);
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 800;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .room-title__price span {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .room-booking-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 22px;
+            background: var(--gradient-success);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            box-shadow: 0 8px 22px rgba(34,197,94,0.26);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .room-booking-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(34,197,94,0.34);
         }
 
         /* Price in Booking Container */
@@ -133,8 +210,14 @@
         /* Main Content Layout */
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 480px;
-            gap: 24px;
+            grid-template-columns: 1fr;
+            gap: 28px;
+            width: min(100%, 1180px);
+            margin: 0 auto;
+        }
+
+        .main-content--booking {
+            width: min(100%, 1080px);
         }
 
         /* Left Column */
@@ -240,12 +323,19 @@
         }
 
         .tab-content {
-            display: block;
+            display: none;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             padding: 28px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        }
+
+        .room-detail-tabs {
+            margin-bottom: 0;
+        }
+
+        .room-tab-panel {
             animation: fadeInUp 0.4s ease;
         }
 
@@ -342,6 +432,211 @@
             font-size: 16px;
         }
 
+        .location-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .location-card {
+            min-width: 0;
+            padding: 16px 18px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(28,28,31,0.9) 0%, rgba(24,24,27,0.94) 100%);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+        }
+
+        .location-card--primary {
+            background: linear-gradient(135deg, rgba(59,130,246,0.10) 0%, rgba(139,92,246,0.10) 100%);
+            border-color: rgba(59,130,246,0.18);
+        }
+
+        .location-card--contact {
+            background: linear-gradient(135deg, rgba(34,197,94,0.10) 0%, rgba(59,130,246,0.08) 100%);
+            border-color: rgba(34,197,94,0.16);
+        }
+
+        .location-card--amenities {
+            background: linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(59,130,246,0.08) 100%);
+            border-color: rgba(34,197,94,0.14);
+        }
+
+        .location-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .location-item + .location-item {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .location-item__icon {
+            width: 22px;
+            min-width: 22px;
+            display: inline-flex;
+            justify-content: center;
+            font-size: 18px;
+            line-height: 1.2;
+            flex-shrink: 0;
+        }
+
+        .location-item__meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .location-item__label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .location-item__value {
+            color: var(--text-primary);
+            font-size: 13px;
+            line-height: 1.5;
+            font-weight: 500;
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .location-link {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .location-link:hover {
+            text-decoration: underline;
+        }
+
+        .location-map-shell {
+            margin-bottom: 18px;
+        }
+
+        .location-map-shell .map-container {
+            margin-top: 0;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 6px 22px rgba(0,0,0,0.16);
+        }
+
+        .location-map-actions {
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .booking-page-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .booking-page-summary-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(59,130,246,0.16);
+            background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.08) 100%);
+        }
+
+        .booking-page-summary-card__label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .booking-page-summary-card__value {
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.5;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .booking-form-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .booking-scheduling-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .booking-form-layout :is(.calendar, .time-section, .duration-section, .booking-summary) {
+            margin-bottom: 0;
+        }
+
+        .booking-form-layout .contact-form {
+            margin-top: 0;
+            padding-top: 16px;
+        }
+
+        .booking-contact-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .booking-contact-grid .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group--full {
+            grid-column: 1 / -1;
+        }
+
+        .booking-form-layout .form-group textarea {
+            min-height: 96px;
+        }
+
+        @media (min-width: 980px) {
+            .right-column {
+                width: min(100%, 1080px);
+                margin: 0 auto;
+            }
+
+            .main-content--booking .right-column {
+                width: 100%;
+                margin: 0;
+            }
+
+            .booking-scheduling-grid {
+                display: grid;
+                grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.88fr);
+                gap: 18px;
+                align-items: start;
+            }
+
+            .booking-scheduling-grid .time-section {
+                height: 100%;
+            }
+
+            .booking-scheduling-grid .time-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                align-content: start;
+            }
+
+            .booking-contact-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 14px 16px;
+            }
+        }
+
         /* Right Column */
         .right-column {
             background: linear-gradient(135deg, rgba(28,28,31,0.95) 0%, rgba(24,24,27,0.95) 100%);
@@ -349,10 +644,10 @@
             border-radius: var(--radius-xl);
             padding: 24px;
             height: fit-content;
-            position: sticky;
-            top: 100px;
-            max-height: calc(100vh - 120px);
-            overflow-y: auto;
+            position: static;
+            top: auto;
+            max-height: none;
+            overflow: visible;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             backdrop-filter: blur(12px);
         }
@@ -1035,6 +1330,17 @@
                 font-size: 24px !important;
             }
 
+            .room-title__actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .room-title__price,
+            .room-booking-link {
+                width: 100%;
+                justify-content: center;
+            }
+
             .time-grid,
             .duration-buttons {
                 grid-template-columns: repeat(2, 1fr);
@@ -1047,21 +1353,68 @@
             .info-section > div[style*="grid-template-columns: repeat(2, 1fr)"] {
                 grid-template-columns: 1fr !important;
             }
+
+            .location-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .location-card {
+                padding: 14px 15px;
+            }
+
+            .location-item__value {
+                font-size: 12px;
+            }
+
+            .location-map-actions .map-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .booking-page-summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-scheduling-grid {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .booking-contact-grid {
+                display: flex;
+                flex-direction: column;
+            }
         }
     </style>
     {% include 'theme_setup.html' %}
 </head>
 <body>
-    <a href="{% url 'home' %}" class="back-button">← Назад</a>
+    <a href="{% if booking_page %}{% url 'room_detail' room.id %}{% else %}{% url 'home' %}{% endif %}" class="back-button">← {% if booking_page %}К комнате{% else %}Назад{% endif %}</a>
 
     <div class="booking-container">
         <!-- Room Title -->
-        <div class="room-title">
-            <h1>{{ room.name }}</h1>
+        <div class="room-title{% if booking_page %} room-title--booking{% endif %}">
+            <div class="room-title__content">
+                <h1>{% if booking_page %}Бронирование: {{ room.name }}{% else %}{{ room.name }}{% endif %}</h1>
+                <p class="room-title__subtitle">
+                    {% if booking_page %}
+                    Выберите дату, время и заполните контактные данные, чтобы отправить запрос на бронирование этой комнаты.
+                    {% else %}
+                    Изучите комнату, её оснащение и отзывы, а затем переходите к отдельной странице бронирования.
+                    {% endif %}
+                </p>
+            </div>
+            {% if not booking_page %}
+            <div class="room-title__actions">
+                <div class="room-title__price">{{ room.price_per_hour }} ₽ <span>за час</span></div>
+                <a href="{% url 'room_booking' room.id %}" class="room-booking-link">📅 Забронировать</a>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Main Content -->
-        <div class="main-content">
+        <div class="main-content{% if booking_page %} main-content--booking{% endif %}">
             <!-- Left Column -->
             <div class="left-column">
                 <div class="room-image-wrapper">
@@ -1080,9 +1433,49 @@
                         {% endif %}
                     </span>
                 </div>
+                {% if booking_page %}
+                <section class="info-section">
+                    <h3>Что вы бронируете</h3>
+                    <div class="booking-page-summary-grid">
+                        <div class="booking-page-summary-card">
+                            <p class="booking-page-summary-card__label">Стоимость</p>
+                            <p class="booking-page-summary-card__value">{{ room.price_per_hour }} ₽ за час</p>
+                        </div>
+                        <div class="booking-page-summary-card">
+                            <p class="booking-page-summary-card__label">Вместимость</p>
+                            <p class="booking-page-summary-card__value">{{ room.capacity }} человек</p>
+                        </div>
+                        <div class="booking-page-summary-card">
+                            <p class="booking-page-summary-card__label">Категория</p>
+                            <p class="booking-page-summary-card__value">
+                                {% if room.category == 'economy' %}Эконом
+                                {% elif room.category == 'standard' %}Стандарт
+                                {% elif room.category == 'comfort' %}Комфорт
+                                {% elif room.category == 'vip' %}VIP
+                                {% elif room.category == 'luxury' %}Люкс
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if room.office %}
+                        <div class="booking-page-summary-card">
+                            <p class="booking-page-summary-card__label">Офис</p>
+                            <p class="booking-page-summary-card__value">{{ room.office.name }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
+                {% else %}
+                <div class="tabs room-detail-tabs" role="tablist" aria-label="Разделы комнаты">
+                    <button type="button" class="tab active" data-room-tab="services" id="room-tab-services" role="tab" aria-selected="true" aria-controls="room-panel-services">Услуги и оборудование</button>
+                    {% if room.office %}
+                    <button type="button" class="tab" data-room-tab="location" id="room-tab-location" role="tab" aria-selected="false" aria-controls="room-panel-location">Месторасположение</button>
+                    {% endif %}
+                    <button type="button" class="tab" data-room-tab="features" id="room-tab-features" role="tab" aria-selected="false" aria-controls="room-panel-features">Характеристики</button>
+                    <button type="button" class="tab" data-room-tab="reviews" id="room-tab-reviews" role="tab" aria-selected="false" aria-controls="room-panel-reviews">Отзывы</button>
+                </div>
 
                 <!-- Характеристики комнаты -->
-                <div class="info-section">
+                <section class="tab-content room-tab-panel" id="room-panel-features" data-room-panel="features" role="tabpanel" aria-labelledby="room-tab-features" hidden>
                     <h3>Характеристики</h3>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                         {% if room.location %}
@@ -1140,10 +1533,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- Услуги и оборудование -->
-                <div class="info-section">
+                <section class="tab-content room-tab-panel active" id="room-panel-services" data-room-panel="services" role="tabpanel" aria-labelledby="room-tab-services">
                     <h3>Услуги и оборудование</h3>
                     {% if room.equipment %}
                     <div class="equipment-columns">
@@ -1163,43 +1556,47 @@
                     {% else %}
                     <p style="color: var(--text-muted);">Описание услуг появится скоро...</p>
                     {% endif %}
-                </div>
+                </section>
 
             {% if room.office %}
             <!-- Информация об офисе - компактная и удобная -->
-            <div class="info-section">
+            <section class="tab-content room-tab-panel" id="room-panel-location" data-room-panel="location" role="tabpanel" aria-labelledby="room-tab-location" hidden>
                 <h3>📍 Месторасположение</h3>
                 
-                <!-- Компактная карточка с основной информацией -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
-                    <!-- Адрес и название офиса -->
-                    <div style="padding: 14px; background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(139,92,246,0.1) 100%); border-radius: var(--radius-md); border: 1px solid rgba(59,130,246,0.2);">
-                        <div style="display: flex; align-items: start; gap: 10px;">
-                            <div style="font-size: 20px; flex-shrink: 0;">🏢</div>
-                            <div style="flex: 1;">
-                                <p style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;">{{ room.office.name }}</p>
-                                <p style="font-size: 13px; color: var(--text-primary); font-weight: 500; margin: 0; line-height: 1.4;">{{ room.office.address }}</p>
+                <div class="location-grid">
+                    <div class="location-card location-card--primary">
+                        <div class="location-item">
+                            <div class="location-item__icon">🏢</div>
+                            <div class="location-item__meta">
+                                <p class="location-item__label">Офис</p>
+                                <p class="location-item__value">{{ room.office.name }}</p>
+                            </div>
+                        </div>
+                        <div class="location-item">
+                            <div class="location-item__icon">📍</div>
+                            <div class="location-item__meta">
+                                <p class="location-item__label">Адрес</p>
+                                <p class="location-item__value">{{ room.office.address }}</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Контакты -->
-                    <div style="padding: 14px; background: linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(59,130,246,0.1) 100%); border-radius: var(--radius-md); border: 1px solid rgba(34,197,94,0.2);">
+                    <div class="location-card location-card--contact">
                         {% if room.office.phone %}
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <span style="font-size: 18px;">📞</span>
-                            <div>
-                                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600;">Телефон</p>
-                                <a href="tel:{{ room.office.phone }}" style="color: var(--accent-primary); text-decoration: none; font-weight: 600; font-size: 13px;">{{ room.office.phone }}</a>
+                        <div class="location-item">
+                            <span class="location-item__icon">📞</span>
+                            <div class="location-item__meta">
+                                <p class="location-item__label">Телефон</p>
+                                <a href="tel:{{ room.office.phone }}" class="location-item__value location-link">{{ room.office.phone }}</a>
                             </div>
                         </div>
                         {% endif %}
                         {% if room.office.work_hours %}
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 18px;">🕐</span>
-                            <div>
-                                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600;">Часы работы</p>
-                                <p style="color: var(--text-primary); font-size: 13px; font-weight: 500; margin: 0;">{{ room.office.work_hours }}</p>
+                        <div class="location-item">
+                            <span class="location-item__icon">🕐</span>
+                            <div class="location-item__meta">
+                                <p class="location-item__label">Часы работы</p>
+                                <p class="location-item__value">{{ room.office.work_hours }}</p>
                             </div>
                         </div>
                         {% endif %}
@@ -1208,25 +1605,25 @@
 
                 <!-- Транспорт и парковка (если есть) -->
                 {% if room.office.transport or room.office.parking %}
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+                <div class="location-grid">
                     {% if room.office.transport %}
-                    <div style="padding: 14px; background: var(--bg-tertiary); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 18px;">🚇</span>
-                            <div>
-                                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600;">Транспорт</p>
-                                <p style="color: var(--text-primary); font-size: 13px; font-weight: 500; margin: 0;">{{ room.office.transport }}</p>
+                    <div class="location-card">
+                        <div class="location-item">
+                            <span class="location-item__icon">🚇</span>
+                            <div class="location-item__meta">
+                                <p class="location-item__label">Транспорт</p>
+                                <p class="location-item__value">{{ room.office.transport }}</p>
                             </div>
                         </div>
                     </div>
                     {% endif %}
                     {% if room.office.parking %}
-                    <div style="padding: 14px; background: var(--bg-tertiary); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 18px;">🅿️</span>
-                            <div>
-                                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600;">Парковка</p>
-                                <p style="color: var(--text-primary); font-size: 13px; font-weight: 500; margin: 0;">{{ room.office.parking }}</p>
+                    <div class="location-card">
+                        <div class="location-item">
+                            <span class="location-item__icon">🅿️</span>
+                            <div class="location-item__meta">
+                                <p class="location-item__label">Парковка</p>
+                                <p class="location-item__value">{{ room.office.parking }}</p>
                             </div>
                         </div>
                     </div>
@@ -1235,12 +1632,12 @@
                 {% endif %}
 
                 <!-- Карта -->
-                <div style="margin-bottom: 18px;">
-                    <div class="map-container" style="height: 350px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                <div class="location-map-shell">
+                    <div class="map-container">
                         <iframe src="https://yandex.ru/map-widget/v1/?ll={{ room.office.longitude }}%2C{{ room.office.latitude }}&z=16&l=map&pt={{ room.office.longitude }},{{ room.office.latitude }},pm2rdm" style="width: 100%; height: 100%; border: none;"></iframe>
                     </div>
                     {% if room.office.yandex_map_url %}
-                    <div style="margin-top: 10px; text-align: center;">
+                    <div class="location-map-actions">
                         <a href="{{ room.office.yandex_map_url }}" target="_blank" class="map-btn" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: var(--gradient-primary); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; font-size: 12px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">
                             <span>🔎</span>
                             <span>Открыть в Яндекс.Картах</span>
@@ -1251,16 +1648,16 @@
 
                 <!-- Удобства (если есть) -->
                 {% if room.office.amenities %}
-                <div style="padding: 14px; background: linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(59,130,246,0.08) 100%); border-radius: var(--radius-md); border: 1px solid rgba(34,197,94,0.15);">
-                    <p style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 600;">✨ Удобства</p>
-                    <p style="color: var(--text-primary); font-size: 13px; line-height: 1.5; margin: 0;">{{ room.office.amenities }}</p>
+                <div class="location-card location-card--amenities">
+                    <p class="location-item__label">✨ Удобства</p>
+                    <p class="location-item__value">{{ room.office.amenities }}</p>
                 </div>
                 {% endif %}
-            </div>
+            </section>
             {% endif %}
 
             <!-- Отзывы -->
-            <div class="info-section">
+            <section class="tab-content room-tab-panel" id="room-panel-reviews" data-room-panel="reviews" role="tabpanel" aria-labelledby="room-tab-reviews" hidden>
                 <h3>Отзывы</h3>
 
                 <!-- Полностью переделанная секция отзывов -->
@@ -1416,9 +1813,11 @@
                         <p style="color: var(--text-muted); text-align: center; padding: 24px;">Загрузка отзывов...</p>
                     </div>
                 </div>
-            </div>
+            </section>
+            {% endif %}
         </div>
 
+        {% if booking_page %}
         <!-- Right Column - Booking Form -->
         <div class="right-column">
             <!-- Price -->
@@ -1443,107 +1842,111 @@
             <form class="booking-form" method="POST" action="{% url 'create_booking' %}">
                 {% csrf_token %}
                 <input type="hidden" name="room_id" value="{{ room.id }}">
+                <input type="hidden" name="booking_origin" value="room_booking">
                 <input type="hidden" name="selected_date" id="selectedDate">
                 <input type="hidden" name="start_time" id="startTime">
                 <input type="hidden" name="duration" id="duration">
 
-                <!-- Calendar -->
-                <div class="calendar">
-                    <div class="calendar-header">
-                        <button type="button" class="calendar-nav" onclick="changeMonth(-1)">←</button>
-                        <h3 id="currentMonth">Ноябрь 2024</h3>
-                        <button type="button" class="calendar-nav" onclick="changeMonth(1)">→</button>
+                <div class="booking-form-layout">
+                    <div class="booking-scheduling-grid">
+                        <!-- Calendar -->
+                        <div class="calendar">
+                            <div class="calendar-header">
+                                <button type="button" class="calendar-nav" onclick="changeMonth(-1)">←</button>
+                                <h3 id="currentMonth">Ноябрь 2024</h3>
+                                <button type="button" class="calendar-nav" onclick="changeMonth(1)">→</button>
+                            </div>
+                            <div class="calendar-grid" id="calendarGrid"></div>
+                        </div>
+
+                        <!-- Time Selection -->
+                        <div class="time-section">
+                            <h3>Выберите время начала</h3>
+                            <div class="time-grid" id="timeGrid"></div>
+                        </div>
                     </div>
-                    <div class="calendar-grid" id="calendarGrid"></div>
+
+                    <!-- Duration Selection -->
+                    <div class="duration-section">
+                        <h3>Продолжительность</h3>
+                        <div class="duration-buttons" id="durationButtons">
+                            <button type="button" class="duration-btn" data-hours="1">1 час</button>
+                            <button type="button" class="duration-btn" data-hours="2">2 часа</button>
+                            <button type="button" class="duration-btn" data-hours="3">3 часа</button>
+                            <button type="button" class="duration-btn" data-hours="4">4 часа</button>
+                        </div>
+                    </div>
+
+                    <!-- Booking Summary -->
+                    <div class="booking-summary" id="bookingSummary" style="display: none;">
+                        <h4>📋 Детали бронирования</h4>
+                        <div class="summary-item">
+                            <span>Комната:</span>
+                            <span>{{ room.name }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Дата:</span>
+                            <span id="summaryDate">—</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Время:</span>
+                            <span id="summaryTime">—</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Продолжительность:</span>
+                            <span id="summaryDuration">—</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Расчет:</span>
+                            <span id="summaryCalculation">—</span>
+                        </div>
+
+                        <div class="summary-item total-price">
+                            <span>Итого к оплате:</span>
+                            <span id="summaryTotal">—</span>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="contact-form">
+                        <h3>📝 Контактные данные</h3>
+
+                        <div class="booking-contact-grid">
+                            <div class="form-group">
+                                <label for="booking_full_name">ФИО *</label>
+                                <input type="text" id="booking_full_name" name="booking_full_name"
+                                       value="{{ user.get_full_name|default:user.username }}"
+                                       placeholder="Иванов Иван Иванович" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="booking_email">Email для уведомлений *</label>
+                                <input type="email" id="booking_email" name="booking_email"
+                                       value="{{ user.email|default:'' }}"
+                                       placeholder="email@example.com" required>
+                                {% if user.email %}
+                                <small style="color: var(--text-muted); font-size: 12px;">
+                                    📧 Письмо с подтверждением придет на этот адрес
+                                </small>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="booking_phone">Телефон *</label>
+                                <input type="tel" id="booking_phone" name="booking_phone"
+                                       value="{{ user.phone|default:'' }}"
+                                       placeholder="+7 (___) ___-__-__" required>
+                            </div>
+
+                            <div class="form-group form-group--full">
+                                <label for="comment">Комментарий (необязательно)</label>
+                                <textarea id="comment" name="comment" placeholder="Дополнительные пожелания..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn" disabled>✅ Подтвердить бронирование</button>
                 </div>
-
-                <!-- Time Selection -->
-                <div class="time-section">
-                    <h3>Выберите время начала</h3>
-                    <div class="time-grid" id="timeGrid"></div>
-                </div>
-
-                <!-- Duration Selection -->
-                <div class="duration-section">
-                    <h3>Продолжительность</h3>
-                    <div class="duration-buttons" id="durationButtons">
-                        <button type="button" class="duration-btn" data-hours="1">1 час</button>
-                        <button type="button" class="duration-btn" data-hours="2">2 часа</button>
-                        <button type="button" class="duration-btn" data-hours="3">3 часа</button>
-                        <button type="button" class="duration-btn" data-hours="4">4 часа</button>
-                    </div>
-                </div>
-
-                <!-- Booking Summary -->
-                <div class="booking-summary" id="bookingSummary" style="display: none;">
-                    <h4>📋 Детали бронирования</h4>
-                    <div class="summary-item">
-                        <span>Комната:</span>
-                        <span>{{ room.name }}</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Дата:</span>
-                        <span id="summaryDate">—</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Время:</span>
-                        <span id="summaryTime">—</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Продолжительность:</span>
-                        <span id="summaryDuration">—</span>
-                    </div>
-                    <!-- ★★★ ДЕТАЛИ РАСЧЕТА (отдельная строка) ★★★ -->
-                    <div class="summary-item">
-                        <span>Расчет:</span>
-                        <span id="summaryCalculation">—</span>
-                    </div>
-
-                    <!-- ★★★ ИТОГОВАЯ СУММА (отдельная строка с выделением) ★★★ -->
-                    <div class="summary-item total-price">
-                        <span>Итого к оплате:</span>
-                        <span id="summaryTotal">—</span>
-                    </div>
-                </div>
-
-                <!-- Contact Form -->
-                <div class="contact-form">
-                    <h3>📝 Контактные данные</h3>
-
-                    <div class="form-group">
-                        <label for="booking_full_name">ФИО *</label>
-                        <input type="text" id="booking_full_name" name="booking_full_name"
-                               value="{{ user.get_full_name|default:user.username }}"
-                               placeholder="Иванов Иван Иванович" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="booking_email">Email для уведомлений *</label>
-                        <input type="email" id="booking_email" name="booking_email"
-                               value="{{ user.email|default:'' }}"
-                               placeholder="email@example.com" required>
-                        <!-- ★★★ ТОЛЬКО ИНФОРМАЦИЯ, БЕЗ ПРЕДУПРЕЖДЕНИЙ ★★★ -->
-                        {% if user.email %}
-                        <small style="color: var(--text-muted); font-size: 12px;">
-                            📧 Письмо с подтверждением придет на этот адрес
-                        </small>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="booking_phone">Телефон *</label>
-                        <input type="tel" id="booking_phone" name="booking_phone"
-                               value="{{ user.phone|default:'' }}"
-                               placeholder="+7 (___) ___-__-__" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="comment">Комментарий (необязательно)</label>
-                        <textarea id="comment" name="comment" placeholder="Дополнительные пожелания..."></textarea>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-submit" id="submitBtn" disabled>✅ Подтвердить бронирование</button>
             </form>
             {% else %}
             <!-- Auth Required Block -->
@@ -1558,6 +1961,7 @@
             </div>
             {% endif %}
         </div>
+        {% endif %}
         </div>
     </div>
 
@@ -1566,7 +1970,40 @@
         const roomId = {{ room.id }};
     </script>
 
-    {% if user.is_authenticated %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.room-detail-tabs [data-room-tab]');
+            const tabPanels = document.querySelectorAll('.room-tab-panel');
+
+            if (!tabButtons.length || !tabPanels.length) return;
+
+            function activateRoomTab(tabName) {
+                tabButtons.forEach(button => {
+                    const isActive = button.dataset.roomTab === tabName;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    button.tabIndex = isActive ? 0 : -1;
+                });
+
+                tabPanels.forEach(panel => {
+                    const isActive = panel.dataset.roomPanel === tabName;
+                    panel.classList.toggle('active', isActive);
+                    panel.hidden = !isActive;
+                });
+            }
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    activateRoomTab(this.dataset.roomTab);
+                });
+            });
+
+            const initialTab = document.querySelector('.room-detail-tabs .tab.active')?.dataset.roomTab || tabButtons[0].dataset.roomTab;
+            activateRoomTab(initialTab);
+        });
+    </script>
+
+    {% if booking_page and user.is_authenticated %}
     <script>
         console.log('=== СКРИПТ БРОНИРОВАНИЯ ЗАГРУЖЕН ===');
         console.log('roomId:', {{ room.id }});
@@ -1915,7 +2352,9 @@
             }
         }, 500);
     </script>
+    {% endif %}
 
+    {% if not booking_page %}
     <!-- Добавляем скрипт для работы с отзывами -->
     <script>
         // Переменные для работы с отзывами

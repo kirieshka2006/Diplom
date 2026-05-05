@@ -598,12 +598,12 @@
             <tbody>
                 {% for booking in bookings %}
                 <tr>
-                    <td>{{ booking.start_time|date:"d.m.Y" }}</td>
-                    <td>
+                    <td data-label="Дата">{{ booking.start_time|date:"d.m.Y" }}</td>
+                    <td data-label="Комната">
                         <div class="room-name">{{ booking.room.name }}</div>
                     </td>
                     <!-- Добавлен класс комнаты -->
-                    <td>
+                    <td data-label="Класс">
                         <span class="category-badge category-{{ booking.room.category }}">
                             {% if booking.room.category == 'economy' %}Эконом
                             {% elif booking.room.category == 'standard' %}Стандарт
@@ -613,10 +613,10 @@
                             {% else %}{{ booking.room.category }}{% endif %}
                         </span>
                     </td>
-                    <td>{{ booking.user.username }}</td>
-                    <td>{{ booking.start_time|time:"H:i" }}</td>
-                    <td>{{ booking.end_time|time:"H:i" }}</td>
-                    <td>
+                    <td data-label="Пользователь">{{ booking.user.username }}</td>
+                    <td data-label="Начало">{{ booking.start_time|time:"H:i" }}</td>
+                    <td data-label="Конец">{{ booking.end_time|time:"H:i" }}</td>
+                    <td data-label="Статус">
                         <!-- Исправлен класс статуса: completed вместо finished -->
                         <span class="status-badge
                             {% if booking.status == 'confirmed' %}status-confirmed
@@ -640,7 +640,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
+                <tr class="report-empty-row">
                     <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
                         Бронирования не найдены
                     </td>

@@ -296,3 +296,192 @@
 - Files: `meeting_reservation_system/views.py`, `requirements.txt`, `REQUESTS_AND_CHANGES_LOG.md`
 - Result: экспорт PDF теперь не требует `wkhtmltopdf` и должен работать на локалке и на сервере без отдельной установки внешнего exe/bin-файла.
 - Next: руками скачать оба PDF из интерфейса и проверить визуально содержание таблиц; если понадобится, следующим шагом можно уже точечно полировать внешний вид PDF или переходить к третьему пункту плана.
+
+### 2026-05-04 16:33
+- Request: вернуть проект в `settings.py` обратно на MySQL, чтобы подготовить его к выкладке на сервер.
+- Done: в `bron/settings.py` активирован существующий боевой MySQL-конфиг `django_prometheus.db.backends.mysql`, а `SQLite` оставлен рядом как закомментированный локальный вариант; попытка выполнить `manage.py check` после переключения показала, что в текущей локальной `.venv` отсутствует модуль `MySQLdb` / `mysqlclient`, поэтому локальный запуск на этих настройках сейчас падает ещё на этапе инициализации backend.
+- Files: `bron/settings.py`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: проект снова настроен на MySQL для сервера, но локально с текущим окружением не стартует, пока не установлен `mysqlclient` или пока снова не вернуть `SQLite`.
+- Next: если нужно будет проверять проект локально после этого, либо ставить `mysqlclient` в `.venv`, либо временно переключать `DATABASES` обратно на `SQLite`.
+
+### 2026-05-05 13:52
+- Request: вернуть `settings.py` обратно на `SQLite` для локальной работы и напомнить, что именно было зафиксировано по будущему новому дизайну.
+- Done: в `bron/settings.py` снова активирован локальный `SQLite`-конфиг, а `MySQL` оставлен рядом закомментированным как боевой вариант; напоминание по дизайну поднято из `REQUESTS_AND_CHANGES_LOG.md` и `SHORT_ACTION_PLAN.md`: фиксированных детальных макетов не было, но были зафиксированы пожелания "обновить дизайн, кнопки и общий вид", а в кратком плане третий пункт сформулирован как "Попробовать поменять дизайн на другой".
+- Files: `bron/settings.py`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: проект снова можно проверять локально на `SQLite`, а по редизайну у нас пока есть только общее направление, без жёсткого финального ТЗ по конкретным блокам/стилю.
+- Next: выполнить `manage.py check` на `SQLite` и затем уже определить, с какого экрана начинать полноценный редизайн.
+
+### 2026-05-05 14:06
+- Request: сделать сайт заметно комфортнее на телефоне, потому что текущая мобильная версия открывается, но выглядит криво.
+- Done: в `theme_setup.html` добавлен первый общий responsive-layer для `max-width: 900px` и `max-width: 640px`: переработаны mobile-layout `home` (header, actions, sidebar как grid-навигация вместо исчезновения, filters, room cards, messages), `room_detail` (main-content, back button, right column, calendar/time/duration blocks, reviews stats), `offices` (header/cards/map/button) и `support` (header, tabs, FAQ stats, ticket header); для узких экранов выпадающие filter/popover-блоки переведены в более безопасный fixed mobile режим; выполнен `manage.py check`; через Django test client подтверждено, что `/`, `/offices/`, `/support/` и `/room/1/` отдают `200`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: после первого прохода основные пользовательские страницы должны вести себя заметно стабильнее и удобнее на телефоне, без пропадающей навигации и тяжёлых desktop-раскладок.
+- Next: открыть сайт на реальном телефоне или в mobile emulation и собрать второй точечный список проблем; при необходимости отдельно дожать админские страницы, `info`, `profile`, `reports` и прочие вторичные экраны.
+
+### 2026-05-05 14:18
+- Request: на мобильной главной заменить сразу видимый sidebar на кнопку из трёх полосок, убрать верхний поиск, сделать админскую шестерёнку компактной в правом верхнем углу и сделать так, чтобы фильтрация изначально была свёрнута.
+- Done: в `home.html` `body` помечен как `home-page`, в header добавлен `mobileSidebarToggle`, после header добавлен `mobileSidebarBackdrop`, а sidebar получил `id="mobileSidebar"`; в `theme_setup.html` добавлены home-specific mobile overrides: off-canvas sidebar, backdrop, hamburger-анимация, компактный header-row без верхнего поиска, уменьшенные `admin-btn` и `user-profile-btn`; в `home.html` JS дополнен `ensureMobileFiltersCollapsed()` для автосворачивания фильтров на `max-width: 900px` и логикой `setMobileSidebarOpen()` для открытия/закрытия мобильного sidebar, включая backdrop, outside-click, Escape и закрытие по нажатию на ссылки; также добавлены click-toggle обработчики для `admin-btn` и `user-profile-btn`, чтобы их меню нормально открывались на телефоне, а не только по hover; выполнен `manage.py check`; через Django test client подтверждено, что `/` отдает `200` и содержит `mobileSidebarToggle`.
+- Files: `meeting_reservation_system/templates/home.html`, `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на телефоне главная теперь должна открываться с hamburger вместо постоянно видимого sidebar, без верхнего поиска, с более компактными правыми действиями и со свёрнутыми фильтрами по умолчанию.
+- Next: обновить главную в mobile emulation через `Ctrl+F5` и проверить именно поведение hamburger, admin/user dropdown и свёрнутого фильтра; дальше уже можно будет точечно добивать оставшиеся мобильные дефекты.
+
+### 2026-05-05 14:24
+- Request: на мобильной главной полностью убрать верхний `user-profile-btn`, а админскую шестерёнку оставить как единственное компактное действие справа; верхний поиск тоже должен оставаться убранным.
+- Done: в `theme_setup.html` для `home-page` mobile-header добавлены более жёсткие overrides: `user-profile-dropdown` теперь скрыт на `max-width: 900px` и `max-width: 640px`, `header-actions` принудительно выравниваются вправо, а `admin-dropdown` получает `margin-left: auto`, чтобы шестерёнка оставалась в правом верхнем углу как отдельное действие; `header-search` по-прежнему скрыт в мобильном сценарии; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/` отдает `200`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на телефоне у главной не должно быть верхней кнопки профиля рядом с hamburger, а справа должна оставаться только компактная админская шестерёнка.
+- Next: обновить главную в mobile emulation через `Ctrl+F5` и проверить шапку ещё раз; если после этого останется визуальный перекос, уже точечно подвинуть только spacing/header-grid.
+
+### 2026-05-05 14:32
+- Request: на мобильной главной шестерёнка всё ещё визуально висела не там, где нужно, а верхний поиск всё ещё был виден; нужно было оставить только icon-only шестерёнку в правом верхнем углу и жёстко убрать `header-search`.
+- Done: в `theme_setup.html` mobile-override для `home-page` усилен ещё раз: `.header-content` переведён в явную трёхзонную grid-схему с `position: relative`, шестерёнка переведена в полностью icon-only состояние без рамок/фона/hover-обводки, `admin-dropdown` принудительно сжат до `auto`, а `header-search`, `headerSearchInput`, `.header-search-input` и `.header-search-icon` теперь скрываются жёстко через `display/visibility/size/overflow` и на `max-width: 900px`, и на `max-width: 640px`; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/` отдает `200`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на мобильной главной в шапке должна оставаться только компактная шестерёнка справа сверху, а верхний поиск не должен занимать место и не должен быть виден даже если на него раньше влияли общие mobile-правила шапки.
+- Next: обновить главную в mobile emulation через `Ctrl+F5` и проверить именно три вещи: положение шестерёнки, отсутствие блока поиска и поведение hamburger; если что-то ещё поедет, дальше уже точечно добить только mobile-header.
+
+### 2026-05-05 14:42
+- Request: на очень узкой мобильной ширине шестерёнка стала неудобной для нажатия, визуально почти упиралась в границы, а админ-меню иногда открывалось не с первого нажатия.
+- Done: в `theme_setup.html` mobile-style шестерёнки переработан под touch: `admin-dropdown` получил фиксированный компактный hit-area, bridge-псевдоэлемент отключён, сама `admin-btn` увеличена до удобного touch-размера, но оставлена визуально прозрачной иконкой без рамок/фона; дополнительно убраны `appearance`, tap-highlight и лишние focus/active/filter эффекты; в `home.html` кнопка администрирования получила `type="button"` и `aria-label`, а JS открытия `admin-menu` переведён на touch-friendly режим: hover-логика больше не вмешивается на `max-width: 900px` / coarse pointer, а на телефоне меню переключается через `pointerup`, чтобы открываться с первого нажатия; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/` отдает `200`, а для авторизованного admin/manager-рэндера кнопка с `aria-label="Администрирование"` присутствует.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `meeting_reservation_system/templates/home.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на телефоне шестерёнка на главной должна быть заметно удобнее для тапа и больше не должна требовать повторного нажатия для открытия admin-меню.
+- Next: обновить главную в mobile emulation через `Ctrl+F5` и проверить именно сценарий с шириной `500px` и меньше; если останется проблема, дальше уже отдельно править только positioning/admin-menu на совсем узких экранах.
+
+### 2026-05-05 14:51
+- Request: даже после touch-фикса на ширине примерно `600px` и меньше у шестерёнки оставалась невидимая широкая зона нажатия, а сама иконка визуально стояла не справа, а ближе к центру.
+- Done: в `theme_setup.html` добавлены более сильные mobile-overrides с `html[data-theme] .home-page ...`, чтобы перебить общие правила шапки по специфичности: `header-content` для главной закреплён как `position: relative` с собственной grid-схемой, `header-actions` на `max-width: 900px` и `max-width: 640px` жёстко ограничен до `44px/42px`, принудительно позиционируется абсолютно справа с `transform: translateY(-50%)`, а `admin-dropdown` и `admin-btn` тоже ограничены теми же размерами; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/` отдает `200`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на мобильной главной общие grid-правила шапки больше не должны раздувать админский блок на всю строку, поэтому шестерёнка должна реально стоять справа, а её зона нажатия не должна занимать лишнее место.
+- Next: обновить главную в mobile emulation через `Ctrl+F5` и проверить именно ширины около `600px`, `500px` и `390px`; если после этого останется визуальный сдвиг, дальше уже смотреть конкретно внешний `header-content` и возможный leftover `justify-self/order` из старых правил.
+
+### 2026-05-05 14:53
+- Request: сместить шестерёнку ещё правее, потому что на мобильной ширине она всё ещё частично залезала на буквы логотипа.
+- Done: в `theme_setup.html` шестерёнка в mobile-header сдвинута ещё ближе к правому краю (`right: 8px` для `max-width: 900px` и `right: 6px` для `max-width: 640px`), а правый внутренний отступ шапки увеличен (`padding-right: 86px/72px`), чтобы текст логотипа оставался дальше от кнопки; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/` отдает `200`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на мобильной главной шестерёнка должна стоять заметно правее и меньше конфликтовать с текстом логотипа.
+- Next: обновить главную в mobile emulation через `Ctrl+F5` и перепроверить узкие ширины; если кнопка всё ещё задевает текст, следующим шагом уже отдельно ограничить ширину блока логотипа.
+
+### 2026-05-05 14:55
+- Request: сместить шестерёнку ещё ближе к самому углу.
+- Done: в `theme_setup.html` мобильное позиционирование админской шестерёнки сдвинуто ещё правее: `right: 2px` для `max-width: 900px` и `right: 0` для `max-width: 640px`; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/` отдает `200`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на мобильной главной шестерёнка должна стоять максимально близко к правому верхнему углу.
+- Next: обновить главную в mobile emulation через `Ctrl+F5` и посмотреть, хватает ли этого сдвига; если нет, дальше уже придётся отдельно ужимать блок логотипа, а не только двигать кнопку.
+
+### 2026-05-05 14:59
+- Request: предыдущие сдвиги не дали нужного эффекта; на мобильной главной шестерёнку нужно поставить в тот же правый угол, где логически находится третий столбец шапки, как у hamburger слева.
+- Done: вместо дальнейшего абсолютного сдвига в `theme_setup.html` mobile-header для `home-page` переведён на более правильную трёхколоночную grid-схему: `mobile-sidebar-toggle` закреплён в первой колонке, `logo` и `logo-text` ограничены во второй колонке с `ellipsis`, а `header-actions` возвращён в третью колонку с `justify-self: end` и фиксированной шириной `44px/42px`; при этом правый extra-padding у шапки возвращён к обычным мобильным значениям `16px/14px`; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/` отдает `200`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на мобильной главной шестерёнка должна стоять как правый крайний элемент шапки, симметрично hamburger-кнопке слева, а не жить отдельным абсолютным слоем над текстом логотипа.
+- Next: обновить главную в mobile emulation через `Ctrl+F5` и проверить `600px`, `500px` и `390px`; если визуально всё ещё будет не у края, дальше уже смотреть конкретный остаточный стиль у `.header-actions` в DevTools.
+
+### 2026-05-05 15:09
+- Request: на странице комнаты заменить длинную вертикальную последовательность блоков `Характеристики / Услуги и оборудование / Месторасположение / Отзывы` на переключаемые вкладки, а блок `Забронировать` оставить снизу отдельным.
+- Done: в `meeting_reservation_system/templates/room_detail.html` активирована уже существовавшая tab-стилизация: добавлена строка вкладок `Услуги и оборудование`, `Месторасположение`, `Характеристики`, `Отзывы`, а соответствующие секции переведены в `tab-content room-tab-panel` с JS-переключением по `data-room-tab` / `data-room-panel`; `Услуги и оборудование` сделан стартовой вкладкой; общая раскладка страницы переведена в одну колонку, поэтому `right-column` с бронированием теперь идёт ниже основного инфо-блока, а не сбоку; дополнительно вынесен `endif` после booking-script, чтобы скрипт загрузки отзывов работал не только у авторизованных, но и у гостей; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/room/1/` отдаёт `200` и для гостя, и для авторизованного пользователя.
+- Files: `meeting_reservation_system/templates/room_detail.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: страница комнаты теперь должна открываться как более управляемый экран с верхней строкой вкладок и отдельным нижним блоком бронирования, без длинной непрерывной простыни секций.
+- Next: открыть `/room/1/`, проверить порядок и читаемость вкладок, а затем уже отдельно полировать внешний вид самих tab-кнопок и spacing внутри конкретных панелей.
+
+### 2026-05-05 15:15
+- Request: во вкладке `Месторасположение` элементы выглядели слишком тесно и местами визуально налезали друг на друга; нужно было уменьшить визуальный шум и сделать блок спокойнее.
+- Done: в `meeting_reservation_system/templates/room_detail.html` для вкладки месторасположения добавлены отдельные классы layout/styling: `location-grid`, `location-card`, `location-item`, `location-item__label`, `location-item__value`, `location-map-shell`, `location-map-actions`; сам markup секции переведён с тяжёлых inline-grid и inline-типографики на адаптивную сетку карточек с более компактными подписями, переносом длинных значений и разнесением `Офис`/`Адрес` на отдельные строки; для мобильной ширины добавлены отдельные responsive-правила; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/room/1/` отдаёт `200`.
+- Files: `meeting_reservation_system/templates/room_detail.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: вкладка `Месторасположение` должна выглядеть заметно чище и легче читаться, без ощущения, что название, адрес и контакты спрессованы в один плотный блок.
+- Next: обновить `/room/1/`, открыть вкладку `Месторасположение` и проверить её визуально; если нужно, следующим шагом можно уже отдельно уменьшить высоту карты или приглушить акцентные карточки.
+
+### 2026-05-05 15:24
+- Request: вынести рабочий блок бронирования с текущей страницы комнаты на отдельную страницу, а в самой комнате оставить только кнопку-ссылку на бронирование.
+- Done: в `meeting_reservation_system/views.py` добавлен helper `_get_visible_room()` и новый view `room_booking_page()`, который рендерит отдельный экран бронирования той же комнаты; в `bron/urls.py` добавлен маршрут `room/<int:room_id>/booking/` с именем `room_booking`; в `meeting_reservation_system/templates/room_detail.html` шаблон переведён в два режима через `booking_page`: обычная страница комнаты теперь показывает CTA-кнопку `Забронировать`, а booking-режим показывает отдельный экран с той же рабочей booking-формой, room-summary и авторизационным блоком для гостей; booking-form получила скрытое поле `booking_origin=room_booking`, а `create_booking()` теперь при ошибках умеет возвращать пользователя обратно на новый booking-экран; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/room/1/` содержит ссылку на `/room/1/booking/`, а `/room/1/booking/` отдаёт `200` и для гостя, и для авторизованного пользователя.
+- Files: `meeting_reservation_system/views.py`, `bron/urls.py`, `meeting_reservation_system/templates/room_detail.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: бронирование комнаты теперь живёт на отдельной странице без переписывания существующего form-flow, а основная страница комнаты стала легче и чище.
+- Next: открыть обычную страницу комнаты и новый `/room/1/booking/`, проверить визуально CTA-кнопку, summary-блок новой страницы и общий flow бронирования; дальше уже можно точечно полировать booking-страницу как самостоятельный экран.
+
+### 2026-05-05 15:29
+- Request: после вынесения бронирования на отдельную страницу новая верхняя зона `room_detail` / `booking_page` начала выбиваться по палитре: в светлой теме были неприятные зелёные тексты и неподходящие фоны у `Назад`, цены и `Забронировать`, а в тёмной теме отдельно страдала кнопка `Забронировать`.
+- Done: в `meeting_reservation_system/templates/theme_setup.html` добавлены theme-specific overrides для новых элементов room-detail/booking-page: в `light` исправлены `room-title h1`, `room-title__subtitle`, `back-button`, `room-title__price`, `room-booking-link` и `booking-page-summary-card`, чтобы они легли в более спокойную sage/stone палитру; в `dark` отдельно приведены к общей navy/indigo гамме `back-button`, `room-title__price`, `room-booking-link` и summary-карточки новой booking-страницы; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/room/1/` и `/room/1/booking/` отдают `200`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: room-detail и отдельная booking-страница должны визуально лучше попадать в обе темы и перестать выбиваться по цвету в верхней action-зоне.
+- Next: обновить `/room/1/` и `/room/1/booking/` через `Ctrl+F5` и проверить палитру ещё раз; если останется один проблемный элемент, дальше уже точечно править только его, без новых общих цветовых сдвигов.
+
+### 2026-05-05 15:34
+- Request: в светлой теме немного увести `Назад` в цвет, но без перебора, и одновременно сделать `room_detail` / `booking` визуально уже на десктопе, потому что страницы ощущались слишком широкими.
+- Done: в `meeting_reservation_system/templates/theme_setup.html` слегка скорректирован `light`-override для `back-button` в более мягкий sage-tint без сильного акцентирования; в `meeting_reservation_system/templates/room_detail.html` уменьшена рабочая ширина страницы: `booking-container` сужен до `1320px`, а `room-title` и `main-content` ограничены до `1180px` и центрированы через `margin: 0 auto`; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/room/1/` и `/room/1/booking/` отдают `200`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `meeting_reservation_system/templates/room_detail.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: верхняя кнопка `Назад` в светлой теме должна чуть лучше попадать в общую палитру, а страницы комнаты и бронирования должны выглядеть заметно собраннее и уже на десктопе.
+- Next: обновить `/room/1/` и `/room/1/booking/` через `Ctrl+F5` и проверить именно desktop-width; если нужно, следующим шагом можно ещё чуть ужать только booking-страницу, не трогая обычную страницу комнаты.
+
+### 2026-05-05 15:40
+- Request: на десктопе booking-страницу перестроить так, чтобы календарь был слева, выбор времени справа, продолжительность ниже, а контактные данные стали компактнее.
+- Done: в `meeting_reservation_system/templates/room_detail.html` для booking-режима добавлены layout-классы `booking-form-layout`, `booking-scheduling-grid`, `booking-contact-grid`; сама форма перестроена без изменения логики и id-полей: календарь и время теперь объединены в верхнюю desktop-grid, блок `Продолжительность` идёт ниже отдельной строкой, summary остаётся следом, а контактные данные собраны в более компактную сетку с тремя колонками на десктопе и полным переносом `Комментария`; дополнительно `right-column` на ширине от `980px` ограничен до `1080px` и центрирован, чтобы booking-экран оставался собранным; повторно выполнен `manage.py check`; через Django test client подтверждено, что авторизованный `/room/1/booking/` отдаёт `200` и содержит `booking-scheduling-grid` и `booking-contact-grid`.
+- Files: `meeting_reservation_system/templates/room_detail.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на компьютере booking-страница должна стать заметно удобнее и логичнее по компоновке, без изменения существующей логики бронирования.
+- Next: обновить `/room/1/booking/` через `Ctrl+F5` и проверить именно десктопную раскладку; если понадобится, следующим шагом можно ещё отдельно ужать только contact-form или поменять пропорцию `календарь/время`.
+
+### 2026-05-05 15:43
+- Request: на десктопе верхняя и нижняя части booking-страницы визуально выглядели разной ширины; нужно было либо сузить верх, либо расширить низ так, чтобы экран воспринимался одинаково собранным.
+- Done: в `meeting_reservation_system/templates/room_detail.html` для booking-режима добавлены отдельные width-классы `room-title--booking` и `main-content--booking`; обе зоны приведены к одной рабочей ширине `1080px`, а `right-column` внутри `main-content--booking` на ширине от `980px` принудительно растянут до `100%` без дополнительного внутреннего сужения, чтобы верхний блок с заголовком и summary и нижний блок с формой бронирования выглядели как единая колонка; повторно выполнен `manage.py check`; через Django test client подтверждено, что авторизованный `/room/1/booking/` отдаёт `200` и содержит `room-title--booking` и `main-content--booking`.
+- Files: `meeting_reservation_system/templates/room_detail.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на компьютере booking-страница должна выглядеть ровнее по ширине, без ощущения, что верх шире низа или наоборот.
+- Next: обновить `/room/1/booking/` через `Ctrl+F5` и проверить именно десктопное восприятие верхнего и нижнего блока; если нужно, следующим шагом можно уже точечно подправить только пропорции summary или поля контактов.
+
+### 2026-05-05 15:44
+- Request: на вкладке `Месторасположение` в светлой теме карточки `Транспорт` и `Парковка` оставались чёрными и выбивались из общей палитры.
+- Done: в `meeting_reservation_system/templates/theme_setup.html` добавлены light-theme overrides для `location-card`, `location-card--primary`, `location-card--contact`, `location-card--amenities`, а также для `location-item__label`, `location-item__value`, `location-link` и разделителя между `location-item`; это убирает тёмный базовый фон у карточек месторасположения и переводит транспорт/парковку в ту же светлую sage/stone палитру, что и остальная страница комнаты; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/room/1/` отдаёт `200` и в HTML присутствуют `Транспорт` и `Парковка`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: в светлой теме транспорт и парковка должны перестать выглядеть чёрными и стать визуально согласованными с остальными карточками секции `Месторасположение`.
+- Next: обновить `/room/1/` через `Ctrl+F5`, открыть вкладку `Месторасположение` и проверить именно карточки `Транспорт` и `Парковка`; если какой-то один из блоков всё ещё выбивается, дальше уже точечно править только его акцент или текст.
+
+### 2026-05-05 15:49
+- Request: сделать кнопку `Забронировать` заметнее, чтобы она лучше считывалась как главное действие и в светлой, и в тёмной теме.
+- Done: в `meeting_reservation_system/templates/theme_setup.html` обновлены theme-specific стили для `room-booking-link`: в `light` CTA переведён в более насыщённый зелёный градиент с сильнее выраженной глубиной и контрастом, а в `dark` — в более заметный indigo/violet gradient с усиленным свечением и более читаемой контрастностью текста; hover-состояния в обеих темах тоже подстроены, чтобы кнопка выглядела как явный primary action; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/room/1/` отдаёт `200` и содержит `📅 Забронировать`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: CTA `Забронировать` на странице комнаты должен сильнее привлекать внимание и лучше считываться в обеих темах, не выпадая из общей палитры.
+- Next: обновить `/room/1/` через `Ctrl+F5` и посмотреть кнопку в светлой и тёмной теме; если понадобится, следующим шагом можно отдельно дожать только оттенок `light` или только насыщенность `dark`.
+
+### 2026-05-05 15:52
+- Request: в тёмной теме кнопка `Забронировать` уже стала заметной, но в светлой всё ещё почти не выделялась и выглядела слишком близко к общему зелёному фону страницы.
+- Done: в `meeting_reservation_system/templates/theme_setup.html` повторно усилен только `light`-вариант `room-booking-link`: градиент переведён в более глубокий forest/emerald диапазон, увеличены контраст border/shadow, добавлен более явный объём через двойную тень и лёгкий `text-shadow`, а hover-состояние тоже сделано насыщеннее; `dark`-вариант на этом шаге не менялся; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/room/1/` отдаёт `200` и содержит `📅 Забронировать`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: в светлой теме CTA `Забронировать` должен визуально отделяться сильнее и читаться как более явное главное действие.
+- Next: обновить `/room/1/` через `Ctrl+F5` и проверить именно светлую тему; если всё ещё покажется недостаточно заметной, следующим шагом можно уже пойти не в ещё более зелёный тон, а в другой акцентный цвет в пределах общей палитры.
+
+### 2026-05-05 16:09
+- Request: привести `profile` и админские страницы к нормальному мобильному виду, чтобы на телефоне всё читалось целиком и выглядело аккуратно; отдельно требовалось убрать ситуацию, когда в админке на маленьком экране видна только часть информации о пользователях.
+- Done: в `meeting_reservation_system/templates/profile.html` добавлен расширенный responsive-layer для мобильных ширин: уменьшены paddings, ужаты header/section cards, кнопки и формы переведены в полный width-stack, сообщения и блок подтверждения email адаптированы под телефон, а `info-value` и имя пользователя теперь нормально переносятся; в `meeting_reservation_system/templates/admin_panel.html` таблица пользователей на мобильных переведена в карточный формат через `data-label`, действия собраны в адаптивный button-grid, а шапка и фильтры перестроены под узкий экран; в `meeting_reservation_system/templates/admin_user_profile.html` similarly адаптированы header, карточка профиля, stats/progress и история бронирований, где desktop-table на телефоне превращается в читабельные booking-cards с подписями полей; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/profile/`, `/admin-panel/` и `/admin-panel/user/2/` отдают `200`.
+- Files: `meeting_reservation_system/templates/profile.html`, `meeting_reservation_system/templates/admin_panel.html`, `meeting_reservation_system/templates/admin_user_profile.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: профиль и ключевые админские экраны должны стать заметно удобнее на телефоне: без обрезанных таблиц, с более чистым стеком карточек, кнопок и информационных блоков.
+- Next: открыть в mobile emulation `/profile/`, `/admin-panel/` и экран конкретного пользователя из админки; если после этого останется ещё один кривой admin-экран, следующим шагом отдельно адаптировать уже `manager_panel`, `room_management` или `office_management`.
+
+### 2026-05-05 16:15
+- Request: не просто адаптировать `profile` и просмотр пользователя из админки под телефон, а сделать их визуально более приятными и цельными: с более красивой шапкой, карточками, статистикой и mobile-историей.
+- Done: в `meeting_reservation_system/templates/profile.html` поверх существующего responsive-layer добавлен отдельный mobile-design pass: шапка профиля получила более выразительный gradient-overlay и glow вокруг аватара, `section-card` переведены в более цельные layered-cards с верхней акцентной линией, `section-title` и `edit-btn` визуально усилены, а `info-item`, формы и code-confirmation блок стали выглядеть как отдельные мобильные карточки; в `meeting_reservation_system/templates/admin_user_profile.html` аналогично усилены `profile-card`, `user-header`, `role-badge`, `stat-item`, `progress-section` и mobile booking-cards, чтобы экран просмотра пользователя из админки ощущался не как ужатая desktop-страница, а как отдельный аккуратный мобильный экран; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/profile/` и `/admin-panel/user/2/` отдают `200`.
+- Files: `meeting_reservation_system/templates/profile.html`, `meeting_reservation_system/templates/admin_user_profile.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: на телефоне `profile` и `admin user profile` должны выглядеть заметно “дороже” и собраннее: с более живой верхней частью, мягкими карточками и аккуратной историей/статистикой.
+- Next: открыть в mobile emulation `/profile/` и `/admin-panel/user/<id>/`, посмотреть именно шапку, карточки и историю бронирований; если захочется, следующим шагом можно уже выбрать один экран и дожать его под более конкретный визуальный стиль.
+
+### 2026-05-05 16:18
+- Request: сделать инфо-блоки в `profile` и в просмотре пользователя из админки компактнее, чтобы, например, `ID пользователя` и `Имя`, а также `Фамилия` и `Отчество` шли рядом и страница занимала меньше высоты.
+- Done: в `meeting_reservation_system/templates/profile.html` и `meeting_reservation_system/templates/admin_user_profile.html` добавлены компактные парные блоки `info-grid--paired` / `info-pair-card`; одиночные `info-item` перегруппированы в более плотные пары: в `profile` теперь рядом идут `Имя пользователя + Телефон`, `Имя + Фамилия`, `Отчество + Пол`, а дата рождения вынесена в отдельный компактный блок; в `admin_user_profile` рядом собраны `Email + Телефон`, `Дата регистрации + Последний вход`, `ID пользователя + Имя`, `Фамилия + Отчество`, `Дата рождения + Пол`; для очень узких экранов пары автоматически складываются в один столбец; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/profile/` и `/admin-panel/user/2/` отдают `200` и содержат `info-pair-card`.
+- Files: `meeting_reservation_system/templates/profile.html`, `meeting_reservation_system/templates/admin_user_profile.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: инфо-секции в профиле и в админском просмотре пользователя должны стать короче, плотнее и быстрее считываться на телефоне.
+- Next: открыть в mobile emulation `/profile/` и `/admin-panel/user/2/`, посмотреть именно блоки с основной информацией; если нужно, следующим шагом можно уже ещё плотнее переставить конкретные пары или собрать часть полей вообще в одну строку.
+
+### 2026-05-05 16:21
+- Request: в просмотре пользователя из админки телефон и почта плохо помещались в одной паре, поэтому их нужно было развести, чтобы длинные значения не ломали компактный блок.
+- Done: в `meeting_reservation_system/templates/admin_user_profile.html` для парных инфо-блоков добавлен вариант `info-pair-card--single`; блок `Email` вынесен в отдельную строку, а `Телефон` перенесён в пару с `ID пользователя`, чтобы длинный email не конкурировал по ширине с номером телефона; остальные пары тоже немного переставлены, чтобы структура осталась компактной и логичной; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/admin-panel/user/2/` отдаёт `200`, а в HTML присутствуют `info-pair-card--single`, `📧 Email`, `📞 Телефон` и `🆔 ID пользователя`.
+- Files: `meeting_reservation_system/templates/admin_user_profile.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: в админском просмотре пользователя email и телефон должны помещаться заметно лучше, без ощущения, что один длинный текст давит второй.
+- Next: обновить `/admin-panel/user/2/` через `Ctrl+F5` и проверить именно верхний инфо-блок; если понадобится, следующим шагом можно так же отдельно развести ещё одну конкретную пару полей.
+
+### 2026-05-05 16:29
+- Request: адаптировать под телефон `room management/категория`, `office management`, `database backup`, `manager panel`, `report`, `users report` и `review-moderation`, чтобы экраны были не просто доступны, а реально удобны на мобильной ширине.
+- Done: в `meeting_reservation_system/templates/theme_setup.html` добавлен общий mobile-pass для management/report экранов: на ширинах до `768px` и `520px` усилены mobile-раскладки для `header/header-actions`, `categories-grid`, `rooms-grid`, `offices-grid`, `backup-actions`, `stats-grid`, `booking-preview`, `history-item`, `review-actions`, `room-actions`, фильтров, кнопок действий, модалок и карточек; для `report_page` и `users_report` в шаблонах `meeting_reservation_system/templates/report_page.html` и `meeting_reservation_system/templates/users_report.html` добавлены `data-label` ко всем ячейкам, а в `theme_setup.html` сами таблицы на телефоне переведены в карточный stacked-view вместо неудобного горизонтального чтения; дополнительно на мобильной ширине отключён фиксированный back-button для отчётов, history/backup actions складываются в колонку, а filters/export buttons растягиваются во всю ширину; повторно выполнен `manage.py check`; через Django test client подтверждено, что `/room-management/`, `/room-management/economy/`, `/office-management/`, `/database-backup/`, `/manager-panel/`, `/report/`, `/users-report/` и `/review-moderation/` отдают `200`, а в HTML `report` и `users report` присутствуют новые `data-label`.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `meeting_reservation_system/templates/report_page.html`, `meeting_reservation_system/templates/users_report.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: перечисленные management/report страницы должны стать заметно удобнее на телефоне: с более короткими header-блоками, вертикальными action-группами и читаемыми карточными таблицами вместо широких desktop-рядов.
+- Next: открыть в mobile emulation `/room-management/`, `/room-management/economy/`, `/office-management/`, `/database-backup/`, `/manager-panel/`, `/report/`, `/users-report/` и `/review-moderation/`; если на каком-то одном экране останется кривой блок, следующим шагом уже точечно дожать именно его, а не весь mobile-layer целиком.
+
+### 2026-05-05 16:39
+- Request: вернуть `settings.py` обратно на `MySQL`, чтобы проект можно было готовить к загрузке на сервер.
+- Done: в `bron/settings.py` активирован боевой `MySQL`-конфиг на `django_prometheus.db.backends.mysql` с `meeting_db`, `dbuser`, `127.0.0.1:3306`; локальный `SQLite`-вариант при этом не удалён, а оставлен рядом закомментированным как dev-резерв.
+- Files: `bron/settings.py`, `REQUESTS_AND_CHANGES_LOG.md`
+- Result: конфигурация Django снова смотрит в `MySQL` как в основную базу для серверного запуска.
+- Next: если понадобится локально запускать проект на этих настройках, отдельно проверить наличие `mysqlclient/MySQLdb` в окружении; если драйвер не установлен, локальный `manage.py check` на `MySQL` может не стартовать.

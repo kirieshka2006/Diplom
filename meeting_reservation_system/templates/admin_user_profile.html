@@ -75,6 +75,10 @@
             font-weight: 700;
         }
 
+        .header-spacer {
+            width: 140px;
+        }
+
         .profile-card {
             background: var(--bg-card);
             border-radius: var(--radius-lg);
@@ -156,6 +160,42 @@
             border-left: 3px solid var(--accent-primary);
         }
 
+        .info-grid--paired {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .info-pair-card {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .info-pair-card .info-item {
+            background: transparent;
+            padding: 0;
+            border: 0;
+            min-width: 0;
+        }
+
+        .info-pair-card .info-item + .info-item {
+            padding-left: 14px;
+            border-left: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .info-pair-card--single {
+            grid-template-columns: 1fr;
+        }
+
+        .info-pair-card--single .info-item + .info-item {
+            padding-left: 0;
+            border-left: 0;
+        }
+
         .info-label {
             color: var(--text-muted);
             font-size: 12px;
@@ -166,6 +206,7 @@
             color: var(--text-primary);
             font-size: 15px;
             font-weight: 600;
+            overflow-wrap: anywhere;
         }
 
         .stats {
@@ -316,6 +357,323 @@
                 text-align: center;
             }
         }
+
+        @media (max-width: 900px) {
+            body {
+                padding: 18px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .profile-card {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .header-actions {
+                align-items: stretch;
+                text-align: left;
+                margin-bottom: 24px;
+            }
+
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .page-title {
+                font-size: 22px;
+            }
+
+            .header-spacer {
+                display: none;
+            }
+
+            .profile-card {
+                padding: 20px 16px;
+                margin-bottom: 18px;
+            }
+
+            .user-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                margin-bottom: 22px;
+            }
+
+            .user-info h2 {
+                font-size: 20px;
+                line-height: 1.2;
+                overflow-wrap: anywhere;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-pair-card {
+                gap: 12px;
+                padding: 14px;
+                border-radius: 16px;
+            }
+
+            .progress-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .progress-header > div:last-child {
+                text-align: left !important;
+            }
+
+            .bookings-table,
+            .bookings-table thead,
+            .bookings-table tbody,
+            .bookings-table tr,
+            .bookings-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .bookings-table thead {
+                display: none;
+            }
+
+            .bookings-table tbody {
+                display: grid;
+                gap: 14px;
+            }
+
+            .bookings-table tr {
+                background: var(--bg-tertiary);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-md);
+                padding: 14px;
+            }
+
+            .bookings-table tr:hover {
+                background: var(--bg-tertiary);
+            }
+
+            .bookings-table td {
+                padding: 0;
+                border: 0;
+            }
+
+            .bookings-table td + td {
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .bookings-table td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 6px;
+                color: var(--text-muted);
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+
+            .bookings-table td:first-child > div {
+                align-items: flex-start !important;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 12px;
+            }
+
+            .profile-card {
+                padding: 18px 14px;
+            }
+
+            .user-header {
+                align-items: center;
+                text-align: center;
+            }
+
+            .user-info {
+                text-align: center;
+            }
+
+            .user-avatar,
+            .avatar-placeholder {
+                width: 72px;
+                height: 72px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                border-radius: 16px;
+                background-image: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+                box-shadow: 0 14px 28px rgba(0,0,0,0.14);
+            }
+
+            .profile-card {
+                position: relative;
+                overflow: hidden;
+                background-color: var(--bg-card);
+                background-image: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%), linear-gradient(145deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.05) 100%);
+                border-color: rgba(255,255,255,0.05);
+                box-shadow: 0 18px 34px rgba(0,0,0,0.14);
+            }
+
+            .profile-card::before {
+                content: '';
+                position: absolute;
+                left: 16px;
+                right: 16px;
+                top: 0;
+                height: 1px;
+                background: linear-gradient(90deg, rgba(59,130,246,0) 0%, rgba(59,130,246,0.44) 26%, rgba(139,92,246,0.40) 74%, rgba(139,92,246,0) 100%);
+            }
+
+            .profile-card:first-of-type::after {
+                content: '';
+                position: absolute;
+                top: -58px;
+                right: -46px;
+                width: 150px;
+                height: 150px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(59,130,246,0.20) 0%, rgba(59,130,246,0) 72%);
+                pointer-events: none;
+            }
+
+            .user-avatar,
+            .avatar-placeholder {
+                box-shadow: 0 16px 30px rgba(0,0,0,0.24);
+                position: relative;
+                z-index: 1;
+            }
+
+            .user-info {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .role-badge {
+                align-self: flex-start;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+            }
+
+            .info-item {
+                border-left: none;
+                border: 1px solid rgba(255,255,255,0.05);
+                border-radius: 16px;
+                background-color: var(--bg-tertiary);
+                background-image: linear-gradient(145deg, rgba(59,130,246,0.08) 0%, rgba(255,255,255,0.02) 100%);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            }
+
+            .info-label {
+                text-transform: uppercase;
+                letter-spacing: 0.55px;
+            }
+
+            .stats {
+                gap: 12px;
+            }
+
+            .stat-item {
+                min-height: 96px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                background-image: linear-gradient(145deg, rgba(59,130,246,0.06) 0%, rgba(255,255,255,0.02) 100%);
+                border-radius: 16px;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            }
+
+            .progress-section {
+                border-left: none;
+                border: 1px solid rgba(245,158,11,0.18);
+                background-image: linear-gradient(145deg, rgba(245,158,11,0.10) 0%, rgba(255,255,255,0.02) 100%);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            }
+
+            .bookings-table tbody {
+                gap: 16px;
+            }
+
+            .bookings-table tr {
+                border-radius: 18px;
+                background-color: var(--bg-tertiary);
+                background-image: linear-gradient(145deg, rgba(59,130,246,0.07) 0%, rgba(255,255,255,0.02) 100%);
+                box-shadow: 0 14px 28px rgba(0,0,0,0.14);
+            }
+
+            .bookings-table td::before {
+                letter-spacing: 0.6px;
+            }
+
+            .bookings-table td[data-label="Комната"] strong {
+                font-size: 15px;
+                line-height: 1.32;
+            }
+
+            .bookings-table td[data-label="Стоимость"] strong {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .page-title {
+                line-height: 1.2;
+            }
+
+            .role-badge {
+                align-self: center;
+            }
+
+            .profile-card {
+                border-radius: 18px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .info-pair-card {
+                grid-template-columns: 1fr;
+            }
+
+            .info-pair-card .info-item + .info-item {
+                padding-left: 0;
+                padding-top: 10px;
+                border-left: 0;
+                border-top: 1px solid rgba(255,255,255,0.06);
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
     {% include 'theme_setup.html' %}
 </head>
@@ -324,7 +682,7 @@
         <div class="header-actions">
             <a href="{% url 'admin_panel' %}" class="back-btn">← Назад к админ-панели</a>
             <h1 class="page-title">👤 Профиль пользователя</h1>
-            <div style="width: 140px;"></div>
+            <div class="header-spacer"></div>
         </div>
 
         <div class="profile-card">
@@ -342,59 +700,67 @@
                 </div>
             </div>
 
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">📧 Email</div>
-                    <div class="info-value">{{ target_user.email|default:"Не указан" }}</div>
+            <div class="info-grid info-grid--paired">
+                <div class="info-pair-card info-pair-card--single">
+                    <div class="info-item">
+                        <div class="info-label">📧 Email</div>
+                        <div class="info-value">{{ target_user.email|default:"Не указан" }}</div>
+                    </div>
                 </div>
 
-                <div class="info-item">
-                    <div class="info-label">📞 Телефон</div>
-                    <div class="info-value">{{ target_user.phone|default:"Не указан" }}</div>
+                <div class="info-pair-card">
+                    <div class="info-item">
+                        <div class="info-label">📞 Телефон</div>
+                        <div class="info-value">{{ target_user.phone|default:"Не указан" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">🆔 ID пользователя</div>
+                        <div class="info-value">#{{ target_user.id }}</div>
+                    </div>
                 </div>
 
-                <div class="info-item">
-                    <div class="info-label">📅 Дата регистрации</div>
-                    <div class="info-value">{{ target_user.date_joined|date:"d.m.Y H:i" }}</div>
+                <div class="info-pair-card">
+                    <div class="info-item">
+                        <div class="info-label">📅 Дата регистрации</div>
+                        <div class="info-value">{{ target_user.date_joined|date:"d.m.Y H:i" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">🔐 Последний вход</div>
+                        <div class="info-value">{{ target_user.last_login|date:"d.m.Y H:i"|default:"Никогда" }}</div>
+                    </div>
                 </div>
 
-                <div class="info-item">
-                    <div class="info-label">🔐 Последний вход</div>
-                    <div class="info-value">{{ target_user.last_login|date:"d.m.Y H:i"|default:"Никогда" }}</div>
+                <div class="info-pair-card">
+                    <div class="info-item">
+                        <div class="info-label">👤 Имя</div>
+                        <div class="info-value">{{ target_user.first_name|default:"Не указано" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">👥 Фамилия</div>
+                        <div class="info-value">{{ target_user.last_name|default:"Не указано" }}</div>
+                    </div>
                 </div>
 
-                <div class="info-item">
-                    <div class="info-label">🆔 ID пользователя</div>
-                    <div class="info-value">#{{ target_user.id }}</div>
+                <div class="info-pair-card">
+                    <div class="info-item">
+                        <div class="info-label">📝 Отчество</div>
+                        <div class="info-value">{{ target_user.patronymic|default:"Не указано" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">⚧ Пол</div>
+                        <div class="info-value">
+                            {% if target_user.gender == 'M' %}Мужской
+                            {% elif target_user.gender == 'F' %}Женский
+                            {% else %}Не указан
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
 
-                <div class="info-item">
-                    <div class="info-label">👤 Имя</div>
-                    <div class="info-value">{{ target_user.first_name|default:"Не указано" }}</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">👥 Фамилия</div>
-                    <div class="info-value">{{ target_user.last_name|default:"Не указано" }}</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">📝 Отчество</div>
-                    <div class="info-value">{{ target_user.patronymic|default:"Не указано" }}</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">🎂 Дата рождения</div>
-                    <div class="info-value">{{ target_user.birth_date|date:"d.m.Y"|default:"Не указана" }}</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">⚧ Пол</div>
-                    <div class="info-value">
-                        {% if target_user.gender == 'M' %}Мужской
-                        {% elif target_user.gender == 'F' %}Женский
-                        {% else %}Не указан
-                        {% endif %}
+                <div class="info-pair-card info-pair-card--single">
+                    <div class="info-item">
+                        <div class="info-label">🎂 Дата рождения</div>
+                        <div class="info-value">{{ target_user.birth_date|date:"d.m.Y"|default:"Не указана" }}</div>
                     </div>
                 </div>
             </div>
@@ -459,7 +825,7 @@
                 <tbody>
                     {% for booking in user_bookings %}
                     <tr>
-                        <td>
+                        <td data-label="Комната">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span class="room-category category-{{ booking.room.category }}">
                                     {% if booking.room.category == 'economy' %}🟢
@@ -472,16 +838,16 @@
                                 <strong>{{ booking.room.name }}</strong>
                             </div>
                         </td>
-                        <td>{{ booking.start_time|date:"d.m.Y" }}</td>
-                        <td>{{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
-                        <td class="status-{{ booking.status }}">
+                        <td data-label="Дата">{{ booking.start_time|date:"d.m.Y" }}</td>
+                        <td data-label="Время">{{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                        <td data-label="Статус" class="status-{{ booking.status }}">
                             {% if booking.status == 'pending' %}⏳ Ожидание
                             {% elif booking.status == 'confirmed' %}✅ Подтверждено
                             {% elif booking.status == 'cancelled' %}❌ Отменено
                             {% elif booking.status == 'completed' %}🔵 Завершено
                             {% endif %}
                         </td>
-                        <td><strong>{{ booking.total_price }} ₽</strong></td>
+                        <td data-label="Стоимость"><strong>{{ booking.total_price }} ₽</strong></td>
                     </tr>
                     {% endfor %}
                 </tbody>

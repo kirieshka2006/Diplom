@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -2140,7 +2141,7 @@
     </style>
     {% include 'theme_setup.html' %}
 </head>
-<body>
+<body class="home-page">
     <!-- Messages -->
     {% if messages %}
     <div class="messages">
@@ -2155,6 +2156,11 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
+            <button type="button" class="mobile-sidebar-toggle" id="mobileSidebarToggle" aria-label="Открыть меню" aria-controls="mobileSidebar" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <a href="{% url 'home' %}" class="logo">
                 <div class="logo-icon">🏢</div>
                 <span class="logo-text">Система бронирования переговоров</span>
@@ -2170,7 +2176,7 @@
                 {% if user.is_authenticated %}
                     {% if user.role == 'admin' or user.role == 'manager' %}
                     <div class="admin-dropdown">
-                        <button class="admin-btn">⚙</button>
+                        <button type="button" class="admin-btn" aria-label="Администрирование">⚙</button>
                         <div class="admin-menu">
                             {% if user.role == 'admin' %}
                             <a href="{% url 'admin_panel' %}">👥 Пользователи</a>
@@ -2279,11 +2285,13 @@
         </div>
     </header>
 
+    <div class="mobile-sidebar-backdrop" id="mobileSidebarBackdrop"></div>
+
     <!-- Main Content -->
     <main class="main-container">
         <div class="main-layout">
             <!-- Sidebar -->
-            <div class="sidebar">
+            <div class="sidebar" id="mobileSidebar" aria-hidden="true">
                 <div class="sidebar-content">
                     <!-- Секция пользователя (объединена с профилем) только для авторизованных - ПЕРВАЯ -->
                     {% if user.is_authenticated %}
@@ -3320,14 +3328,44 @@
             // Управление сворачиванием фильтров
             const filtersToggleBtn = document.getElementById('filtersToggleBtn');
             const filtersCard = document.getElementById('filtersCard');
+            const mobileFiltersMedia = window.matchMedia('(max-width: 900px)');
+
+            function syncFiltersToggleLabel() {
+                if (!filtersToggleBtn || !filtersCard) return;
+                const toggleText = filtersToggleBtn.querySelector('span:first-child');
+                if (toggleText) {
+                    toggleText.textContent = filtersCard.classList.contains('collapsed') ? 'Показать' : 'Скрыть';
+                }
+            }
+
             if (filtersToggleBtn && filtersCard) {
                 filtersToggleBtn.addEventListener('click', function() {
                     filtersCard.classList.toggle('collapsed');
-                    const toggleText = filtersToggleBtn.querySelector('span:first-child');
-                    if (toggleText) {
-                        toggleText.textContent = filtersCard.classList.contains('collapsed') ? 'Показать' : 'Скрыть';
-                    }
+                    syncFiltersToggleLabel();
                 });
+            }
+
+            let mobileFiltersAutoCollapsed = false;
+
+            function ensureMobileFiltersCollapsed() {
+                if (!filtersCard) return;
+
+                if (mobileFiltersMedia.matches && !mobileFiltersAutoCollapsed) {
+                    filtersCard.classList.add('collapsed');
+                    mobileFiltersAutoCollapsed = true;
+                } else if (!mobileFiltersMedia.matches) {
+                    mobileFiltersAutoCollapsed = false;
+                }
+
+                syncFiltersToggleLabel();
+            }
+
+            ensureMobileFiltersCollapsed();
+
+            if (typeof mobileFiltersMedia.addEventListener === 'function') {
+                mobileFiltersMedia.addEventListener('change', ensureMobileFiltersCollapsed);
+            } else if (typeof mobileFiltersMedia.addListener === 'function') {
+                mobileFiltersMedia.addListener(ensureMobileFiltersCollapsed);
             }
         });
 
@@ -3337,6 +3375,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (adminDropdown) {
         const adminBtn = adminDropdown.querySelector(".admin-btn");
         const adminMenu = adminDropdown.querySelector(".admin-menu");
+        const adminTouchModeMedia = window.matchMedia("(max-width: 900px), (hover: none), (pointer: coarse)");
 
         if (adminBtn && adminMenu) {
             adminMenu.style.display = adminMenu.style.display || "none";
@@ -3346,6 +3385,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let adminCloseTimer = null;
             const CLOSE_DELAY_MS = 200;
+
+            function isAdminTouchMode() {
+                return adminTouchModeMedia.matches;
+            }
 
             function cancelAdminClose() {
                 if (adminCloseTimer) {
@@ -3394,8 +3437,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 return !adminDropdown.contains(rt);
             }
 
-            adminDropdown.addEventListener("pointerenter", () => openAdminMenu());
+            adminDropdown.addEventListener("pointerenter", () => {
+                if (isAdminTouchMode()) return;
+                openAdminMenu();
+            });
             adminDropdown.addEventListener("pointerleave", (e) => {
+                if (isAdminTouchMode()) return;
                 if (!isPointerMovingOutside(e)) {
                     cancelAdminClose();
                     return;
@@ -3403,8 +3450,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 scheduleAdminClose();
             });
 
-            adminMenu.addEventListener("pointerenter", () => openAdminMenu());
+            adminMenu.addEventListener("pointerenter", () => {
+                if (isAdminTouchMode()) return;
+                openAdminMenu();
+            });
             adminMenu.addEventListener("pointerleave", (e) => {
+                if (isAdminTouchMode()) return;
                 if (!isPointerMovingOutside(e)) { cancelAdminClose(); return; }
                 scheduleAdminClose();
             });
@@ -3413,6 +3464,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!adminDropdown.contains(e.target)) {
                     closeAdminMenuImmediate();
                 }
+            });
+
+            function toggleAdminMenu(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const isOpen = adminMenu.style.display === "block" && adminMenu.style.opacity !== "0";
+                if (isOpen) {
+                    closeAdminMenuImmediate();
+                } else {
+                    openAdminMenu();
+                }
+            }
+
+            adminBtn.addEventListener("pointerup", (e) => {
+                if (!isAdminTouchMode()) return;
+                toggleAdminMenu(e);
+            });
+
+            adminBtn.addEventListener("click", (e) => {
+                if (isAdminTouchMode()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                toggleAdminMenu(e);
             });
 
             document.addEventListener("keydown", (e) => {
@@ -3504,9 +3580,83 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
+            userProfileBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const isOpen = userProfileMenu.style.display === "block" && userProfileMenu.style.opacity !== "0";
+                if (isOpen) {
+                    closeUserMenuImmediate();
+                } else {
+                    openUserMenu();
+                }
+            });
+
             document.addEventListener("keydown", (e) => {
                 if (e.key === "Escape") closeUserMenuImmediate();
             });
+        }
+    }
+
+    const mobileSidebarToggle = document.getElementById("mobileSidebarToggle");
+    const mobileSidebar = document.getElementById("mobileSidebar");
+    const mobileSidebarBackdrop = document.getElementById("mobileSidebarBackdrop");
+    const mobileSidebarMedia = window.matchMedia("(max-width: 900px)");
+
+    function setMobileSidebarOpen(isOpen) {
+        const shouldOpen = Boolean(isOpen) && mobileSidebarMedia.matches;
+        document.body.classList.toggle("mobile-sidebar-open", shouldOpen);
+
+        if (mobileSidebarToggle) {
+            mobileSidebarToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+            mobileSidebarToggle.setAttribute("aria-label", shouldOpen ? "Закрыть меню" : "Открыть меню");
+        }
+
+        if (mobileSidebar) {
+            mobileSidebar.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+        }
+    }
+
+    if (mobileSidebarToggle && mobileSidebar && mobileSidebarBackdrop) {
+        mobileSidebarToggle.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setMobileSidebarOpen(!document.body.classList.contains("mobile-sidebar-open"));
+        });
+
+        mobileSidebarBackdrop.addEventListener("click", () => {
+            setMobileSidebarOpen(false);
+        });
+
+        mobileSidebar.querySelectorAll("a").forEach((link) => {
+            link.addEventListener("click", () => {
+                if (mobileSidebarMedia.matches) {
+                    setMobileSidebarOpen(false);
+                }
+            });
+        });
+
+        document.addEventListener("pointerdown", (e) => {
+            if (!document.body.classList.contains("mobile-sidebar-open")) return;
+            if (mobileSidebar.contains(e.target) || mobileSidebarToggle.contains(e.target)) return;
+            setMobileSidebarOpen(false);
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                setMobileSidebarOpen(false);
+            }
+        });
+
+        const handleMobileSidebarViewport = (event) => {
+            if (!event.matches) {
+                setMobileSidebarOpen(false);
+            }
+        };
+
+        if (typeof mobileSidebarMedia.addEventListener === "function") {
+            mobileSidebarMedia.addEventListener("change", handleMobileSidebarViewport);
+        } else if (typeof mobileSidebarMedia.addListener === "function") {
+            mobileSidebarMedia.addListener(handleMobileSidebarViewport);
         }
     }
 });

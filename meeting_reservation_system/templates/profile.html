@@ -218,6 +218,42 @@
             border-left: 3px solid var(--accent-primary);
         }
 
+        .info-grid--paired {
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .info-pair-card {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .info-pair-card .info-item {
+            background: transparent;
+            padding: 0;
+            border: 0;
+            min-width: 0;
+        }
+
+        .info-pair-card .info-item + .info-item {
+            padding-left: 14px;
+            border-left: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .info-pair-card--single {
+            grid-template-columns: 1fr;
+        }
+
+        .info-pair-card--single .info-item + .info-item {
+            padding-left: 0;
+            border-left: 0;
+        }
+
         .info-label {
             font-size: 12px;
             color: var(--text-muted);
@@ -229,6 +265,7 @@
             font-size: 15px;
             color: var(--text-primary);
             font-weight: 600;
+            overflow-wrap: anywhere;
         }
 
         /* Edit Forms */
@@ -524,6 +561,335 @@
                 justify-content: center;
             }
         }
+
+        @media (max-width: 900px) {
+            body {
+                padding: 18px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .profile-header,
+            .section-card {
+                padding: 24px;
+            }
+
+            .messages {
+                top: 16px;
+                right: 16px;
+                left: 16px;
+            }
+
+            .message {
+                width: 100%;
+                padding: 14px 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 18px;
+            }
+
+            .profile-header {
+                padding: 22px 18px;
+                margin-bottom: 18px;
+            }
+
+            .profile-info {
+                gap: 18px;
+            }
+
+            .profile-details h1 {
+                font-size: 24px;
+                line-height: 1.15;
+                overflow-wrap: anywhere;
+            }
+
+            .avatar,
+            .avatar-placeholder {
+                width: 88px;
+                height: 88px;
+            }
+
+            .avatar-edit {
+                width: 34px;
+                height: 34px;
+            }
+
+            .profile-sections {
+                gap: 18px;
+            }
+
+            .section-card {
+                padding: 20px 16px;
+            }
+
+            .section-title {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 14px;
+                margin-bottom: 18px;
+            }
+
+            .section-title-text {
+                font-size: 16px;
+            }
+
+            .edit-btn,
+            .btn,
+            .profile-action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .info-item {
+                padding: 14px;
+            }
+
+            .info-pair-card {
+                gap: 12px;
+                padding: 14px;
+                border-radius: 16px;
+            }
+
+            .edit-form {
+                padding: 18px 14px;
+                margin-top: 16px;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+
+            .email-status {
+                margin-left: 0;
+                margin-top: 8px;
+                flex-wrap: wrap;
+            }
+
+            #codeGroup {
+                padding: 16px;
+            }
+
+            #codeGroup input {
+                font-size: 16px;
+                letter-spacing: 4px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 12px;
+            }
+
+            .profile-header,
+            .section-card {
+                padding: 18px 14px;
+                border-radius: 14px;
+            }
+
+            .profile-details h1 {
+                font-size: 22px;
+            }
+
+            .role-badge {
+                width: 100%;
+                text-align: center;
+            }
+
+            .messages {
+                top: auto;
+                bottom: 12px;
+                right: 12px;
+                left: 12px;
+            }
+
+            .message {
+                font-size: 13px;
+                padding: 12px 14px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .info-pair-card {
+                grid-template-columns: 1fr;
+            }
+
+            .info-pair-card .info-item + .info-item {
+                padding-left: 0;
+                padding-top: 10px;
+                border-left: 0;
+                border-top: 1px solid rgba(255,255,255,0.06);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                border-radius: 16px;
+                background-image: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+                box-shadow: 0 14px 28px rgba(0,0,0,0.14);
+            }
+
+            .profile-header {
+                background-color: var(--bg-card);
+                background-image: linear-gradient(160deg, rgba(59,130,246,0.16) 0%, rgba(139,92,246,0.08) 38%, rgba(0,0,0,0) 72%);
+                border-color: rgba(255,255,255,0.06);
+                box-shadow: 0 24px 42px rgba(0,0,0,0.18);
+            }
+
+            .profile-header::after {
+                content: '';
+                position: absolute;
+                top: -46px;
+                right: -34px;
+                width: 144px;
+                height: 144px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(59,130,246,0.24) 0%, rgba(59,130,246,0.0) 72%);
+                pointer-events: none;
+            }
+
+            .avatar-wrapper::before {
+                content: '';
+                position: absolute;
+                inset: -10px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(59,130,246,0.24) 0%, rgba(139,92,246,0.12) 48%, rgba(139,92,246,0) 74%);
+                z-index: 0;
+            }
+
+            .avatar,
+            .avatar-placeholder {
+                position: relative;
+                z-index: 1;
+                box-shadow: 0 16px 30px rgba(0,0,0,0.24);
+            }
+
+            .avatar-edit {
+                z-index: 2;
+                box-shadow: 0 10px 22px rgba(59,130,246,0.30);
+            }
+
+            .profile-details {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .role-badge {
+                background: rgba(59,130,246,0.12);
+                border-color: rgba(59,130,246,0.20);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+            }
+
+            .section-card {
+                position: relative;
+                overflow: hidden;
+                background-color: var(--bg-card);
+                background-image: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%), linear-gradient(145deg, rgba(59,130,246,0.08) 0%, rgba(34,197,94,0.05) 100%);
+                border-color: rgba(255,255,255,0.05);
+                box-shadow: 0 18px 34px rgba(0,0,0,0.14);
+            }
+
+            .section-card::before {
+                content: '';
+                position: absolute;
+                left: 16px;
+                right: 16px;
+                top: 0;
+                height: 1px;
+                background: linear-gradient(90deg, rgba(59,130,246,0) 0%, rgba(59,130,246,0.45) 26%, rgba(34,197,94,0.45) 74%, rgba(34,197,94,0) 100%);
+            }
+
+            .section-title-text span {
+                width: 34px;
+                height: 34px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                background: linear-gradient(135deg, rgba(59,130,246,0.14) 0%, rgba(139,92,246,0.12) 100%);
+                border: 1px solid rgba(59,130,246,0.16);
+                flex: 0 0 34px;
+            }
+
+            .edit-btn {
+                min-height: 46px;
+                border-radius: 14px;
+                background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+            }
+
+            .info-item {
+                border-left: none;
+                border: 1px solid rgba(255,255,255,0.05);
+                border-radius: 16px;
+                background-color: var(--bg-tertiary);
+                background-image: linear-gradient(145deg, rgba(59,130,246,0.08) 0%, rgba(255,255,255,0.02) 100%);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            }
+
+            .info-label {
+                text-transform: uppercase;
+                letter-spacing: 0.55px;
+                font-size: 11px;
+            }
+
+            .info-value {
+                line-height: 1.4;
+            }
+
+            .edit-form {
+                background-color: var(--bg-tertiary);
+                background-image: linear-gradient(145deg, rgba(59,130,246,0.06) 0%, rgba(139,92,246,0.04) 100%);
+                border-radius: 16px;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            }
+
+            .form-group :is(input, select, textarea) {
+                min-height: 48px;
+                border-radius: 14px;
+            }
+
+            .btn {
+                min-height: 48px;
+                border-radius: 14px;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+            }
+
+            #codeGroup {
+                border-width: 1px;
+                background-image: linear-gradient(145deg, rgba(59,130,246,0.10) 0%, rgba(139,92,246,0.05) 100%);
+            }
+        }
+
+        @media (max-width: 520px) {
+            .role-badge {
+                width: fit-content;
+                max-width: 100%;
+                margin: 0 auto;
+            }
+
+            .section-title-text {
+                gap: 12px;
+            }
+        }
     </style>
     {% include 'theme_setup.html' %}
 </head>
@@ -576,39 +942,47 @@
                     <button class="edit-btn" onclick="toggleEditSection('personal')">✏️ Редактировать</button>
                 </div>
 
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Имя пользователя</div>
-                        <div class="info-value">{{ user.username }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Имя</div>
-                        <div class="info-value">{{ user.first_name|default:"Не указано" }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Фамилия</div>
-                        <div class="info-value">{{ user.last_name|default:"Не указано" }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Отчество</div>
-                        <div class="info-value">{{ user.patronymic|default:"Не указано" }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Дата рождения</div>
-                        <div class="info-value">{{ user.birth_date|date:"d.m.Y"|default:"Не указана" }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Пол</div>
-                        <div class="info-value">
-                            {% if user.gender == 'M' %}Мужской
-                            {% elif user.gender == 'F' %}Женский
-                            {% else %}Не указан
-                            {% endif %}
+                <div class="info-grid info-grid--paired">
+                    <div class="info-pair-card">
+                        <div class="info-item">
+                            <div class="info-label">Имя пользователя</div>
+                            <div class="info-value">{{ user.username }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Телефон</div>
+                            <div class="info-value">{{ user.phone|default:"Не указан" }}</div>
                         </div>
                     </div>
-                    <div class="info-item">
-                        <div class="info-label">Телефон</div>
-                        <div class="info-value">{{ user.phone|default:"Не указан" }}</div>
+                    <div class="info-pair-card">
+                        <div class="info-item">
+                            <div class="info-label">Имя</div>
+                            <div class="info-value">{{ user.first_name|default:"Не указано" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Фамилия</div>
+                            <div class="info-value">{{ user.last_name|default:"Не указано" }}</div>
+                        </div>
+                    </div>
+                    <div class="info-pair-card">
+                        <div class="info-item">
+                            <div class="info-label">Отчество</div>
+                            <div class="info-value">{{ user.patronymic|default:"Не указано" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Пол</div>
+                            <div class="info-value">
+                                {% if user.gender == 'M' %}Мужской
+                                {% elif user.gender == 'F' %}Женский
+                                {% else %}Не указан
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-pair-card info-pair-card--single">
+                        <div class="info-item">
+                            <div class="info-label">Дата рождения</div>
+                            <div class="info-value">{{ user.birth_date|date:"d.m.Y"|default:"Не указана" }}</div>
+                        </div>
                     </div>
                 </div>
 

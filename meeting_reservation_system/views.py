@@ -990,23 +990,46 @@ def home(request):
     })
 
 
-def room_detail(request, room_id):
-    """Страница комнаты"""
+def _get_visible_room(request, room_id):
     try:
-        room = Room.objects.get(id=room_id)
-
-        # Проверяем доступ для обычных пользователей
-        if not request.user.is_authenticated or request.user.role not in ['admin', 'manager']:
-            if room.status != 'active':
-                messages.error(request, '❌ Эта комната временно недоступна!')
-                return redirect('home')
-
-        reviews = Review.objects.filter(room=room, status='approved').order_by('-created_at')
-
-        return render(request, 'room_detail.html', {'room': room, 'reviews': reviews})
+        room = Room.objects.select_related('office').get(id=room_id)
     except Room.DoesNotExist:
         messages.error(request, '❌ Комната не найдена!')
+        return None
+
+    if not request.user.is_authenticated or request.user.role not in ['admin', 'manager']:
+        if room.status != 'active':
+            messages.error(request, '❌ Эта комната временно недоступна!')
+            return None
+
+    return room
+
+
+def room_detail(request, room_id):
+    """Страница комнаты"""
+    room = _get_visible_room(request, room_id)
+    if room is None:
         return redirect('home')
+
+    reviews = Review.objects.filter(room=room, status='approved').order_by('-created_at')
+
+    return render(request, 'room_detail.html', {
+        'room': room,
+        'reviews': reviews,
+        'booking_page': False,
+    })
+
+
+def room_booking_page(request, room_id):
+    """Отдельная страница бронирования комнаты"""
+    room = _get_visible_room(request, room_id)
+    if room is None:
+        return redirect('home')
+
+    return render(request, 'room_detail.html', {
+        'room': room,
+        'booking_page': True,
+    })
 
 
 @login_required
@@ -1320,6 +1343,7 @@ def create_booking(request):
     if request.method == 'POST':
         try:
             room_id = request.POST.get('room_id')
+            booking_origin = request.POST.get('booking_origin')
             date_str = request.POST.get('selected_date')
             time_str = request.POST.get('start_time')
             duration = request.POST.get('duration')
@@ -1349,6 +1373,8 @@ def create_booking(request):
             # Проверяем что бронирование в будущем
             if start_datetime < timezone.now():
                 messages.error(request, '❌ Нельзя бронировать в прошлом!')
+                if booking_origin == 'room_booking':
+                    return redirect('room_booking', room_id=room_id)
                 return redirect('room_detail', room_id=room_id)
 
             # Проверяем доступность комнаты
@@ -1361,6 +1387,8 @@ def create_booking(request):
 
             if overlapping:
                 messages.error(request, '❌ Комната уже занята в это время!')
+                if booking_origin == 'room_booking':
+                    return redirect('room_booking', room_id=room_id)
                 return redirect('room_detail', room_id=room_id)
 
             # ★★★ СОХРАНЯЕМ ДАННЫЕ В ПРОФИЛЬ ЕСЛИ ИЗМЕНИЛИСЬ ★★★
@@ -1419,6 +1447,8 @@ def create_booking(request):
         except Exception as e:
             print(f"❌ ОШИБКА ПРИ БРОНИРОВАНИИ: {str(e)}")
             messages.error(request, f'❌ Ошибка при бронировании: {str(e)}')
+            if booking_origin == 'room_booking':
+                return redirect('room_booking', room_id=room_id)
             return redirect('room_detail', room_id=room_id)
 
     return redirect('home')
@@ -2129,4 +2159,3 @@ def change_user_role(request, user_id):
 
     except User.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Пользователь не найден'})
-
