@@ -134,6 +134,8 @@ class Office(models.Model):
 
 
 class Room(models.Model):
+    MAX_TOTAL_IMAGES = 8
+
     CATEGORY_CHOICES = [
         ('economy', '🟢 Эконом'),
         ('standard', '🔵 Стандарт'),
@@ -187,6 +189,26 @@ class Room(models.Model):
         items = self.equipment_list
         mid = (len(items) + 1) // 2
         return items[:mid], items[mid:]
+
+
+class RoomImage(models.Model):
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.CASCADE,
+        related_name='gallery_images',
+        verbose_name="Комната",
+    )
+    image = models.ImageField(upload_to='rooms/', verbose_name="Изображение")
+    sort_order = models.PositiveIntegerField(default=0, verbose_name="Порядок")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = "Дополнительное фото комнаты"
+        verbose_name_plural = "Дополнительные фото комнат"
+
+    def __str__(self):
+        return f"{self.room.name} — фото {self.id}"
 
 
 class EmailConfirmation(models.Model):

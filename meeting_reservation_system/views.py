@@ -8,8 +8,9 @@ from django.contrib.auth import login, authenticate, logout, update_session_auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
+from django.db.models import Max
 from django.utils import timezone
-from .models import Room, User, EmailConfirmation, Booking, Office, Review
+from .models import Room, RoomImage, User, EmailConfirmation, Booking, Office, Review
 from django.http import JsonResponse, FileResponse, Http404
 from datetime import datetime, timedelta
 from .models import SupportTicket, TicketResponse
@@ -979,6 +980,12 @@ def home(request):
     if request.user.is_authenticated:
         recent_bookings = Booking.objects.filter(user=request.user).select_related('room').order_by('-created_at')[:5]
 
+    main_page_messages = [
+        message
+        for message in messages.get_messages(request)
+        if message.level >= messages.WARNING
+    ]
+
     return render(request, 'home.html', {
         'rooms': rooms,
         'offices': offices,
@@ -986,12 +993,185 @@ def home(request):
         'selected_category': category,
         'selected_office': office_id,
         'recent_bookings': recent_bookings,
+        'page_messages': main_page_messages,
     })
+
+
+def _save_room_image_file(uploaded_file):
+    fs = FileSystemStorage(location=settings.MEDIA_ROOT / 'rooms')
+    filename = fs.save(uploaded_file.name, uploaded_file)
+    return f'rooms/{filename}'
+
+
+def _parse_optional_int(raw_value):
+    try:
+        return int(raw_value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _extract_room_image_uploads(request, allow_gallery_fallback=True):
+    primary_image = request.FILES.get('image')
+    extra_images = [image for image in request.FILES.getlist('gallery_images') if image]
+    selected_pending_cover_index = _parse_optional_int(request.POST.get('selected_pending_cover_index'))
+
+    if (
+        not primary_image
+        and extra_images
+        and selected_pending_cover_index is not None
+        and 0 <= selected_pending_cover_index < len(extra_images)
+    ):
+        primary_image = extra_images.pop(selected_pending_cover_index)
+    elif not primary_image and allow_gallery_fallback and extra_images:
+        primary_image = extra_images.pop(0)
+
+    return primary_image, extra_images
+
+
+def _parse_gallery_image_ids(raw_ids):
+    parsed_ids = []
+
+    for raw_id in raw_ids:
+        try:
+            parsed_ids.append(int(raw_id))
+        except (TypeError, ValueError):
+            continue
+
+    return parsed_ids
+
+
+def _parse_gallery_order(raw_value):
+    if not raw_value:
+        return []
+
+    return _parse_gallery_image_ids([chunk.strip() for chunk in str(raw_value).split(',') if chunk.strip()])
+
+
+def _validate_room_image_limit(room, primary_image=None, extra_images=None, removed_gallery_ids=None):
+    extra_images = extra_images or []
+    removed_gallery_ids = removed_gallery_ids or []
+
+    if room.pk:
+        remaining_extra_count = room.gallery_images.exclude(id__in=removed_gallery_ids).count()
+    else:
+        remaining_extra_count = 0
+
+    has_primary_after = bool(primary_image or room.image)
+    total_images_after = (1 if has_primary_after else 0) + remaining_extra_count + len(extra_images)
+
+    if total_images_after > Room.MAX_TOTAL_IMAGES:
+        raise ValueError(f'Можно сохранить не более {Room.MAX_TOTAL_IMAGES} фото для одной комнаты.')
+
+
+def _append_room_gallery_images(room, uploaded_images):
+    if not uploaded_images:
+        return
+
+    current_max_order = room.gallery_images.aggregate(max_order=Max('sort_order'))['max_order'] or 0
+
+    for offset, uploaded_image in enumerate(uploaded_images, start=1):
+        RoomImage.objects.create(
+            room=room,
+            image=_save_room_image_file(uploaded_image),
+            sort_order=current_max_order + offset,
+        )
+
+
+def _apply_room_gallery_order(room, ordered_gallery_ids):
+    if not ordered_gallery_ids:
+        return
+
+    gallery_images = list(room.gallery_images.all())
+    if not gallery_images:
+        return
+
+    images_by_id = {image.id: image for image in gallery_images}
+    ordered_images = []
+    seen_ids = set()
+
+    for image_id in ordered_gallery_ids:
+        if image_id in images_by_id and image_id not in seen_ids:
+            ordered_images.append(images_by_id[image_id])
+            seen_ids.add(image_id)
+
+    ordered_images.extend(image for image in gallery_images if image.id not in seen_ids)
+
+    images_to_update = []
+    for position, image in enumerate(ordered_images, start=1):
+        if image.sort_order != position:
+            image.sort_order = position
+            images_to_update.append(image)
+
+    if images_to_update:
+        RoomImage.objects.bulk_update(images_to_update, ['sort_order'])
+
+
+def _promote_gallery_image_to_cover(room, gallery_image_id):
+    if gallery_image_id is None:
+        return
+
+    gallery_image = room.gallery_images.filter(id=gallery_image_id).first()
+    if not gallery_image or not gallery_image.image:
+        raise ValueError('Выбранное фото для обложки не найдено.')
+
+    previous_cover_name = room.image.name if room.image else None
+    promoted_image_name = gallery_image.image.name
+    promoted_sort_order = gallery_image.sort_order
+
+    room.image = promoted_image_name
+    room.save(update_fields=['image'])
+    gallery_image.delete()
+
+    if previous_cover_name and previous_cover_name != promoted_image_name:
+        RoomImage.objects.create(
+            room=room,
+            image=previous_cover_name,
+            sort_order=promoted_sort_order,
+        )
+
+
+def _build_room_gallery(room):
+    gallery = []
+    photo_index = 1
+
+    if room.image:
+        gallery.append({
+            'id': 'primary',
+            'url': room.image.url,
+            'alt': f'{room.name} — фото {photo_index}',
+            'is_primary': True,
+        })
+        photo_index += 1
+
+    for gallery_image in room.gallery_images.all():
+        if not gallery_image.image:
+            continue
+
+        gallery.append({
+            'id': gallery_image.id,
+            'url': gallery_image.image.url,
+            'alt': f'{room.name} — фото {photo_index}',
+            'is_primary': False,
+        })
+        photo_index += 1
+
+    return gallery
+
+
+def _build_room_gallery_payload(room):
+    return [
+        {
+            'id': gallery_image.id,
+            'url': gallery_image.image.url,
+        }
+        for gallery_image in room.gallery_images.all()
+        if gallery_image.image
+    ]
 
 
 def _get_visible_room(request, room_id):
     try:
-        room = Room.objects.select_related('office').get(id=room_id)
+        room = Room.objects.select_related('office').prefetch_related('gallery_images').get(id=room_id)
     except Room.DoesNotExist:
         messages.error(request, '❌ Комната не найдена!')
         return None
@@ -1011,10 +1191,12 @@ def room_detail(request, room_id):
         return redirect('home')
 
     reviews = Review.objects.filter(room=room, status='approved').order_by('-created_at')
+    room_gallery = _build_room_gallery(room)
 
     return render(request, 'room_detail.html', {
         'room': room,
         'reviews': reviews,
+        'room_gallery': room_gallery,
         'booking_page': False,
     })
 
@@ -1027,6 +1209,7 @@ def room_booking_page(request, room_id):
 
     return render(request, 'room_detail.html', {
         'room': room,
+        'room_gallery': _build_room_gallery(room),
         'booking_page': True,
     })
 
@@ -1539,6 +1722,13 @@ def add_room(request):
             price_per_hour = request.POST.get('price_per_hour')
             equipment = request.POST.get('equipment', '')
             category = request.POST.get('category', 'standard')
+            primary_image, extra_images = _extract_room_image_uploads(request)
+
+            _validate_room_image_limit(
+                room=Room(),
+                primary_image=primary_image,
+                extra_images=extra_images,
+            )
 
             # 👉 получаем выбранный офис
             office_id = request.POST.get('office')
@@ -1558,13 +1748,12 @@ def add_room(request):
                 room.office_id = office_id
 
             room.save()
-            # Обработка изображения
-            image = request.FILES.get('image')
-            if image:
-                fs = FileSystemStorage(location=settings.MEDIA_ROOT / 'rooms')
-                filename = fs.save(image.name, image)
-                room.image = f'rooms/{filename}'
-                room.save()
+
+            if primary_image:
+                room.image = _save_room_image_file(primary_image)
+                room.save(update_fields=['image'])
+
+            _append_room_gallery_images(room, extra_images)
 
             messages.success(request, '✅ Комната успешно добавлена!')
             return JsonResponse({'success': True, 'room_id': room.id})
@@ -1582,7 +1771,7 @@ def edit_room(request, room_id):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
 
     try:
-        room = Room.objects.get(id=room_id)
+        room = Room.objects.prefetch_related('gallery_images').get(id=room_id)
 
         if request.method == 'POST':
             # Админ может менять всё, менеджер только цену и оборудование
@@ -1598,18 +1787,49 @@ def edit_room(request, room_id):
 
             # Обработка изображения (только админ)
             if request.user.role == 'admin':
-                image = request.FILES.get('image')
-                if image:
-                    fs = FileSystemStorage(location=settings.MEDIA_ROOT / 'rooms')
-                    filename = fs.save(image.name, image)
-                    room.image = f'rooms/{filename}'
+                primary_image, extra_images = _extract_room_image_uploads(request, allow_gallery_fallback=False)
+                removed_gallery_ids = _parse_gallery_image_ids(request.POST.getlist('remove_gallery_image_ids'))
+                selected_gallery_cover_id = _parse_optional_int(request.POST.get('selected_gallery_cover_id'))
+                ordered_gallery_ids = _parse_gallery_order(request.POST.get('gallery_order'))
+
+                if selected_gallery_cover_id in removed_gallery_ids:
+                    removed_gallery_ids = [image_id for image_id in removed_gallery_ids if image_id != selected_gallery_cover_id]
+
+                _validate_room_image_limit(
+                    room=room,
+                    primary_image=primary_image,
+                    extra_images=extra_images,
+                    removed_gallery_ids=removed_gallery_ids,
+                )
+
+                if primary_image:
+                    room.image = _save_room_image_file(primary_image)
+                    selected_gallery_cover_id = None
 
             room.save()
+
+            if request.user.role == 'admin':
+                if selected_gallery_cover_id and not primary_image:
+                    if removed_gallery_ids:
+                        room.gallery_images.filter(id__in=removed_gallery_ids).delete()
+
+                    _apply_room_gallery_order(room, ordered_gallery_ids)
+                    _promote_gallery_image_to_cover(room, selected_gallery_cover_id)
+                else:
+                    if removed_gallery_ids:
+                        room.gallery_images.filter(id__in=removed_gallery_ids).delete()
+
+                    _apply_room_gallery_order(room, ordered_gallery_ids)
+
+                _append_room_gallery_images(room, extra_images)
+
             messages.success(request, '✅ Комната успешно обновлена!')
             return JsonResponse({'success': True})
 
     except Room.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Комната не найдена'})
+    except ValueError as error:
+        return JsonResponse({'success': False, 'error': str(error)})
 
     return JsonResponse({'success': False, 'error': 'Неверный метод запроса'})
 
@@ -1630,7 +1850,8 @@ def get_all_rooms(request):
             'capacity': room.capacity,
             'price_per_hour': str(room.price_per_hour),
             'equipment': room.equipment,  # ← ВОТ ЭТО ВАЖНО
-            'image': room.image.url if room.image else None
+            'image': room.image.url if room.image else None,
+            'image_count': (1 if room.image else 0) + room.gallery_images.count(),
         })
 
     return JsonResponse({'rooms': rooms_data})
@@ -1640,7 +1861,7 @@ def get_all_rooms(request):
 def get_room_data(request, room_id):
     """Получить данные комнаты для редактирования"""
     try:
-        room = Room.objects.get(id=room_id)
+        room = Room.objects.select_related('office').prefetch_related('gallery_images').get(id=room_id)
         return JsonResponse({
             'success': True,
             'room': {
@@ -1650,7 +1871,11 @@ def get_room_data(request, room_id):
                 "office_id": room.office.id if room.office else None,
                 'capacity': room.capacity,
                 'price_per_hour': str(room.price_per_hour),
-                'equipment': room.equipment
+                'equipment': room.equipment,
+                'image': room.image.url if room.image else None,
+                'gallery_images': _build_room_gallery_payload(room),
+                'image_limit': Room.MAX_TOTAL_IMAGES,
+                'image_count': (1 if room.image else 0) + room.gallery_images.count(),
             }
         })
     except Room.DoesNotExist:

@@ -227,6 +227,55 @@
             gap: 20px;
         }
 
+        .room-gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 18px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(18, 24, 35, 0.76) 0%, rgba(13, 18, 28, 0.88) 100%);
+            border: 1px solid rgba(139, 166, 217, 0.12);
+            box-shadow: 0 18px 38px rgba(2, 7, 16, 0.22);
+            overflow: hidden;
+        }
+
+        .room-gallery-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .room-gallery-header__title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.02em;
+        }
+
+        .room-gallery-header__subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .room-gallery-header__count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.14);
+            border: 1px solid rgba(139, 166, 217, 0.18);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .room-gallery-stage {
+            position: relative;
+        }
+
         .room-image-wrapper {
             position: relative;
             width: 100%;
@@ -238,6 +287,16 @@
             background: var(--bg-card);
         }
 
+        .room-image-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 42%;
+            background: linear-gradient(180deg, rgba(10, 15, 24, 0) 0%, rgba(10, 15, 24, 0.12) 38%, rgba(10, 15, 24, 0.48) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
         .room-image {
             width: 100%;
             height: 100%;
@@ -247,6 +306,96 @@
 
         .room-image-wrapper:hover .room-image {
             transform: scale(1.05);
+        }
+
+        .room-gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 46px;
+            height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.62);
+            color: #fff;
+            cursor: pointer;
+            z-index: 5;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.22);
+            transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+            font-size: 26px;
+            line-height: 1;
+        }
+
+        .room-gallery-nav:hover {
+            transform: translateY(-50%) scale(1.04);
+            background: rgba(30, 41, 59, 0.78);
+            border-color: rgba(255,255,255,0.28);
+        }
+
+        .room-gallery-nav--prev {
+            left: 16px;
+        }
+
+        .room-gallery-nav--next {
+            right: 16px;
+        }
+
+        .room-gallery-counter {
+            position: absolute;
+            right: 18px;
+            bottom: 18px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.62);
+            border: 1px solid rgba(255,255,255,0.16);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            z-index: 4;
+            backdrop-filter: blur(10px);
+        }
+
+        .room-gallery-thumbnails {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 4px 2px 8px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(139, 166, 217, 0.26) transparent;
+        }
+
+        .room-gallery-thumbnail {
+            flex: 0 0 92px;
+            padding: 4px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(24, 31, 45, 0.96) 0%, rgba(18, 24, 35, 0.98) 100%);
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 20px rgba(2, 7, 16, 0.18);
+        }
+
+        .room-gallery-thumbnail:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-hover);
+        }
+
+        .room-gallery-thumbnail.active {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.16);
+        }
+
+        .room-gallery-thumbnail img {
+            width: 100%;
+            height: 68px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
         }
 
         .room-category-badge {
@@ -1417,21 +1566,62 @@
         <div class="main-content{% if booking_page %} main-content--booking{% endif %}">
             <!-- Left Column -->
             <div class="left-column">
-                <div class="room-image-wrapper">
-                    {% if room.image %}
-                    <img src="{{ room.image.url }}" alt="{{ room.name }}" class="room-image">
-                    {% else %}
-                    <div class="room-image" style="display: flex; align-items: center; justify-content: center; font-size: 64px; background: var(--bg-card);">🏢</div>
+                <div class="room-gallery" data-room-gallery>
+                    <div class="room-gallery-header">
+                        <div>
+                            <div class="room-gallery-header__title">Фотогалерея комнаты</div>
+                            <div class="room-gallery-header__subtitle">
+                                {% if room_gallery|length > 1 %}
+                                Листайте фотографии и выберите удобный ракурс.
+                                {% else %}
+                                Основное фото комнаты.
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="room-gallery-header__count">{{ room_gallery|length|default:0 }} фото</div>
+                    </div>
+                    <div class="room-gallery-stage">
+                        <div class="room-image-wrapper">
+                            {% if room_gallery %}
+                            <img src="{{ room_gallery.0.url }}" alt="{{ room_gallery.0.alt }}" class="room-image" data-room-gallery-main>
+                            {% else %}
+                            <div class="room-image" style="display: flex; align-items: center; justify-content: center; font-size: 64px; background: var(--bg-card);">🏢</div>
+                            {% endif %}
+
+                            <span class="room-category-badge badge-{{ room.category }}">
+                                {% if room.category == 'economy' %}🟢 Эконом
+                                {% elif room.category == 'standard' %}🔵 Стандарт
+                                {% elif room.category == 'comfort' %}🟡 Комфорт
+                                {% elif room.category == 'vip' %}🟣 VIP
+                                {% elif room.category == 'luxury' %}🔴 Люкс
+                                {% endif %}
+                            </span>
+
+                            {% if room_gallery|length > 1 %}
+                            <button type="button" class="room-gallery-nav room-gallery-nav--prev" data-room-gallery-prev aria-label="Предыдущее фото">&#8249;</button>
+                            <button type="button" class="room-gallery-nav room-gallery-nav--next" data-room-gallery-next aria-label="Следующее фото">&#8250;</button>
+                            <div class="room-gallery-counter" data-room-gallery-counter>1 / {{ room_gallery|length }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if room_gallery|length > 1 %}
+                    <div class="room-gallery-thumbnails">
+                        {% for image in room_gallery %}
+                        <button
+                            type="button"
+                            class="room-gallery-thumbnail{% if forloop.first %} active{% endif %}"
+                            data-room-gallery-thumb
+                            data-image-url="{{ image.url }}"
+                            data-image-alt="{{ image.alt }}"
+                            data-image-index="{{ forloop.counter0 }}"
+                            aria-label="Открыть фото {{ forloop.counter }}"
+                        >
+                            <img src="{{ image.url }}" alt="{{ image.alt }}">
+                        </button>
+                        {% endfor %}
+                    </div>
                     {% endif %}
-                    
-                    <span class="room-category-badge badge-{{ room.category }}">
-                        {% if room.category == 'economy' %}🟢 Эконом
-                        {% elif room.category == 'standard' %}🔵 Стандарт
-                        {% elif room.category == 'comfort' %}🟡 Комфорт
-                        {% elif room.category == 'vip' %}🟣 VIP
-                        {% elif room.category == 'luxury' %}🔴 Люкс
-                        {% endif %}
-                    </span>
                 </div>
                 {% if booking_page %}
                 <section class="info-section">
@@ -2000,6 +2190,56 @@
 
             const initialTab = document.querySelector('.room-detail-tabs .tab.active')?.dataset.roomTab || tabButtons[0].dataset.roomTab;
             activateRoomTab(initialTab);
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gallery = document.querySelector('[data-room-gallery]');
+            const mainImage = gallery?.querySelector('[data-room-gallery-main]');
+            const thumbnailButtons = Array.from(gallery?.querySelectorAll('[data-room-gallery-thumb]') || []);
+            const prevButton = gallery?.querySelector('[data-room-gallery-prev]');
+            const nextButton = gallery?.querySelector('[data-room-gallery-next]');
+            const counter = gallery?.querySelector('[data-room-gallery-counter]');
+
+            if (!gallery || !mainImage || thumbnailButtons.length === 0) return;
+
+            let currentIndex = 0;
+
+            function setActiveImage(nextIndex) {
+                const safeIndex = (nextIndex + thumbnailButtons.length) % thumbnailButtons.length;
+                const activeButton = thumbnailButtons[safeIndex];
+
+                mainImage.src = activeButton.dataset.imageUrl;
+                mainImage.alt = activeButton.dataset.imageAlt;
+                currentIndex = safeIndex;
+
+                thumbnailButtons.forEach((button, buttonIndex) => {
+                    button.classList.toggle('active', buttonIndex === safeIndex);
+                });
+
+                if (counter) {
+                    counter.textContent = `${safeIndex + 1} / ${thumbnailButtons.length}`;
+                }
+            }
+
+            thumbnailButtons.forEach((button, index) => {
+                button.addEventListener('click', function() {
+                    setActiveImage(index);
+                });
+            });
+
+            if (prevButton) {
+                prevButton.addEventListener('click', function() {
+                    setActiveImage(currentIndex - 1);
+                });
+            }
+
+            if (nextButton) {
+                nextButton.addEventListener('click', function() {
+                    setActiveImage(currentIndex + 1);
+                });
+            }
         });
     </script>
 

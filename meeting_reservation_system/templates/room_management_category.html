@@ -467,6 +467,289 @@
             background: var(--bg-tertiary);
         }
 
+        .upload-help {
+            display: block;
+            margin-top: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .upload-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--border-color);
+            background: linear-gradient(180deg, rgba(24, 24, 27, 0.96) 0%, rgba(18, 18, 24, 0.98) 100%);
+        }
+
+        .upload-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .upload-card__title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .upload-card__badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.14);
+            border: 1px solid rgba(59, 130, 246, 0.22);
+            color: var(--text-primary);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .upload-card__status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .pending-gallery-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .pending-gallery-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: 100%;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pending-gallery-chip--cover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.18);
+        }
+
+        .pending-gallery-chip__name {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .pending-gallery-chip__cover {
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            transition: all 0.2s ease;
+        }
+
+        .pending-gallery-chip__cover.is-active {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: white;
+        }
+
+        .pending-gallery-chip__remove {
+            width: 20px;
+            height: 20px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(239, 68, 68, 0.16);
+            color: #fca5a5;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .pending-gallery-empty {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .current-images-panel {
+            display: none;
+            margin-bottom: 18px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+
+        .current-images-panel.is-visible {
+            display: block;
+        }
+
+        .current-images-panel__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .current-images-panel__title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .current-images-panel__meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .current-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .current-image-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .current-image-card.is-cover-selected {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.18);
+            transform: translateY(-1px);
+        }
+
+        .current-image-card[draggable="true"] {
+            cursor: grab;
+        }
+
+        .current-image-card[draggable="true"]:active {
+            cursor: grabbing;
+        }
+
+        .current-image-card.is-dragging {
+            opacity: 0.6;
+            transform: scale(0.98);
+        }
+
+        .current-image-card img {
+            width: 100%;
+            height: 88px;
+            object-fit: cover;
+            border-radius: 10px;
+            background: var(--bg-input);
+        }
+
+        .current-image-card__badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-start;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            background: var(--gradient-primary);
+        }
+
+        .current-image-card__label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .current-image-card__drag {
+            display: inline-flex;
+            align-items: center;
+            align-self: flex-start;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.10);
+            border: 1px dashed rgba(59, 130, 246, 0.18);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        .current-image-card__actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .current-image-cover-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 34px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .current-image-cover-toggle.is-active {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: white;
+        }
+
+        .current-image-remove {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .current-image-remove.is-disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .current-image-remove input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent-danger);
+        }
+
         .form-actions {
             display: flex;
             gap: 12px;
@@ -526,6 +809,10 @@
 
             .info-blocks {
                 grid-template-columns: 1fr;
+            }
+
+            .current-images-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
     </style>
@@ -706,6 +993,9 @@
             <form id="roomForm" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" name="category" value="{{ category }}">
+                <input type="hidden" name="selected_gallery_cover_id" id="selectedGalleryCoverId">
+                <input type="hidden" name="selected_pending_cover_index" id="selectedPendingCoverIndex">
+                <input type="hidden" name="gallery_order" id="galleryOrderInput">
 
                 <div class="form-group">
                     <label>Название комнаты</label>
@@ -737,8 +1027,40 @@
                     <textarea name="equipment" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Изображение</label>
-                    <input type="file" name="image" accept="image/*">
+                    <label>Основное фото</label>
+                    <div class="upload-card">
+                        <div class="upload-card__header">
+                            <div class="upload-card__title">Обложка комнаты</div>
+                            <div class="upload-card__badge">Главное фото</div>
+                        </div>
+                        <input type="file" name="image" accept="image/*" data-upload-input="primary">
+                        <small class="upload-help">Можно загрузить отдельную обложку или выбрать её ниже среди текущих и новых дополнительных фото.</small>
+                        <div class="upload-card__status" id="roomCategoryPrimaryImageStatus">Файл не выбран</div>
+                    </div>
+                </div>
+                <div class="current-images-panel" id="currentImagesPanel">
+                    <div class="current-images-panel__header">
+                        <div>
+                            <div class="current-images-panel__title">Текущие фото комнаты</div>
+                            <div class="current-images-panel__meta" id="currentImagesMeta">0 из 8 фото</div>
+                        </div>
+                    </div>
+                    <div class="current-images-grid" id="currentImagesGrid"></div>
+                </div>
+                <div class="form-group">
+                    <label>Дополнительные фото</label>
+                    <div class="upload-card">
+                        <div class="upload-card__header">
+                            <div class="upload-card__title">Галерея комнаты</div>
+                            <div class="upload-card__badge">До 8 фото</div>
+                        </div>
+                        <input type="file" name="gallery_images" accept="image/*" multiple data-upload-input="gallery">
+                        <small class="upload-help">Можно добавлять фото по одному или сразу пачкой. Любое новое фото ниже можно назначить обложкой до сохранения.</small>
+                        <div class="upload-card__status" id="roomCategoryGalleryImageStatus">Дополнительные фото не выбраны</div>
+                        <div class="pending-gallery-list" id="roomCategoryPendingGalleryList">
+                            <span class="pending-gallery-empty">Новые дополнительные фото пока не добавлены.</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" onclick="closeModal()" class="btn btn-cancel">Отмена</button>
@@ -750,6 +1072,11 @@
 
     <script>
         let currentRoomId = null;
+        let currentRoomSnapshot = null;
+        let pendingCategoryGalleryFiles = [];
+        let selectedCategoryGalleryCoverId = '';
+        let selectedCategoryPendingCoverIndex = null;
+        let draggedCategoryGalleryCard = null;
 
         // Filter Toggle
         const filterToggle = document.getElementById('filterToggle');
@@ -849,10 +1176,311 @@
         // Initial update
         updateFilterCount();
 
+        function getCategoryRoomForm() {
+            return document.getElementById('roomForm');
+        }
+
+        function getCategoryPrimaryInput() {
+            return getCategoryRoomForm().querySelector('[data-upload-input="primary"]');
+        }
+
+        function getCategoryGalleryInput() {
+            return getCategoryRoomForm().querySelector('[data-upload-input="gallery"]');
+        }
+
+        function getCategoryImageLimit() {
+            return currentRoomSnapshot?.image_limit || 8;
+        }
+
+        function getCategorySelectedGalleryCoverInput() {
+            return document.getElementById('selectedGalleryCoverId');
+        }
+
+        function getCategorySelectedPendingCoverInput() {
+            return document.getElementById('selectedPendingCoverIndex');
+        }
+
+        function getCategoryGalleryOrderInput() {
+            return document.getElementById('galleryOrderInput');
+        }
+
+        function syncCategoryCoverInputs() {
+            getCategorySelectedGalleryCoverInput().value = selectedCategoryGalleryCoverId || '';
+            getCategorySelectedPendingCoverInput().value = Number.isInteger(selectedCategoryPendingCoverIndex)
+                ? String(selectedCategoryPendingCoverIndex)
+                : '';
+        }
+
+        function syncCategoryGalleryOrderInput() {
+            const orderedIds = Array.from(
+                document.querySelectorAll('#currentImagesGrid .current-image-card[data-gallery-image-id]')
+            ).map(card => card.dataset.galleryImageId);
+
+            getCategoryGalleryOrderInput().value = orderedIds.join(',');
+        }
+
+        function getRemainingExistingGalleryCount() {
+            if (!currentRoomSnapshot?.gallery_images?.length) {
+                return 0;
+            }
+
+            const removedIds = new Set(
+                Array.from(document.querySelectorAll('#currentImagesGrid input[name="remove_gallery_image_ids"]:checked'))
+                    .map(input => Number(input.value))
+            );
+
+            let remainingCount = currentRoomSnapshot.gallery_images.filter(image => !removedIds.has(image.id)).length;
+
+            if (!currentRoomSnapshot?.image && selectedCategoryGalleryCoverId) {
+                remainingCount = Math.max(0, remainingCount - 1);
+            }
+
+            return remainingCount;
+        }
+
+        function getCategoryBaseImageCount() {
+            const primaryInput = getCategoryPrimaryInput();
+            const remainingExistingGalleryCount = getRemainingExistingGalleryCount();
+
+            if (primaryInput.files?.length) {
+                return 1 + remainingExistingGalleryCount;
+            }
+
+            if (Number.isInteger(selectedCategoryPendingCoverIndex)) {
+                return remainingExistingGalleryCount;
+            }
+
+            const hasPrimaryCover = Boolean(currentRoomSnapshot?.image || selectedCategoryGalleryCoverId);
+            return (hasPrimaryCover ? 1 : 0) + remainingExistingGalleryCount;
+        }
+
+        function syncCategoryGalleryInput() {
+            const galleryInput = getCategoryGalleryInput();
+            const dataTransfer = new DataTransfer();
+
+            pendingCategoryGalleryFiles.forEach(file => dataTransfer.items.add(file));
+            galleryInput.files = dataTransfer.files;
+        }
+
+        function renderPendingCategoryGalleryFiles() {
+            const list = document.getElementById('roomCategoryPendingGalleryList');
+
+            if (!pendingCategoryGalleryFiles.length) {
+                list.innerHTML = '<span class="pending-gallery-empty">Новые дополнительные фото пока не добавлены.</span>';
+                return;
+            }
+
+            list.innerHTML = pendingCategoryGalleryFiles.map((file, index) => `
+                <span class="pending-gallery-chip${selectedCategoryPendingCoverIndex === index ? ' pending-gallery-chip--cover' : ''}">
+                    <span class="pending-gallery-chip__name">${file.name}</span>
+                    <button
+                        type="button"
+                        class="pending-gallery-chip__cover${selectedCategoryPendingCoverIndex === index ? ' is-active' : ''}"
+                        data-select-pending-gallery-cover="${index}"
+                    >
+                        ${selectedCategoryPendingCoverIndex === index ? 'Будет обложкой' : 'Сделать обложкой'}
+                    </button>
+                    <button type="button" class="pending-gallery-chip__remove" data-remove-pending-gallery="${index}" aria-label="Убрать файл ${file.name}">×</button>
+                </span>
+            `).join('');
+        }
+
+        function updateCategoryRoomUploadStatus() {
+            const primaryInput = getCategoryPrimaryInput();
+            const primaryStatus = document.getElementById('roomCategoryPrimaryImageStatus');
+            const galleryStatus = document.getElementById('roomCategoryGalleryImageStatus');
+            const selectedPendingCoverFile = Number.isInteger(selectedCategoryPendingCoverIndex)
+                ? pendingCategoryGalleryFiles[selectedCategoryPendingCoverIndex]
+                : null;
+            const selectedGalleryCover = selectedCategoryGalleryCoverId
+                ? currentRoomSnapshot?.gallery_images?.find(image => String(image.id) === String(selectedCategoryGalleryCoverId))
+                : null;
+            const limit = getCategoryImageLimit();
+            const baseCount = getCategoryBaseImageCount();
+            const freeSlots = Math.max(0, limit - baseCount - pendingCategoryGalleryFiles.length);
+
+            if (primaryInput && primaryStatus) {
+                if (primaryInput.files?.length) {
+                    primaryStatus.textContent = `Новая обложка: ${primaryInput.files[0].name}`;
+                } else if (selectedPendingCoverFile) {
+                    primaryStatus.textContent = `Обложкой станет новое фото: ${selectedPendingCoverFile.name}`;
+                } else if (selectedGalleryCover) {
+                    primaryStatus.textContent = 'Обложкой станет выбранное текущее дополнительное фото.';
+                } else if (currentRoomSnapshot?.image) {
+                    primaryStatus.textContent = 'Текущая обложка сохранена. Выберите новый файл, если хотите её заменить.';
+                } else {
+                    primaryStatus.textContent = 'Файл не выбран';
+                }
+            }
+
+            if (galleryStatus) {
+                if (pendingCategoryGalleryFiles.length) {
+                    galleryStatus.textContent = `Подготовлено к добавлению: ${pendingCategoryGalleryFiles.length}. Свободно слотов после этого: ${freeSlots}`;
+                } else {
+                    galleryStatus.textContent = `Новые дополнительные фото не выбраны. Свободно слотов: ${Math.max(0, limit - baseCount)}`;
+                }
+            }
+        }
+
+        function syncRenderedCurrentCoverState() {
+            const selectedId = selectedCategoryGalleryCoverId ? String(selectedCategoryGalleryCoverId) : '';
+            const hasCurrentPrimary = Boolean(currentRoomSnapshot?.image);
+            const hasUploadedPrimary = Boolean(getCategoryPrimaryInput().files?.length);
+            const hasPendingCover = Number.isInteger(selectedCategoryPendingCoverIndex);
+            const canHighlightCurrentImages = !hasUploadedPrimary && !hasPendingCover;
+
+            document.querySelectorAll('#currentImagesGrid .current-image-card').forEach(card => {
+                const galleryId = card.dataset.galleryImageId || '';
+                const isPrimaryCard = card.dataset.imageRole === 'primary';
+                const isSelected = canHighlightCurrentImages && (
+                    selectedId
+                        ? galleryId === selectedId
+                        : (isPrimaryCard && hasCurrentPrimary)
+                );
+
+                card.classList.toggle('is-cover-selected', isSelected);
+
+                const coverButton = card.querySelector('.current-image-cover-toggle');
+                if (coverButton) {
+                    coverButton.classList.toggle('is-active', isSelected);
+                    if (isPrimaryCard) {
+                        coverButton.textContent = isSelected ? 'Текущая обложка' : 'Оставить обложкой';
+                    } else {
+                        coverButton.textContent = isSelected ? 'Будет обложкой' : 'Сделать обложкой';
+                    }
+                }
+
+                const removeLabel = card.querySelector('.current-image-remove');
+                const removeInput = removeLabel?.querySelector('input[name="remove_gallery_image_ids"]');
+                if (removeInput) {
+                    removeInput.disabled = isSelected;
+                    if (isSelected) {
+                        removeInput.checked = false;
+                    }
+                    removeLabel.classList.toggle('is-disabled', isSelected);
+                }
+            });
+
+            syncCategoryCoverInputs();
+        }
+
+        function clearCategoryPrimaryCoverSelection() {
+            const primaryInput = getCategoryPrimaryInput();
+            if (primaryInput.value) {
+                primaryInput.value = '';
+            }
+        }
+
+        function resetCategoryGalleryQueue() {
+            pendingCategoryGalleryFiles = [];
+            selectedCategoryPendingCoverIndex = null;
+            syncCategoryGalleryInput();
+            syncCategoryCoverInputs();
+            renderPendingCategoryGalleryFiles();
+            updateCategoryRoomUploadStatus();
+        }
+
+        function handleCategoryGallerySelection() {
+            const galleryInput = getCategoryGalleryInput();
+            const selectedFiles = Array.from(galleryInput.files || []);
+
+            if (!selectedFiles.length) {
+                return;
+            }
+
+            const availableSlots = Math.max(0, getCategoryImageLimit() - getCategoryBaseImageCount() - pendingCategoryGalleryFiles.length);
+
+            if (availableSlots <= 0) {
+                alert(`У комнаты уже будет ${getCategoryImageLimit()} фото. Сначала уберите часть текущих или отложенных фотографий.`);
+                syncCategoryGalleryInput();
+                updateCategoryRoomUploadStatus();
+                return;
+            }
+
+            const acceptedFiles = selectedFiles.slice(0, availableSlots);
+            pendingCategoryGalleryFiles = pendingCategoryGalleryFiles.concat(acceptedFiles);
+            syncCategoryGalleryInput();
+            renderPendingCategoryGalleryFiles();
+            updateCategoryRoomUploadStatus();
+
+            if (selectedFiles.length > acceptedFiles.length) {
+                alert(`Можно добавить только ${availableSlots} фото. Остальные файлы не были включены в очередь.`);
+            }
+        }
+
+        function resetRoomImagesPanel() {
+            const panel = document.getElementById('currentImagesPanel');
+            const grid = document.getElementById('currentImagesGrid');
+            const meta = document.getElementById('currentImagesMeta');
+
+            panel.classList.remove('is-visible');
+            grid.innerHTML = '';
+            meta.textContent = '0 из 8 фото';
+            selectedCategoryGalleryCoverId = '';
+            syncCategoryCoverInputs();
+            syncCategoryGalleryOrderInput();
+        }
+
+        function renderRoomImagesPanel(room) {
+            const panel = document.getElementById('currentImagesPanel');
+            const grid = document.getElementById('currentImagesGrid');
+            const meta = document.getElementById('currentImagesMeta');
+            const limit = room.image_limit || 8;
+            const total = room.image_count || 0;
+            const cards = [];
+
+            meta.textContent = `${total} из ${limit} фото`;
+
+            if (room.image) {
+                cards.push(`
+                    <div class="current-image-card" data-image-role="primary">
+                        <img src="${room.image}" alt="Основное фото">
+                        <span class="current-image-card__badge">Обложка</span>
+                        <div class="current-image-card__label">Основное фото комнаты</div>
+                        <div class="current-image-card__actions">
+                            <button type="button" class="current-image-cover-toggle" data-cover-target="primary">Текущая обложка</button>
+                        </div>
+                    </div>
+                `);
+            }
+
+            (room.gallery_images || []).forEach((image, index) => {
+                cards.push(`
+                    <div class="current-image-card" data-gallery-image-id="${image.id}" draggable="true">
+                        <img src="${image.url}" alt="Дополнительное фото ${index + 1}">
+                        <div class="current-image-card__drag">⇅ Перетащите</div>
+                        <div class="current-image-card__label">Доп. фото ${index + 1}</div>
+                        <div class="current-image-card__actions">
+                            <button type="button" class="current-image-cover-toggle" data-cover-target="${image.id}">Сделать обложкой</button>
+                            <label class="current-image-remove">
+                                <input type="checkbox" name="remove_gallery_image_ids" value="${image.id}">
+                                Удалить
+                            </label>
+                        </div>
+                    </div>
+                `);
+            });
+
+            if (cards.length) {
+                grid.innerHTML = cards.join('');
+                panel.classList.add('is-visible');
+                syncRenderedCurrentCoverState();
+                syncCategoryGalleryOrderInput();
+            } else {
+                resetRoomImagesPanel();
+            }
+        }
+
         function showAddRoomForm() {
             document.getElementById('modalTitle').textContent = 'Добавить {{ category_display }} комнату';
             document.getElementById('roomForm').reset();
             currentRoomId = null;
+            currentRoomSnapshot = null;
+            selectedCategoryGalleryCoverId = '';
+            selectedCategoryPendingCoverIndex = null;
+            syncCategoryCoverInputs();
+            resetRoomImagesPanel();
+            resetCategoryGalleryQueue();
             document.getElementById('roomModal').style.display = 'block';
         }
 
@@ -862,6 +1490,14 @@
                 .then(data => {
                     if (data.success) {
                         const room = data.room;
+                        document.getElementById('roomForm').reset();
+                        currentRoomSnapshot = room;
+                        selectedCategoryGalleryCoverId = '';
+                        selectedCategoryPendingCoverIndex = null;
+                        syncCategoryCoverInputs();
+                        pendingCategoryGalleryFiles = [];
+                        syncCategoryGalleryInput();
+                        renderPendingCategoryGalleryFiles();
                         document.getElementById('modalTitle').textContent = 'Редактировать комнату';
                         document.querySelector('input[name="name"]').value = room.name;
                         document.querySelector('input[name="location"]').value = room.location;
@@ -869,6 +1505,8 @@
                         document.querySelector('input[name="price_per_hour"]').value = room.price_per_hour;
                         document.querySelector('textarea[name="equipment"]').value = room.equipment;
                         document.querySelector('select[name="office"]').value = room.office_id || "";
+                        renderRoomImagesPanel(room);
+                        updateCategoryRoomUploadStatus();
                         currentRoomId = roomId;
                         document.getElementById('roomModal').style.display = 'block';
                     } else {
@@ -884,6 +1522,7 @@
         document.getElementById('roomForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            syncCategoryGalleryInput();
             const formData = new FormData(this);
             let url = '/api/add-room/';
 
@@ -955,6 +1594,141 @@
                 closeModal();
             }
         }
+
+        document.getElementById('currentImagesGrid').addEventListener('change', function(event) {
+            if (event.target.matches('input[name="remove_gallery_image_ids"]')) {
+                updateCategoryRoomUploadStatus();
+            }
+        });
+
+        document.getElementById('currentImagesGrid').addEventListener('dragstart', function(event) {
+            const card = event.target.closest('.current-image-card[data-gallery-image-id]');
+            if (!card) {
+                return;
+            }
+
+            draggedCategoryGalleryCard = card;
+            card.classList.add('is-dragging');
+
+            if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', card.dataset.galleryImageId);
+            }
+        });
+
+        document.getElementById('currentImagesGrid').addEventListener('dragover', function(event) {
+            if (!draggedCategoryGalleryCard) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const targetCard = event.target.closest('.current-image-card[data-gallery-image-id]');
+            if (!targetCard || targetCard === draggedCategoryGalleryCard) {
+                return;
+            }
+
+            const rect = targetCard.getBoundingClientRect();
+            const shouldInsertAfter = event.clientY > rect.top + rect.height / 2;
+
+            if (shouldInsertAfter) {
+                targetCard.parentNode.insertBefore(draggedCategoryGalleryCard, targetCard.nextSibling);
+            } else {
+                targetCard.parentNode.insertBefore(draggedCategoryGalleryCard, targetCard);
+            }
+
+            syncCategoryGalleryOrderInput();
+        });
+
+        document.getElementById('currentImagesGrid').addEventListener('drop', function(event) {
+            if (!draggedCategoryGalleryCard) {
+                return;
+            }
+
+            event.preventDefault();
+            syncCategoryGalleryOrderInput();
+        });
+
+        document.getElementById('currentImagesGrid').addEventListener('dragend', function() {
+            if (!draggedCategoryGalleryCard) {
+                return;
+            }
+
+            draggedCategoryGalleryCard.classList.remove('is-dragging');
+            draggedCategoryGalleryCard = null;
+            syncCategoryGalleryOrderInput();
+        });
+
+        document.getElementById('currentImagesGrid').addEventListener('click', function(event) {
+            const coverButton = event.target.closest('[data-cover-target]');
+            if (!coverButton) {
+                return;
+            }
+
+            clearCategoryPrimaryCoverSelection();
+            selectedCategoryPendingCoverIndex = null;
+            selectedCategoryGalleryCoverId = coverButton.dataset.coverTarget === 'primary'
+                ? ''
+                : coverButton.dataset.coverTarget;
+
+            renderPendingCategoryGalleryFiles();
+            syncRenderedCurrentCoverState();
+            updateCategoryRoomUploadStatus();
+        });
+
+        document.getElementById('roomCategoryPendingGalleryList').addEventListener('click', function(event) {
+            const coverButton = event.target.closest('[data-select-pending-gallery-cover]');
+            if (coverButton) {
+                clearCategoryPrimaryCoverSelection();
+                selectedCategoryGalleryCoverId = '';
+
+                const index = Number(coverButton.dataset.selectPendingGalleryCover);
+                if (!Number.isNaN(index)) {
+                    selectedCategoryPendingCoverIndex = selectedCategoryPendingCoverIndex === index ? null : index;
+                    syncCategoryCoverInputs();
+                    renderPendingCategoryGalleryFiles();
+                    syncRenderedCurrentCoverState();
+                    updateCategoryRoomUploadStatus();
+                }
+                return;
+            }
+
+            const removeButton = event.target.closest('[data-remove-pending-gallery]');
+            if (!removeButton) {
+                return;
+            }
+
+            const index = Number(removeButton.dataset.removePendingGallery);
+            if (!Number.isNaN(index)) {
+                pendingCategoryGalleryFiles.splice(index, 1);
+                if (selectedCategoryPendingCoverIndex === index) {
+                    selectedCategoryPendingCoverIndex = null;
+                } else if (Number.isInteger(selectedCategoryPendingCoverIndex) && selectedCategoryPendingCoverIndex > index) {
+                    selectedCategoryPendingCoverIndex -= 1;
+                }
+                syncCategoryGalleryInput();
+                syncCategoryCoverInputs();
+                renderPendingCategoryGalleryFiles();
+                updateCategoryRoomUploadStatus();
+            }
+        });
+
+        getCategoryPrimaryInput().addEventListener('change', function() {
+            if (this.files?.length) {
+                selectedCategoryGalleryCoverId = '';
+                selectedCategoryPendingCoverIndex = null;
+                syncCategoryCoverInputs();
+                renderPendingCategoryGalleryFiles();
+                syncRenderedCurrentCoverState();
+            }
+
+            updateCategoryRoomUploadStatus();
+        });
+        getCategoryGalleryInput().addEventListener('change', handleCategoryGallerySelection);
+
+        syncCategoryCoverInputs();
+        renderPendingCategoryGalleryFiles();
+        updateCategoryRoomUploadStatus();
     </script>
     {% include 'theme_toggle.html' %}
 </body>

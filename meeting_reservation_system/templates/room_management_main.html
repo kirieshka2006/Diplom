@@ -208,6 +208,129 @@
             background: var(--bg-tertiary);
         }
 
+        .upload-help {
+            display: block;
+            margin-top: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .upload-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--border-color);
+            background: linear-gradient(180deg, rgba(24, 24, 27, 0.96) 0%, rgba(18, 18, 24, 0.98) 100%);
+        }
+
+        .upload-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .upload-card__title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .upload-card__badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.14);
+            border: 1px solid rgba(59, 130, 246, 0.22);
+            color: var(--text-primary);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .upload-card__status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .pending-gallery-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .pending-gallery-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: 100%;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pending-gallery-chip--cover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.18);
+        }
+
+        .pending-gallery-chip__name {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .pending-gallery-chip__cover {
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            transition: all 0.2s ease;
+        }
+
+        .pending-gallery-chip__cover.is-active {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: white;
+        }
+
+        .pending-gallery-chip__remove {
+            width: 20px;
+            height: 20px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(239, 68, 68, 0.16);
+            color: #fca5a5;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .pending-gallery-empty {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
         .modal-actions {
             display: flex;
             gap: 12px;
@@ -296,6 +419,7 @@
             <h3>➕ Создать комнату</h3>
             <form id="roomForm" enctype="multipart/form-data">
                 {% csrf_token %}
+                <input type="hidden" name="selected_pending_cover_index" id="mainSelectedPendingCoverIndex">
                 <div class="form-grid">
                     <input type="text" name="name" placeholder="Название комнаты" required>
                     <input type="text" name="location" placeholder="Месторасположение" required>
@@ -310,7 +434,27 @@
                     <input type="number" name="capacity" placeholder="Вместимость" min="1" required>
                     <input type="number" name="price_per_hour" placeholder="Цена за час" step="100" required>
                     <textarea name="equipment" placeholder="Оборудование" rows="3"></textarea>
-                    <input type="file" name="image" accept="image/*">
+                    <div class="upload-card">
+                        <div class="upload-card__header">
+                            <div class="upload-card__title">Основное фото</div>
+                            <div class="upload-card__badge">Обложка</div>
+                        </div>
+                        <input type="file" name="image" accept="image/*" data-upload-input="primary">
+                        <small class="upload-help">Можно загрузить отдельную обложку или назначить её из дополнительных фото ниже.</small>
+                        <div class="upload-card__status" id="roomMainPrimaryImageStatus">Файл не выбран</div>
+                    </div>
+                    <div class="upload-card">
+                        <div class="upload-card__header">
+                            <div class="upload-card__title">Дополнительные фото</div>
+                            <div class="upload-card__badge">До 8 фото</div>
+                        </div>
+                        <input type="file" name="gallery_images" accept="image/*" multiple data-upload-input="gallery">
+                        <small class="upload-help">Дополнительные фото комнаты. Можно добавлять по одному или сразу пачкой и выбрать любое из них обложкой.</small>
+                        <div class="upload-card__status" id="roomMainGalleryImageStatus">Дополнительные фото не выбраны</div>
+                        <div class="pending-gallery-list" id="roomMainPendingGalleryList">
+                            <span class="pending-gallery-empty">Новые дополнительные фото пока не добавлены.</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" onclick="closeModal()" class="btn btn-cancel">Отмена</button>
@@ -321,7 +465,132 @@
     </div>
 
     <script>
+        let pendingMainGalleryFiles = [];
+        let selectedMainPendingCoverIndex = null;
+
+        function getMainRoomForm() {
+            return document.getElementById('roomForm');
+        }
+
+        function getMainPrimaryInput() {
+            return getMainRoomForm().querySelector('[data-upload-input="primary"]');
+        }
+
+        function getMainGalleryInput() {
+            return getMainRoomForm().querySelector('[data-upload-input="gallery"]');
+        }
+
+        function getMainSelectedPendingCoverInput() {
+            return document.getElementById('mainSelectedPendingCoverIndex');
+        }
+
+        function syncMainCoverInput() {
+            getMainSelectedPendingCoverInput().value = Number.isInteger(selectedMainPendingCoverIndex)
+                ? String(selectedMainPendingCoverIndex)
+                : '';
+        }
+
+        function syncMainGalleryInput() {
+            const dataTransfer = new DataTransfer();
+            pendingMainGalleryFiles.forEach(file => dataTransfer.items.add(file));
+            getMainGalleryInput().files = dataTransfer.files;
+        }
+
+        function renderMainPendingGalleryFiles() {
+            const list = document.getElementById('roomMainPendingGalleryList');
+
+            if (!pendingMainGalleryFiles.length) {
+                list.innerHTML = '<span class="pending-gallery-empty">Новые дополнительные фото пока не добавлены.</span>';
+                return;
+            }
+
+            list.innerHTML = pendingMainGalleryFiles.map((file, index) => `
+                <span class="pending-gallery-chip${selectedMainPendingCoverIndex === index ? ' pending-gallery-chip--cover' : ''}">
+                    <span class="pending-gallery-chip__name">${file.name}</span>
+                    <button
+                        type="button"
+                        class="pending-gallery-chip__cover${selectedMainPendingCoverIndex === index ? ' is-active' : ''}"
+                        data-select-main-pending-cover="${index}"
+                    >
+                        ${selectedMainPendingCoverIndex === index ? 'Будет обложкой' : 'Сделать обложкой'}
+                    </button>
+                    <button type="button" class="pending-gallery-chip__remove" data-remove-main-pending-gallery="${index}" aria-label="Убрать файл ${file.name}">×</button>
+                </span>
+            `).join('');
+        }
+
+        function updateMainRoomUploadStatus() {
+            const primaryInput = getMainPrimaryInput();
+            const primaryStatus = document.getElementById('roomMainPrimaryImageStatus');
+            const galleryStatus = document.getElementById('roomMainGalleryImageStatus');
+            const selectedPendingCoverFile = Number.isInteger(selectedMainPendingCoverIndex)
+                ? pendingMainGalleryFiles[selectedMainPendingCoverIndex]
+                : null;
+
+            if (primaryInput && primaryStatus) {
+                if (primaryInput.files?.length) {
+                    primaryStatus.textContent = `Новая обложка: ${primaryInput.files[0].name}`;
+                } else if (selectedPendingCoverFile) {
+                    primaryStatus.textContent = `Обложкой станет новое фото: ${selectedPendingCoverFile.name}`;
+                } else {
+                    primaryStatus.textContent = 'Файл не выбран';
+                }
+            }
+
+            if (galleryStatus) {
+                const limit = 8;
+                const baseCount = primaryInput.files?.length ? 1 : 0;
+                const freeSlots = Math.max(0, limit - baseCount - pendingMainGalleryFiles.length);
+
+                galleryStatus.textContent = pendingMainGalleryFiles.length
+                    ? `Подготовлено к добавлению: ${pendingMainGalleryFiles.length}. Свободно слотов после этого: ${freeSlots}`
+                    : `Новые дополнительные фото не выбраны. Свободно слотов: ${limit - baseCount}`;
+            }
+        }
+
+        function resetMainGalleryQueue() {
+            pendingMainGalleryFiles = [];
+            selectedMainPendingCoverIndex = null;
+            syncMainGalleryInput();
+            syncMainCoverInput();
+            renderMainPendingGalleryFiles();
+            updateMainRoomUploadStatus();
+        }
+
+        function handleMainGallerySelection() {
+            const galleryInput = getMainGalleryInput();
+            const selectedFiles = Array.from(galleryInput.files || []);
+
+            if (!selectedFiles.length) {
+                return;
+            }
+
+            const primarySelected = getMainPrimaryInput().files?.length ? 1 : 0;
+            const availableSlots = Math.max(0, 8 - primarySelected - pendingMainGalleryFiles.length);
+
+            if (availableSlots <= 0) {
+                alert('Для новой комнаты уже набран максимум в 8 фотографий.');
+                syncMainGalleryInput();
+                updateMainRoomUploadStatus();
+                return;
+            }
+
+            const acceptedFiles = selectedFiles.slice(0, availableSlots);
+            pendingMainGalleryFiles = pendingMainGalleryFiles.concat(acceptedFiles);
+            syncMainGalleryInput();
+            renderMainPendingGalleryFiles();
+            updateMainRoomUploadStatus();
+
+            if (selectedFiles.length > acceptedFiles.length) {
+                alert(`Можно добавить только ${availableSlots} фото. Остальные файлы не были включены в очередь.`);
+            }
+        }
+
         function showAddRoomForm() {
+            document.getElementById('roomForm').reset();
+            selectedMainPendingCoverIndex = null;
+            syncMainCoverInput();
+            resetMainGalleryQueue();
             document.getElementById('roomModal').style.display = 'block';
         }
 
@@ -332,6 +601,7 @@
         document.getElementById('roomForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            syncMainGalleryInput();
             const formData = new FormData(this);
 
             fetch('/api/add-room/', {
@@ -357,6 +627,59 @@
                 closeModal();
             }
         }
+
+        document.getElementById('roomMainPendingGalleryList').addEventListener('click', function(event) {
+            const coverButton = event.target.closest('[data-select-main-pending-cover]');
+            if (coverButton) {
+                const primaryInput = getMainPrimaryInput();
+                if (primaryInput.value) {
+                    primaryInput.value = '';
+                }
+
+                const index = Number(coverButton.dataset.selectMainPendingCover);
+                if (!Number.isNaN(index)) {
+                    selectedMainPendingCoverIndex = selectedMainPendingCoverIndex === index ? null : index;
+                    syncMainCoverInput();
+                    renderMainPendingGalleryFiles();
+                    updateMainRoomUploadStatus();
+                }
+                return;
+            }
+
+            const removeButton = event.target.closest('[data-remove-main-pending-gallery]');
+            if (!removeButton) {
+                return;
+            }
+
+            const index = Number(removeButton.dataset.removeMainPendingGallery);
+            if (!Number.isNaN(index)) {
+                pendingMainGalleryFiles.splice(index, 1);
+                if (selectedMainPendingCoverIndex === index) {
+                    selectedMainPendingCoverIndex = null;
+                } else if (Number.isInteger(selectedMainPendingCoverIndex) && selectedMainPendingCoverIndex > index) {
+                    selectedMainPendingCoverIndex -= 1;
+                }
+                syncMainGalleryInput();
+                syncMainCoverInput();
+                renderMainPendingGalleryFiles();
+                updateMainRoomUploadStatus();
+            }
+        });
+
+        getMainPrimaryInput().addEventListener('change', function() {
+            if (this.files?.length) {
+                selectedMainPendingCoverIndex = null;
+                syncMainCoverInput();
+                renderMainPendingGalleryFiles();
+            }
+
+            updateMainRoomUploadStatus();
+        });
+        getMainGalleryInput().addEventListener('change', handleMainGallerySelection);
+
+        syncMainCoverInput();
+        renderMainPendingGalleryFiles();
+        updateMainRoomUploadStatus();
     </script>
     {% include 'theme_toggle.html' %}
 </body>

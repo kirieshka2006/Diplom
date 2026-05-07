@@ -2140,9 +2140,9 @@
 </head>
 <body class="home-page">
     <!-- Messages -->
-    {% if messages %}
+    {% if page_messages %}
     <div class="messages">
-        {% for message in messages %}
+        {% for message in page_messages %}
         <div class="message message-{{ message.tags }}">
             {{ message }}
         </div>
