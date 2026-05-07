@@ -994,6 +994,124 @@
         color: #edf2f9 !important;
     }
 
+    html[data-theme='light'] :is(
+        .auth-required .auth-btn-login,
+        .home-page .header-actions .login-btn,
+        .home-page .sidebar-mobile-auth-btn.login-btn
+    ) {
+        background: linear-gradient(135deg, #355d31 0%, #4f7a46 52%, #6a9658 100%) !important;
+        color: #f8fbf4 !important;
+        border: 1px solid rgba(61, 95, 54, 0.34) !important;
+        box-shadow: 0 16px 30px rgba(62, 96, 55, 0.22), 0 6px 16px rgba(106, 150, 88, 0.12) !important;
+        text-shadow: 0 1px 0 rgba(22, 36, 20, 0.16) !important;
+    }
+
+    html[data-theme='light'] :is(
+        .auth-required .auth-btn-login,
+        .home-page .header-actions .login-btn,
+        .home-page .sidebar-mobile-auth-btn.login-btn
+    ):hover {
+        background: linear-gradient(135deg, #2f542c 0%, #476f40 52%, #608b50 100%) !important;
+        color: #ffffff !important;
+        border-color: rgba(53, 84, 47, 0.38) !important;
+        box-shadow: 0 20px 36px rgba(62, 96, 55, 0.26), 0 8px 18px rgba(96, 139, 80, 0.14) !important;
+    }
+
+    html[data-theme='light'] :is(
+        .auth-required .auth-btn-register,
+        .home-page .sidebar-mobile-auth-btn.register-btn
+    ) {
+        background: linear-gradient(180deg, rgba(244, 248, 240, 0.99) 0%, rgba(229, 236, 223, 0.99) 100%) !important;
+        color: #2e3b2d !important;
+        border: 1px solid rgba(111, 139, 92, 0.24) !important;
+        box-shadow: 0 14px 28px rgba(60, 72, 55, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.66) !important;
+        text-shadow: none !important;
+    }
+
+    html[data-theme='light'] :is(
+        .auth-required .auth-btn-register,
+        .home-page .sidebar-mobile-auth-btn.register-btn
+    ):hover {
+        background: linear-gradient(180deg, rgba(239, 244, 234, 0.99) 0%, rgba(223, 231, 216, 0.99) 100%) !important;
+        color: #243124 !important;
+        border-color: rgba(98, 126, 84, 0.28) !important;
+        box-shadow: 0 18px 34px rgba(60, 72, 55, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.62) !important;
+    }
+
+    html[data-theme='light'] .home-page .header-actions .register-btn {
+        background: linear-gradient(135deg, #4e7f3d 0%, #679c4f 52%, #84b962 100%) !important;
+        color: #fcfff9 !important;
+        border: 1px solid rgba(77, 120, 56, 0.32) !important;
+        box-shadow: 0 16px 30px rgba(76, 120, 58, 0.24), 0 6px 16px rgba(132, 185, 98, 0.14) !important;
+        text-shadow: 0 1px 0 rgba(25, 39, 20, 0.16) !important;
+    }
+
+    html[data-theme='light'] .home-page .header-actions .register-btn:hover {
+        background: linear-gradient(135deg, #467638 0%, #5f9448 52%, #79ae58 100%) !important;
+        color: #ffffff !important;
+        border-color: rgba(68, 106, 50, 0.36) !important;
+        box-shadow: 0 20px 36px rgba(76, 120, 58, 0.28), 0 8px 18px rgba(121, 174, 88, 0.16) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        .auth-required .auth-btn-login,
+        .home-page .header-actions .login-btn,
+        .home-page .sidebar-mobile-auth-btn.login-btn
+    ) {
+        background: linear-gradient(135deg, rgba(65, 88, 171, 0.98) 0%, rgba(82, 105, 191, 0.99) 52%, rgba(93, 115, 203, 0.99) 100%) !important;
+        color: #f7faff !important;
+        border: 1px solid rgba(150, 171, 255, 0.24) !important;
+        box-shadow: 0 18px 34px rgba(2, 7, 16, 0.34), 0 8px 20px rgba(82, 105, 191, 0.20) !important;
+        text-shadow: 0 1px 0 rgba(9, 16, 36, 0.22) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        .auth-required .auth-btn-login,
+        .home-page .header-actions .login-btn,
+        .home-page .sidebar-mobile-auth-btn.login-btn
+    ):hover {
+        background: linear-gradient(135deg, rgba(73, 96, 181, 0.99) 0%, rgba(90, 114, 201, 1) 52%, rgba(102, 124, 212, 1) 100%) !important;
+        color: #ffffff !important;
+        border-color: rgba(164, 184, 255, 0.28) !important;
+        box-shadow: 0 22px 38px rgba(2, 7, 16, 0.38), 0 10px 22px rgba(90, 114, 201, 0.24) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        .auth-required .auth-btn-register,
+        .home-page .sidebar-mobile-auth-btn.register-btn
+    ) {
+        background: linear-gradient(135deg, rgba(39, 47, 66, 0.98) 0%, rgba(53, 48, 78, 0.99) 52%, rgba(68, 56, 96, 0.99) 100%) !important;
+        color: #eef3ff !important;
+        border: 1px solid rgba(143, 132, 214, 0.20) !important;
+        box-shadow: 0 18px 34px rgba(2, 7, 16, 0.30), 0 8px 18px rgba(90, 81, 150, 0.16) !important;
+        text-shadow: 0 1px 0 rgba(9, 14, 29, 0.20) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        .auth-required .auth-btn-register,
+        .home-page .sidebar-mobile-auth-btn.register-btn
+    ):hover {
+        background: linear-gradient(135deg, rgba(46, 55, 76, 0.99) 0%, rgba(61, 56, 88, 1) 52%, rgba(75, 63, 108, 1) 100%) !important;
+        color: #ffffff !important;
+        border-color: rgba(154, 143, 226, 0.24) !important;
+        box-shadow: 0 22px 38px rgba(2, 7, 16, 0.34), 0 10px 20px rgba(95, 86, 158, 0.18) !important;
+    }
+
+    html[data-theme='dark'] .home-page .header-actions .register-btn {
+        background: linear-gradient(135deg, rgba(55, 52, 92, 0.98) 0%, rgba(77, 67, 130, 0.99) 52%, rgba(103, 82, 167, 0.99) 100%) !important;
+        color: #f4f2ff !important;
+        border: 1px solid rgba(164, 150, 233, 0.24) !important;
+        box-shadow: 0 18px 34px rgba(2, 7, 16, 0.34), 0 8px 20px rgba(103, 82, 167, 0.20) !important;
+        text-shadow: 0 1px 0 rgba(14, 12, 33, 0.24) !important;
+    }
+
+    html[data-theme='dark'] .home-page .header-actions .register-btn:hover {
+        background: linear-gradient(135deg, rgba(63, 60, 104, 0.99) 0%, rgba(87, 76, 144, 1) 52%, rgba(113, 93, 182, 1) 100%) !important;
+        color: #ffffff !important;
+        border-color: rgba(177, 163, 244, 0.28) !important;
+        box-shadow: 0 22px 38px rgba(2, 7, 16, 0.38), 0 10px 22px rgba(113, 93, 182, 0.24) !important;
+    }
+
     html[data-theme='dark'] .login-card::before,
     html[data-theme='dark'] .register-card::before,
     html[data-theme='dark'] .recovery-card::before,
@@ -1838,6 +1956,22 @@
         box-shadow: 0 10px 22px rgba(92, 103, 74, 0.14) !important;
     }
 
+    html[data-theme='light'] .room-status-badge.status-active {
+        background: linear-gradient(135deg, rgba(55, 113, 60, 0.96) 0%, rgba(79, 138, 79, 0.98) 100%) !important;
+        color: #f7fff7 !important;
+        border-color: rgba(56, 105, 58, 0.38) !important;
+        box-shadow: 0 12px 24px rgba(55, 113, 60, 0.22), 0 4px 10px rgba(79, 138, 79, 0.12) !important;
+        text-shadow: 0 1px 0 rgba(18, 38, 18, 0.16) !important;
+    }
+
+    html[data-theme='light'] .room-status-badge.status-hidden {
+        background: linear-gradient(135deg, rgba(146, 72, 56, 0.96) 0%, rgba(178, 92, 73, 0.98) 100%) !important;
+        color: #fff8f6 !important;
+        border-color: rgba(129, 60, 48, 0.38) !important;
+        box-shadow: 0 12px 24px rgba(146, 72, 56, 0.20), 0 4px 10px rgba(178, 92, 73, 0.10) !important;
+        text-shadow: 0 1px 0 rgba(46, 18, 14, 0.16) !important;
+    }
+
     html[data-theme='dark'] :is(.room-category-badge, .room-status-badge) {
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
         box-shadow: 0 10px 24px rgba(2, 8, 23, 0.28) !important;
@@ -2001,6 +2135,74 @@
     .home-page.mobile-sidebar-open .mobile-sidebar-backdrop {
         opacity: 1;
         pointer-events: auto;
+    }
+
+    .home-page .sidebar-mobile-auth,
+    .home-page .sidebar-mobile-logout {
+        display: none;
+    }
+
+    .home-page .sidebar-mobile-auth {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        padding: 16px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        box-shadow: var(--shadow-sm);
+        gap: 12px;
+    }
+
+    .home-page .sidebar-mobile-auth::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.10) 0%, rgba(var(--accent-secondary-rgb), 0.08) 100%);
+        pointer-events: none;
+        opacity: 0.9;
+    }
+
+    .home-page .sidebar-mobile-auth > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .home-page .sidebar-mobile-auth-title {
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.3;
+        color: var(--text-primary);
+    }
+
+    .home-page .sidebar-mobile-auth-actions {
+        display: grid;
+        gap: 10px;
+    }
+
+    .home-page .sidebar-mobile-auth-btn {
+        width: 100%;
+        min-height: 48px;
+        justify-content: center;
+        padding: 12px 16px;
+        border-radius: 16px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .home-page .sidebar-mobile-logout {
+        margin-top: auto;
+    }
+
+    html[data-theme='light'] .home-page .sidebar-mobile-auth {
+        background: linear-gradient(180deg, rgba(253, 255, 249, 0.98) 0%, rgba(240, 247, 236, 0.96) 100%);
+        border-color: rgba(111, 139, 92, 0.18);
+        box-shadow: 0 16px 36px rgba(98, 118, 74, 0.14);
+    }
+
+    html[data-theme='dark'] .home-page .sidebar-mobile-auth {
+        background: linear-gradient(180deg, rgba(19, 24, 38, 0.98) 0%, rgba(28, 22, 50, 0.98) 100%);
+        border-color: rgba(126, 116, 221, 0.24);
+        box-shadow: 0 18px 38px rgba(3, 7, 18, 0.38);
     }
 
     html,
@@ -2176,9 +2378,7 @@
         }
 
         .home-page .header-actions .auth-btn {
-            flex: 0 0 auto !important;
-            min-height: 44px !important;
-            padding: 10px 14px !important;
+            display: none !important;
         }
 
         .home-page .header-actions .admin-dropdown,
@@ -2453,6 +2653,36 @@
             width: auto !important;
         }
 
+        .home-page .sidebar-mobile-auth {
+            display: flex !important;
+            flex-direction: column !important;
+            margin-bottom: 6px !important;
+        }
+
+        .home-page .sidebar-mobile-auth-actions .auth-btn {
+            display: flex !important;
+        }
+
+        .home-page .sidebar-mobile-logout {
+            display: flex !important;
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.12) 0%, rgba(249, 115, 22, 0.08) 100%) !important;
+            border-color: rgba(239, 68, 68, 0.22) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .home-page .sidebar-mobile-logout::before {
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.96) 0%, rgba(249, 115, 22, 0.92) 100%) !important;
+        }
+
+        .home-page .sidebar-mobile-logout:hover {
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.18) 0%, rgba(249, 115, 22, 0.12) 100%) !important;
+            border-color: rgba(239, 68, 68, 0.34) !important;
+        }
+
+        .home-page .sidebar-mobile-logout :is(.sidebar-item-title, .sidebar-item-desc) {
+            color: inherit !important;
+        }
+
         html[data-theme] .content-area {
             width: 100% !important;
         }
@@ -2567,24 +2797,23 @@
             display: none !important;
         }
 
-        html[data-theme] .room-more-info {
-            opacity: 1 !important;
-            transform: none !important;
-            right: 12px !important;
-            bottom: 12px !important;
-            padding: 7px 12px !important;
+        html[data-theme] .room-meta-row {
+            gap: 6px !important;
+            margin-bottom: 10px !important;
         }
 
         html[data-theme] .room-card .room-category-badge {
-            top: 10px !important;
-            left: 10px !important;
-            padding: 6px 12px !important;
-            font-size: 11px !important;
+            position: static !important;
+            padding: 5px 10px !important;
+            font-size: 10px !important;
+            border-radius: 16px !important;
         }
 
         html[data-theme] .room-status-badge {
-            top: 12px !important;
-            right: 12px !important;
+            position: static !important;
+            padding: 4px 9px !important;
+            font-size: 9px !important;
+            border-radius: 14px !important;
         }
 
         html[data-theme] :is(.offices-topbar, .offices-header, .offices-container, .support-container, .booking-container) {

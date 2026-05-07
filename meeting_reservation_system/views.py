@@ -909,7 +909,6 @@ def register(request):
                 from .email_utils import send_confirmation_code
                 try:
                     code = send_confirmation_code(user, email)
-                    messages.info(request, f'📧 Код подтверждения отправлен на {email}!')
                     print(f"КОД ДЛЯ ТЕСТА: {code}")
                     
                     # Сохраняем данные регистрации в сессии

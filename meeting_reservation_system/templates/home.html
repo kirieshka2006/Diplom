@@ -2020,25 +2020,30 @@
         .room-hover-info-item:last-child {
             margin-bottom: 0;
         }
+        .room-meta-row{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:8px;
+            flex-wrap:wrap;
+            margin-bottom:10px;
+        }
         .room-category-badge{
-            position:absolute;
-            top:12px;
-            left:12px;
-            padding:8px 16px;
-            border-radius:24px;
-            font-size:13px;
+            position:static;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:6px 12px;
+            border-radius:18px;
+            font-size:11px;
             font-weight:700;
             backdrop-filter:blur(12px);
-            z-index:4;
-            box-shadow:0 4px 12px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow:0 3px 10px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.14);
             text-transform:uppercase;
-            letter-spacing:0.5px;
-            border:2px solid;
+            letter-spacing:0.3px;
+            border:1px solid;
             transition:all .3s ease;
-        }
-        .room-card:hover .room-category-badge{
-            transform:scale(1.05);
-            box-shadow:0 6px 16px rgba(0,0,0,0.4), 0 3px 8px rgba(0,0,0,0.3);
+            max-width:100%;
         }
         .badge-economy{
             background:linear-gradient(135deg, rgba(34,197,94,0.95) 0%, rgba(22,163,74,0.95) 100%);
@@ -2070,7 +2075,20 @@
             border-color:rgba(239,68,68,1);
             text-shadow:0 1px 2px rgba(0,0,0,0.2);
         }
-        .room-status-badge{position:absolute;top:16px;right:16px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;backdrop-filter:blur(8px);}
+        .room-status-badge{
+            position:static;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            align-self:flex-start;
+            padding:5px 10px;
+            border-radius:16px;
+            font-size:10px;
+            font-weight:600;
+            backdrop-filter:blur(8px);
+            max-width:100%;
+            white-space:nowrap;
+        }
         .status-active{background:rgba(34,197,94,0.2);color:#4ade80;border:1px solid rgba(34,197,94,0.3);}
         .status-hidden{background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.3);}
 
@@ -2093,27 +2111,6 @@
         .room-location{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:13px;margin-bottom:16px;}
         .room-features{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
         .room-feature{display:flex;align-items:center;gap:4px;padding:6px 12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary);}
-        .room-more-info {
-            position: absolute;
-            bottom: 16px;
-            right: 16px;
-            background: rgba(59,130,246,0.9);
-            color: white;
-            padding: 8px 16px;
-            border-radius: var(--radius-md);
-            font-size: 12px;
-            font-weight: 600;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all .3s ease;
-            z-index: 3;
-            backdrop-filter: blur(8px);
-        }
-        .room-card:hover .room-more-info {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
         /* Empty state & messages */
         .empty-state,.filter-results{ text-align:center;padding:60px 40px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);grid-column:1 / -1; }
         .empty-state-icon{font-size:64px;margin-bottom:20px;}
@@ -2314,6 +2311,18 @@
                             </div>
                         </div>
                     </a>
+                    {% else %}
+                    <div class="sidebar-mobile-auth">
+                        <div class="sidebar-mobile-auth-title">Вход в аккаунт</div>
+                        <div class="sidebar-mobile-auth-actions">
+                            <a href="{% url 'login' %}" class="auth-btn login-btn sidebar-mobile-auth-btn">
+                                🔐 Войти
+                            </a>
+                            <a href="{% url 'register' %}" class="auth-btn register-btn sidebar-mobile-auth-btn">
+                                📝 Регистрация
+                            </a>
+                        </div>
+                    </div>
                     {% endif %}
 
                     <!-- Элементы для авторизованных пользователей -->
@@ -2355,6 +2364,15 @@
                             <span class="sidebar-item-desc">Правила и инструкции</span>
                         </div>
                     </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="sidebar-item sidebar-mobile-logout">
+                        <span class="icon">🚪</span>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-item-title">Выйти</span>
+                            <span class="sidebar-item-desc">Завершить текущую сессию</span>
+                        </div>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
 
@@ -2582,26 +2600,27 @@
                                 </div>
                             </div>
                             
-                            <div class="room-more-info">Подробнее →</div>
                         </div>
 
-                        <span class="room-category-badge badge-{{ room.category }}">
-                            {% if room.category == 'economy' %}🟢 Эконом
-                            {% elif room.category == 'standard' %}🔵 Стандарт
-                            {% elif room.category == 'comfort' %}🟡 Комфорт
-                            {% elif room.category == 'vip' %}🟣 VIP
-                            {% elif room.category == 'luxury' %}🔴 Люкс
-                            {% endif %}
-                        </span>
-
-                        {% if user.is_authenticated and user.role == 'admin' or user.role == 'manager' %}
-                        <!-- Показываем только active/hidden (maintenance будет считаться hidden) -->
-                        <span class="room-status-badge status-{{ room.status }}">
-                            {% if room.status == 'active' %}✅ Активна{% else %}🔒 Скрыта{% endif %}
-                        </span>
-                        {% endif %}
-
                         <div class="room-content">
+                            <div class="room-meta-row">
+                                <span class="room-category-badge badge-{{ room.category }}">
+                                    {% if room.category == 'economy' %}🟢 Эконом
+                                    {% elif room.category == 'standard' %}🔵 Стандарт
+                                    {% elif room.category == 'comfort' %}🟡 Комфорт
+                                    {% elif room.category == 'vip' %}🟣 VIP
+                                    {% elif room.category == 'luxury' %}🔴 Люкс
+                                    {% endif %}
+                                </span>
+
+                                {% if user.is_authenticated and user.role == 'admin' or user.role == 'manager' %}
+                                <!-- Показываем только active/hidden (maintenance будет считаться hidden) -->
+                                <span class="room-status-badge status-{{ room.status }}">
+                                    {% if room.status == 'active' %}✅ Активна{% else %}🔒 Скрыта{% endif %}
+                                </span>
+                                {% endif %}
+                            </div>
+
                             <div class="room-header">
                                 <h3 class="room-name">{{ room.name }}</h3>
                                 <div class="room-price">
