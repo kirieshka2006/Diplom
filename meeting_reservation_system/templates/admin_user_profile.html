@@ -134,6 +134,12 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
+        .role-owner {
+            background: rgba(99, 102, 241, 0.14);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.34);
+        }
+
         .role-manager {
             background: rgba(245, 158, 11, 0.1);
             color: var(--accent-warning);
@@ -269,6 +275,67 @@
             height: 100%;
             border-radius: 10px;
             transition: width 0.3s ease;
+        }
+
+        .admin-policy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .admin-policy-card {
+            background: var(--bg-tertiary);
+            padding: 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .admin-policy-card--allowed {
+            border-color: rgba(34, 197, 94, 0.26);
+            box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.06);
+        }
+
+        .admin-policy-card--blocked {
+            border-color: rgba(239, 68, 68, 0.20);
+            box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.04);
+        }
+
+        .admin-policy-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .admin-policy-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 30px;
+            padding: 0 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .admin-policy-status--allowed {
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--accent-success);
+            border: 1px solid rgba(34, 197, 94, 0.24);
+        }
+
+        .admin-policy-status--blocked {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239, 68, 68, 0.22);
+        }
+
+        .admin-policy-text {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
         }
 
         /* Bookings Table */
@@ -762,6 +829,32 @@
                         <div class="info-label">🎂 Дата рождения</div>
                         <div class="info-value">{{ target_user.birth_date|date:"d.m.Y"|default:"Не указана" }}</div>
                     </div>
+                </div>
+            </div>
+
+            <div class="admin-policy-grid">
+                <div class="admin-policy-card {% if admin_policy.can_change_role %}admin-policy-card--allowed{% else %}admin-policy-card--blocked{% endif %}">
+                    <div class="admin-policy-title">Изменение роли</div>
+                    <div class="admin-policy-status {% if admin_policy.can_change_role %}admin-policy-status--allowed{% else %}admin-policy-status--blocked{% endif %}">
+                        {% if admin_policy.can_change_role %}Разрешено{% else %}Недоступно{% endif %}
+                    </div>
+                    <div class="admin-policy-text">{{ admin_policy.role_change_reason }}</div>
+                </div>
+
+                <div class="admin-policy-card {% if admin_policy.can_delete %}admin-policy-card--allowed{% else %}admin-policy-card--blocked{% endif %}">
+                    <div class="admin-policy-title">Удаление пользователя</div>
+                    <div class="admin-policy-status {% if admin_policy.can_delete %}admin-policy-status--allowed{% else %}admin-policy-status--blocked{% endif %}">
+                        {% if admin_policy.can_delete %}Разрешено{% else %}Недоступно{% endif %}
+                    </div>
+                    <div class="admin-policy-text">{{ admin_policy.delete_reason }}</div>
+                </div>
+
+                <div class="admin-policy-card {% if admin_policy.has_activity %}admin-policy-card--blocked{% else %}admin-policy-card--allowed{% endif %}">
+                    <div class="admin-policy-title">Связанные данные</div>
+                    <div class="admin-policy-status {% if admin_policy.has_activity %}admin-policy-status--blocked{% else %}admin-policy-status--allowed{% endif %}">
+                        {% if admin_policy.has_activity %}Есть история{% else %}История пуста{% endif %}
+                    </div>
+                    <div class="admin-policy-text">{{ admin_policy.activity_summary }}</div>
                 </div>
             </div>
 

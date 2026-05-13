@@ -175,7 +175,7 @@ def delete_review(request, review_id):
 @require_POST
 def admin_delete_review(request, review_id):
     """Удаление отзыва админом/менеджером"""
-    if request.user.role not in ['admin', 'manager']:
+    if request.user.role not in ['owner', 'admin', 'manager']:
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'})
 
     review = get_object_or_404(Review, id=review_id)
@@ -188,7 +188,7 @@ def admin_delete_review(request, review_id):
 @require_POST
 def reply_to_review(request, review_id):
     """Ответ на отзыв от админа/менеджера"""
-    if request.user.role not in ['admin', 'manager']:
+    if request.user.role not in ['owner', 'admin', 'manager']:
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'})
 
     review = get_object_or_404(Review, id=review_id)
@@ -226,7 +226,7 @@ def reply_to_review(request, review_id):
 @require_POST
 def delete_reply(request, reply_id):
     """Удаление ответа на отзыв"""
-    if request.user.role not in ['admin', 'manager']:
+    if request.user.role not in ['owner', 'admin', 'manager']:
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'})
 
     reply = get_object_or_404(ReviewReply, id=reply_id)
@@ -248,7 +248,7 @@ def get_room_reviews(request, room_id):
     if request.user.is_authenticated:
         user_review = Review.objects.filter(room=room, user=request.user).first()
 
-    is_admin_or_manager = request.user.is_authenticated and request.user.role in ['admin', 'manager']
+    is_admin_or_manager = request.user.is_authenticated and request.user.role in ['owner', 'admin', 'manager']
 
     reviews_data = []
     for review in reviews:
@@ -301,7 +301,7 @@ def get_room_reviews(request, room_id):
 @login_required
 def review_moderation(request):
     """Страница модерации отзывов (для админа/менеджера)"""
-    if request.user.role not in ['admin', 'manager']:
+    if request.user.role not in ['owner', 'admin', 'manager']:
         messages.error(request, 'Доступ запрещен!')
         return redirect('home')
 
@@ -316,7 +316,7 @@ def review_moderation(request):
 @login_required
 def all_reviews(request):
     """Страница всех одобренных отзывов (для админа/менеджера)"""
-    if request.user.role not in ['admin', 'manager']:
+    if request.user.role not in ['owner', 'admin', 'manager']:
         messages.error(request, 'Доступ запрещен!')
         return redirect('home')
 
@@ -359,7 +359,7 @@ def all_reviews(request):
 @require_POST
 def approve_review(request, review_id):
     """Одобрение отзыва"""
-    if request.user.role not in ['admin', 'manager']:
+    if request.user.role not in ['owner', 'admin', 'manager']:
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'})
 
     review = get_object_or_404(Review, id=review_id)
@@ -373,7 +373,7 @@ def approve_review(request, review_id):
 @require_POST
 def reject_review(request, review_id):
     """Отклонение (удаление) отзыва"""
-    if request.user.role not in ['admin', 'manager']:
+    if request.user.role not in ['owner', 'admin', 'manager']:
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'})
 
     review = get_object_or_404(Review, id=review_id)

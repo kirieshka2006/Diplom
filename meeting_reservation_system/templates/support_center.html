@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ и поддержка</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #1c1c1f;
+            --bg-tertiary: #18181b;
+            --bg-input: #232326;
+            --border-color: #3a3b43;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-purple: #8b5cf6;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+            --radius-md: 12px;
+            --radius-lg: 18px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .support-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .page-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .back-btn,
+        .manage-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn,
+        .manage-btn,
+        .hero,
+        .hero-stat,
+        .tab-btn,
+        .panel,
+        .faq-search input,
+        .form-control,
+        .form-textarea,
+        .form-select,
+        .faq-group,
+        .faq-group-title,
+        .faq-item,
+        .ticket-card,
+        .cta-box,
+        .modal-window,
+        .response-ticket,
+        .btn-ghost,
+        .btn-danger {
+            border-width: 1.5px;
+        }
+
+        .back-btn {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .back-btn:hover,
+        .manage-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .manage-btn {
+            background: linear-gradient(135deg, #6677b8 0%, #735fad 100%);
+            color: #fff;
+            border-color: rgba(124, 126, 196, 0.22);
+            box-shadow: 0 14px 28px rgba(87, 90, 164, 0.18);
+        }
+
+        .hero {
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.96) 0%, rgba(21, 21, 25, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 24px 46px rgba(2, 6, 14, 0.18);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto auto 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            right: -80px;
+            top: -140px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .hero-stat {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px;
+        }
+
+        .hero-stat-value {
+            display: block;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .hero-stat-label {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .messages {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .message {
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            border: 1px solid transparent;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message-success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #bbf7d0;
+            border-color: rgba(34, 197, 94, 0.26);
+        }
+
+        .message-error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.26);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-text-fill-color: currentColor;
+        }
+
+        .tab-btn:hover {
+            border-color: rgba(59, 130, 246, 0.32);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .tab-btn.active {
+            background: var(--gradient-primary);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 14px 28px rgba(59, 130, 246, 0.16);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        .panel {
+            display: none;
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.96) 0%, rgba(22, 22, 25, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: 0 22px 42px rgba(2, 6, 14, 0.16);
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .panel-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .panel-subtitle {
+            color: var(--text-muted);
+            line-height: 1.6;
+            max-width: 720px;
+        }
+
+        .faq-search {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .faq-search input,
+        .form-control,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .faq-search input {
+            background: linear-gradient(180deg, rgba(35, 35, 38, 0.96) 0%, rgba(28, 28, 31, 0.96) 100%);
+            box-shadow: 0 18px 34px rgba(6, 10, 19, 0.16);
+        }
+
+        .faq-search input:focus,
+        .form-control:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.38);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        .faq-group {
+            margin-bottom: 24px;
+            padding: 20px;
+            border-radius: calc(var(--radius-lg) - 2px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(180deg, rgba(24, 24, 27, 0.9) 0%, rgba(19, 19, 22, 0.92) 100%);
+            box-shadow: 0 24px 42px rgba(4, 7, 14, 0.14);
+        }
+
+        .faq-group-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+            padding: 13px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid transparent;
+            margin-bottom: 18px;
+            font-weight: 700;
+            box-shadow: 0 16px 28px rgba(15, 23, 42, 0.16);
+        }
+
+        .faq-group-title .faq-count {
+            color: inherit;
+            opacity: 0.8;
+        }
+
+        .faq-group--general .faq-group-title {
+            background: linear-gradient(135deg, rgba(66, 153, 225, 0.22) 0%, rgba(88, 138, 220, 0.12) 100%);
+            border-color: rgba(88, 138, 220, 0.26);
+        }
+
+        .faq-group--booking .faq-group-title {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.22) 0%, rgba(22, 163, 74, 0.12) 100%);
+            border-color: rgba(34, 197, 94, 0.26);
+        }
+
+        .faq-group--payment .faq-group-title {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.24) 0%, rgba(234, 88, 12, 0.12) 100%);
+            border-color: rgba(245, 158, 11, 0.24);
+        }
+
+        .faq-group--technical .faq-group-title {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.24) 0%, rgba(99, 102, 241, 0.12) 100%);
+            border-color: rgba(129, 108, 245, 0.24);
+        }
+
+        .faq-count {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .faq-item {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(31, 31, 35, 0.96) 0%, rgba(24, 24, 27, 0.96) 100%);
+            box-shadow: 0 18px 32px rgba(2, 6, 14, 0.10);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .faq-item:hover {
+            transform: translateY(-1px);
+            border-color: rgba(109, 132, 228, 0.24);
+            box-shadow: 0 22px 36px rgba(6, 10, 19, 0.14);
+        }
+
+        .faq-question {
+            width: 100%;
+            background: transparent;
+            border: 0;
+            color: var(--text-primary);
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .faq-question:hover {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.32) 0%, rgba(79, 70, 229, 0.20) 100%);
+        }
+
+        .faq-question-label {
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .faq-toggle {
+            color: var(--accent-primary);
+            font-size: 14px;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 0 20px 20px;
+            color: var(--text-secondary);
+            line-height: 1.75;
+        }
+
+        .faq-item.active .faq-question {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(139, 92, 246, 0.14) 100%);
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+            margin: 0 18px 18px;
+            padding: 16px 18px 18px;
+            border-radius: calc(var(--radius-md) - 4px);
+            background: linear-gradient(180deg, rgba(22, 26, 35, 0.9) 0%, rgba(19, 22, 29, 0.9) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(90deg);
+        }
+
+        .faq-empty,
+        .empty-state {
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--border-color);
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.74) 0%, rgba(22, 22, 25, 0.78) 100%);
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .ticket-card {
+            background: linear-gradient(180deg, rgba(29, 29, 33, 0.96) 0%, rgba(23, 23, 27, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 18px 34px rgba(2, 6, 14, 0.10);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(82, 122, 214, 0.24);
+            box-shadow: 0 22px 40px rgba(8, 15, 28, 0.14);
+        }
+
+        .ticket-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .ticket-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .ticket-meta {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .ticket-message {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .ticket-status {
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .status-open {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.26);
+        }
+
+        .status-in_progress {
+            background: rgba(59, 130, 246, 0.12);
+            color: #93c5fd;
+            border-color: rgba(59, 130, 246, 0.26);
+        }
+
+        .status-closed {
+            background: rgba(34, 197, 94, 0.12);
+            color: #86efac;
+            border-color: rgba(34, 197, 94, 0.26);
+        }
+
+        .ticket-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn,
+        .btn-ghost,
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn {
+            background: var(--gradient-primary);
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(59, 130, 246, 0.16);
+        }
+
+        .btn:hover,
+        .btn-ghost:hover,
+        .btn-danger:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(34, 197, 94, 0.16);
+        }
+
+        .btn-ghost {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #db6270 0%, #c54b59 100%);
+            color: #ffffff;
+            border-color: rgba(171, 58, 72, 0.38);
+            box-shadow: 0 14px 28px rgba(197, 75, 89, 0.18);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 18px 34px rgba(197, 75, 89, 0.24);
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-note {
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .form-textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+
+        .cta-box {
+            margin-top: 24px;
+            background: linear-gradient(180deg, rgba(31, 31, 36, 0.96) 0%, rgba(24, 24, 28, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 18px 34px rgba(2, 6, 14, 0.10);
+        }
+
+        .cta-box p {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(6px);
+            padding: 24px;
+        }
+
+        .modal.is-open {
+            display: block;
+        }
+
+        .modal-window {
+            max-width: 860px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, rgba(29, 29, 33, 0.98) 0%, rgba(21, 21, 25, 0.98) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 30px 56px rgba(0, 0, 0, 0.34);
+        }
+
+        html[data-theme='light'] body.support-page {
+            --bg-primary: #e8f0e4;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --bg-tertiary: #eef5ea;
+            --bg-input: #fbfef9;
+            --border-color: rgba(108, 137, 111, 0.34);
+            --text-primary: #1d3022;
+            --text-secondary: #395043;
+            --text-muted: #6a7f6e;
+            --accent-primary: #5f9f74;
+            --accent-success: #5f9c6c;
+            --accent-warning: #d09b3a;
+            --accent-danger: #cc5a67;
+            --accent-purple: #8075cc;
+            --gradient-primary: linear-gradient(135deg, #78b17b 0%, #619f76 55%, #88b48e 100%);
+            --gradient-success: linear-gradient(135deg, #75b87b 0%, #629f71 100%);
+            background:
+                radial-gradient(circle at top left, rgba(129, 181, 119, 0.26) 0%, transparent 34%),
+                radial-gradient(circle at top right, rgba(147, 188, 157, 0.18) 0%, transparent 26%),
+                radial-gradient(circle at bottom right, rgba(172, 201, 165, 0.20) 0%, transparent 28%),
+                linear-gradient(180deg, #e8f0e4 0%, #dde8db 100%);
+        }
+
+        html[data-theme='dark'] body.support-page .manage-btn {
+            background: linear-gradient(135deg, #5f6fa8 0%, #6b60a4 58%, #587d96 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(128, 139, 205, 0.28) !important;
+            box-shadow: 0 18px 32px rgba(82, 96, 168, 0.22);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.support-page .tab-btn {
+            background: rgba(23, 30, 42, 0.94);
+            border-color: rgba(114, 126, 160, 0.24);
+            color: #c5cfdd;
+        }
+
+        html[data-theme='dark'] body.support-page .tab-btn.active {
+            background: linear-gradient(135deg, #5f6fa8 0%, #6b60a4 58%, #587d96 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(128, 139, 205, 0.24) !important;
+            box-shadow: 0 18px 32px rgba(82, 96, 168, 0.22);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.support-page .back-btn {
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 18px 32px rgba(96, 128, 102, 0.14);
+        }
+
+        html[data-theme='light'] body.support-page .manage-btn {
+            background: linear-gradient(135deg, #73b87e 0%, #5f9f74 55%, #86b68f 100%);
+            color: #ffffff;
+            border-color: rgba(96, 143, 102, 0.34);
+            box-shadow: 0 18px 34px rgba(99, 151, 107, 0.20);
+        }
+
+        html[data-theme='light'] body.support-page .hero,
+        html[data-theme='light'] body.support-page .panel,
+        html[data-theme='light'] body.support-page .faq-group,
+        html[data-theme='light'] body.support-page .ticket-card,
+        html[data-theme='light'] body.support-page .faq-item,
+        html[data-theme='light'] body.support-page .cta-box,
+        html[data-theme='light'] body.support-page .modal-window {
+            box-shadow: 0 24px 42px rgba(105, 134, 109, 0.13);
+        }
+
+        html[data-theme='light'] body.support-page .modal-window {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(242, 249, 238, 0.99) 100%);
+            border-color: rgba(27, 43, 28, 0.62);
+            box-shadow:
+                0 30px 56px rgba(76, 103, 79, 0.20),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+        }
+
+        html[data-theme='light'] body.support-page .modal-close {
+            background: rgba(247, 251, 245, 1);
+            color: #213127;
+            border-color: rgba(27, 43, 28, 0.30);
+            box-shadow: 0 10px 18px rgba(102, 130, 106, 0.10);
+        }
+
+        html[data-theme='light'] body.support-page .response-ticket {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(239, 247, 236, 0.98) 100%);
+            border-color: rgba(27, 43, 28, 0.34);
+            color: var(--text-secondary);
+        }
+
+        html[data-theme='light'] body.support-page .btn,
+        html[data-theme='light'] body.support-page .btn-success {
+            background: linear-gradient(135deg, #7dc083 0%, #69ab74 55%, #93c49a 100%);
+            color: #ffffff;
+            border-color: rgba(70, 108, 73, 0.34);
+            box-shadow: 0 18px 34px rgba(95, 145, 103, 0.20);
+            border-radius: 999px;
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.support-page .btn,
+        html[data-theme='dark'] body.support-page .btn-success {
+            background: linear-gradient(135deg, #6b79ba 0%, #7567b6 58%, #5f84a1 100%);
+            color: #f7fbff;
+            border-color: rgba(143, 152, 215, 0.30);
+            box-shadow: 0 18px 32px rgba(82, 96, 168, 0.24);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.support-page .tab-btn {
+            color: #1f3124;
+            border-color: rgba(27, 43, 28, 0.30);
+        }
+
+        html[data-theme='light'] body.support-page .tab-btn.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, #7dc083 0%, #69ab74 55%, #93c49a 100%);
+            border-color: rgba(70, 108, 73, 0.36);
+            box-shadow: 0 14px 28px rgba(95, 145, 103, 0.20);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.support-page .tab-btn {
+            color: #dbe6f6;
+            border-color: rgba(119, 130, 170, 0.26);
+        }
+
+        html[data-theme='dark'] body.support-page .tab-btn.active {
+            background: linear-gradient(135deg, #6b79ba 0%, #7567b6 58%, #5f84a1 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(143, 152, 215, 0.30) !important;
+            box-shadow: 0 18px 32px rgba(82, 96, 168, 0.22);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.support-page .hero {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(243, 250, 240, 0.97) 100%);
+        }
+
+        html[data-theme='light'] body.support-page .panel {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(241, 248, 239, 0.97) 100%);
+        }
+
+        html[data-theme='light'] body.support-page .hero-stat,
+        html[data-theme='light'] body.support-page .faq-group,
+        html[data-theme='light'] body.support-page .ticket-card,
+        html[data-theme='light'] body.support-page .faq-item,
+        html[data-theme='light'] body.support-page .cta-box {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(239, 247, 236, 0.96) 100%);
+        }
+
+        html[data-theme='light'] body.support-page .panel-head {
+            border-bottom-color: rgba(120, 145, 122, 0.16);
+        }
+
+        html[data-theme='light'] body.support-page .faq-search input {
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 18px 34px rgba(108, 138, 113, 0.12);
+        }
+
+        html[data-theme='light'] body.support-page .faq-question:hover {
+            background: linear-gradient(135deg, rgba(116, 182, 125, 0.12) 0%, rgba(121, 168, 214, 0.12) 100%);
+        }
+
+        html[data-theme='light'] body.support-page .faq-group--general .faq-group-title,
+        html[data-theme='light'] body.support-page .faq-group--booking .faq-group-title,
+        html[data-theme='light'] body.support-page .faq-group--payment .faq-group-title,
+        html[data-theme='light'] body.support-page .faq-group--technical .faq-group-title {
+            color: #ffffff;
+            border-color: transparent;
+        }
+
+        html[data-theme='light'] body.support-page .faq-group--general .faq-group-title {
+            background: linear-gradient(135deg, #7db0de 0%, #5e94c7 100%);
+        }
+
+        html[data-theme='light'] body.support-page .faq-group--booking .faq-group-title {
+            background: linear-gradient(135deg, #6cb67b 0%, #4c9762 100%);
+        }
+
+        html[data-theme='light'] body.support-page .faq-group--payment .faq-group-title {
+            background: linear-gradient(135deg, #dda55f 0%, #cf7c48 100%);
+        }
+
+        html[data-theme='light'] body.support-page .faq-group--technical .faq-group-title {
+            background: linear-gradient(135deg, #9486d6 0%, #756fc5 100%);
+        }
+
+        html[data-theme='light'] body.support-page .faq-item.active .faq-question {
+            background: linear-gradient(135deg, rgba(108, 182, 123, 0.16) 0%, rgba(125, 176, 222, 0.14) 100%);
+        }
+
+        html[data-theme='light'] body.support-page .faq-item.active .faq-answer {
+            background: linear-gradient(180deg, rgba(247, 252, 245, 0.98) 0%, rgba(239, 247, 236, 0.98) 100%);
+            border-color: rgba(120, 146, 121, 0.14);
+        }
+
+        html[data-theme='light'] body.support-page .tab-btn {
+            background: rgba(255, 255, 255, 0.86);
+        }
+
+        html[data-theme='light'] body.support-page .tab-btn.active {
+            background: linear-gradient(135deg, #76b77c 0%, #639f71 58%, #88b98f 100%) !important;
+            color: #ffffff !important;
+            border-color: rgba(96, 143, 102, 0.26) !important;
+            box-shadow: 0 18px 30px rgba(105, 147, 111, 0.20);
+            -webkit-text-fill-color: currentColor;
+            text-shadow: 0 1px 2px rgba(38, 67, 43, 0.18);
+        }
+
+        html[data-theme='light'] body.support-page .tab-btn.active:hover {
+            color: #ffffff !important;
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.support-page .btn-danger {
+            background: linear-gradient(135deg, #dd6b76 0%, #c34858 100%);
+            color: #ffffff;
+            border-color: rgba(177, 74, 88, 0.36);
+            box-shadow: 0 18px 32px rgba(194, 77, 90, 0.20);
+        }
+
+        html[data-theme='light'] body.support-page .btn-danger:hover {
+            box-shadow: 0 20px 36px rgba(194, 77, 90, 0.26);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 0;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .response-ticket {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .panel,
+            .hero {
+                padding: 20px;
+            }
+
+            .modal {
+                padding: 12px;
+            }
+
+            .modal-window {
+                padding: 20px;
+                max-height: calc(100vh - 24px);
+            }
+
+            .page-actions,
+            .panel-head,
+            .ticket-card-head,
+            .ticket-actions {
+                align-items: stretch;
+            }
+
+            .ticket-status {
+                width: fit-content;
+            }
+        }
+    </style>
+    {% include 'theme_setup.html' %}
+</head>
+<body class="support-page">
+    <div class="support-shell">
+        <form style="display:none;">{% csrf_token %}</form>
+
+        <div class="page-actions">
+            <a href="{% url 'home' %}" class="back-btn">← Назад на главную</a>
+            {% if can_manage_faq %}
+            <a href="{% url 'faq_management' %}" class="manage-btn">⚙️ Управление FAQ</a>
+            {% endif %}
+        </div>
+
+        <section class="hero">
+            <h1>FAQ и техподдержка</h1>
+            <p>Здесь собраны ответы на частые вопросы и обращения пользователей. Сначала попробуйте найти ответ в FAQ, а если его нет — создайте обращение в поддержку.</p>
+
+            {% if can_manage_faq or can_manage_support %}
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ faq_total }}</span>
+                    <span class="hero-stat-label">Активных FAQ</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ faq_category_total }}</span>
+                    <span class="hero-stat-label">Категорий FAQ</span>
+                </div>
+                {% if can_manage_support %}
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ open_tickets_count }}</span>
+                    <span class="hero-stat-label">Открытых обращений</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags|default:'success' }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="tabs">
+            <button type="button" class="tab-btn active" data-tab="faq">FAQ</button>
+            {% if user.is_authenticated %}
+            <button type="button" class="tab-btn" data-tab="new-ticket">Новое обращение</button>
+            <button type="button" class="tab-btn" data-tab="my-tickets">Мои обращения</button>
+            {% endif %}
+            {% if can_manage_support %}
+            <button type="button" class="tab-btn" data-tab="all-tickets">Все обращения</button>
+            {% endif %}
+        </div>
+
+        <section id="faq" class="panel active">
+            <div class="panel-head">
+                <div>
+                    <div class="panel-title">База знаний</div>
+                    <div class="panel-subtitle">FAQ теперь строится только из записей в базе. Без дублей и захардкоженных блоков в шаблоне.</div>
+                </div>
+            </div>
+
+            <div class="faq-search">
+                <input type="text" id="faqSearch" placeholder="🔍 Поиск по вопросам и ответам">
+            </div>
+
+            {% if faq_sections %}
+                {% for section in faq_sections %}
+                <div class="faq-group faq-group--{{ section.code }}" data-faq-group>
+                    <div class="faq-group-title">
+                        <span>{{ section.label }}</span>
+                        <span class="faq-count">({{ section.count }})</span>
+                    </div>
+
+                    <div class="faq-list">
+                        {% for faq in section.items %}
+                        <div class="faq-item" data-faq-item>
+                            <button type="button" class="faq-question">
+                                <span class="faq-question-label">{{ faq.question }}</span>
+                                <span class="faq-toggle">▶</span>
+                            </button>
+                            <div class="faq-answer" data-faq-search-text="{{ faq.question|lower }} {{ faq.answer|striptags|lower }}">
+                                {{ faq.answer|linebreaksbr }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+                <div id="faqEmptySearch" class="faq-empty" style="display:none;">
+                    По вашему запросу в FAQ ничего не найдено.
+                </div>
+            {% else %}
+                <div class="faq-empty">
+                    <p>Пока FAQ не заполнен.</p>
+                    {% if can_manage_faq %}
+                    <div style="margin-top: 16px;">
+                        <a href="{% url 'faq_management' %}" class="manage-btn">Заполнить FAQ</a>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if not user.is_authenticated %}
+            <div class="cta-box">
+                <p>Чтобы отправить обращение в поддержку и отслеживать ответы, войдите в систему или зарегистрируйтесь.</p>
+                <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                    <a href="{% url 'login' %}" class="btn">Войти</a>
+                    <a href="{% url 'register' %}" class="btn btn-success">Регистрация</a>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        {% if user.is_authenticated %}
+        <section id="new-ticket" class="panel">
+            <div class="panel-head">
+                <div>
+                    <div class="panel-title">Новое обращение</div>
+                    <div class="panel-subtitle">Опишите проблему максимально конкретно: что произошло, где именно и что вы ожидали увидеть.</div>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'create_ticket' %}" class="form-grid">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="ticketSubject">Тема обращения</label>
+                    <input id="ticketSubject" class="form-control" type="text" name="subject" maxlength="200" required placeholder="Например: Не приходит подтверждение бронирования">
+                    <div class="form-note">Минимум 5 символов. Лучше коротко и по сути.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ticketMessage">Описание проблемы</label>
+                    <textarea id="ticketMessage" class="form-textarea" name="message" required placeholder="Опишите проблему, шаги воспроизведения и что именно пошло не так"></textarea>
+                    <div class="form-note">Минимум 15 символов. Чем подробнее описание, тем быстрее ответ.</div>
+                </div>
+
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button type="submit" class="btn">Отправить обращение</button>
+                    <button type="button" class="btn-ghost" onclick="switchSupportTab('faq')">Сначала посмотреть FAQ</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="my-tickets" class="panel">
+            <div class="panel-head">
+                <div>
+                    <div class="panel-title">Мои обращения</div>
+                    <div class="panel-subtitle">Здесь видны все ваши обращения, их статус и количество ответов.</div>
+                </div>
+            </div>
+
+            {% if my_tickets %}
+            <div class="ticket-list">
+                {% for ticket in my_tickets %}
+                <article class="ticket-card">
+                    <div class="ticket-card-head">
+                        <div>
+                            <div class="ticket-title">{{ ticket.subject }}</div>
+                            <div class="ticket-meta">
+                                <span>Создано: {{ ticket.created_at|date:"d.m.Y H:i" }}</span>
+                                <span>Последняя активность: {{ ticket.last_activity|date:"d.m.Y H:i" }}</span>
+                                <span>Ответов: {{ ticket.response_count }}</span>
+                            </div>
+                        </div>
+                        <div class="ticket-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</div>
+                    </div>
+
+                    <div class="ticket-message">{{ ticket.message|truncatewords:28 }}</div>
+
+                    <div class="ticket-actions">
+                        <button type="button" class="btn" onclick="openTicket({{ ticket.id }})">Открыть диалог</button>
+                        {% if ticket.status != 'closed' %}
+                        <form method="POST" action="{% url 'close_ticket' ticket.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-ghost">Закрыть обращение</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                У вас пока нет обращений в поддержку.
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        {% if can_manage_support %}
+        <section id="all-tickets" class="panel">
+            <div class="panel-head">
+                <div>
+                    <div class="panel-title">Все обращения</div>
+                    <div class="panel-subtitle">Общий список заявок пользователей с быстрым переходом в диалог и удалением неактуальных обращений.</div>
+                </div>
+            </div>
+
+            {% if all_tickets %}
+            <div class="ticket-list">
+                {% for ticket in all_tickets %}
+                <article class="ticket-card">
+                    <div class="ticket-card-head">
+                        <div>
+                            <div class="ticket-title">👤 {{ ticket.user.username }} — {{ ticket.subject }}</div>
+                            <div class="ticket-meta">
+                                <span>Создано: {{ ticket.created_at|date:"d.m.Y H:i" }}</span>
+                                <span>Последняя активность: {{ ticket.last_activity|date:"d.m.Y H:i" }}</span>
+                                <span>Ответов: {{ ticket.response_count }}</span>
+                            </div>
+                        </div>
+                        <div class="ticket-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</div>
+                    </div>
+
+                    <div class="ticket-message">{{ ticket.message|truncatewords:32 }}</div>
+
+                    <div class="ticket-actions">
+                        <button type="button" class="btn" onclick="openTicket({{ ticket.id }})">Открыть диалог</button>
+                        {% if ticket.status != 'open' %}
+                        <button type="button" class="btn-danger" onclick="confirmDeleteTicket({{ ticket.id }})">Удалить</button>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                Пока нет пользовательских обращений.
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+    </div>
+
+    <div class="modal" id="ticketModal">
+        <div class="modal-window">
+            <button type="button" class="modal-close" onclick="closeTicketModal()">&times;</button>
+            <div id="ticketModalContent"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="responseModal">
+        <div class="modal-window" style="max-width: 720px;">
+            <button type="button" class="modal-close" onclick="closeResponseModal()">&times;</button>
+            <div class="panel-title" style="margin-bottom: 8px;">Ответ на обращение</div>
+            <div class="panel-subtitle" style="margin-bottom: 18px;">Пользователь увидит ответ в карточке обращения.</div>
+
+            <div class="response-ticket">
+                <strong style="display:block; margin-bottom:8px; color: var(--text-primary);">Тема обращения</strong>
+                <div id="responseTicketSubject"></div>
+            </div>
+
+            <form id="responseForm" class="form-grid">
+                {% csrf_token %}
+                <input type="hidden" id="responseTicketId" name="ticket_id">
+                <div class="form-group">
+                    <label for="responseMessage">Ответ</label>
+                    <textarea id="responseMessage" class="form-textarea" name="response" required placeholder="Напишите понятный и полный ответ пользователю"></textarea>
+                </div>
+
+                <div style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
+                    <button type="button" class="btn-ghost" onclick="closeResponseModal()">Отмена</button>
+                    <button type="submit" class="btn btn-success">Отправить ответ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 2000;
+                padding: 14px 18px;
+                border-radius: 12px;
+                font-weight: 700;
+                color: #fff;
+                box-shadow: 0 16px 34px rgba(0,0,0,0.24);
+                background: ${type === 'success' ? 'linear-gradient(135deg, #22c55e, #10b981)' : 'linear-gradient(135deg, #ef4444, #dc2626)'};
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function switchSupportTab(tabName, options = {}) {
+            const { updateHash = true } = options;
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.classList.toggle('active', button.dataset.tab === tabName);
+            });
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === tabName);
+            });
+
+            if (updateHash) {
+                const url = new URL(window.location.href);
+                if (tabName === 'faq') {
+                    url.hash = '';
+                } else {
+                    url.hash = tabName;
+                }
+                window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+            }
+        }
+
+        function toggleFaqItem(button) {
+            const item = button.closest('.faq-item');
+            const isActive = item.classList.contains('active');
+
+            document.querySelectorAll('.faq-item.active').forEach(activeItem => {
+                activeItem.classList.remove('active');
+            });
+
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        }
+
+        function filterFaq(searchTerm) {
+            const normalized = searchTerm.trim().toLowerCase();
+            let visibleItems = 0;
+
+            document.querySelectorAll('[data-faq-group]').forEach(group => {
+                let visibleInGroup = 0;
+                group.querySelectorAll('[data-faq-item]').forEach(item => {
+                    const answer = item.querySelector('.faq-answer');
+                    const question = item.querySelector('.faq-question-label').textContent.toLowerCase();
+                    const answerText = (answer.dataset.faqSearchText || '').toLowerCase();
+                    const isMatch = !normalized || question.includes(normalized) || answerText.includes(normalized);
+
+                    item.style.display = isMatch ? '' : 'none';
+                    if (isMatch) {
+                        visibleInGroup += 1;
+                        visibleItems += 1;
+                    }
+                });
+
+                group.style.display = visibleInGroup ? '' : 'none';
+            });
+
+            const faqEmptyState = document.getElementById('faqEmptySearch');
+            if (faqEmptyState) {
+                faqEmptyState.style.display = visibleItems ? 'none' : 'block';
+            }
+        }
+
+        async function openTicket(ticketId) {
+            try {
+                const response = await fetch(`/support/ticket/${ticketId}/`);
+                if (!response.ok) {
+                    throw new Error('Не удалось открыть обращение');
+                }
+
+                const html = await response.text();
+                document.getElementById('ticketModalContent').innerHTML = html;
+                document.getElementById('ticketModal').classList.add('is-open');
+            } catch (error) {
+                console.error(error);
+                showNotification('Не удалось открыть обращение', 'error');
+            }
+        }
+
+        function closeTicketModal() {
+            document.getElementById('ticketModal').classList.remove('is-open');
+            document.getElementById('ticketModalContent').innerHTML = '';
+        }
+
+        async function showResponseForm(ticketId, ticketSubject) {
+            try {
+                const response = await fetch(`/support/ticket/${ticketId}/check-status/`);
+                const data = await response.json();
+
+                if (!response.ok || data.status === 'forbidden') {
+                    showNotification('Нет доступа к этому обращению', 'error');
+                    return;
+                }
+
+                if (data.status === 'closed') {
+                    showNotification('Тикет уже закрыт. Новые ответы не принимаются.', 'error');
+                    return;
+                }
+
+                document.getElementById('responseTicketSubject').textContent = ticketSubject;
+                document.getElementById('responseTicketId').value = ticketId;
+                document.getElementById('responseForm').action = `/support/ticket/${ticketId}/`;
+                document.getElementById('responseMessage').value = '';
+                document.getElementById('responseModal').classList.add('is-open');
+            } catch (error) {
+                console.error(error);
+                showNotification('Не удалось открыть форму ответа', 'error');
+            }
+        }
+
+        function closeResponseModal() {
+            document.getElementById('responseModal').classList.remove('is-open');
+        }
+
+        async function confirmDeleteTicket(ticketId) {
+            if (!confirm('Удалить это обращение? Это действие нельзя отменить.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/support/ticket/${ticketId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                });
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'Ошибка удаления');
+                }
+
+                showNotification('Обращение удалено');
+                setTimeout(() => window.location.reload(), 600);
+            } catch (error) {
+                console.error(error);
+                showNotification(error.message || 'Ошибка удаления', 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.addEventListener('click', () => switchSupportTab(button.dataset.tab));
+            });
+
+            document.querySelectorAll('.faq-question').forEach(button => {
+                button.addEventListener('click', () => toggleFaqItem(button));
+            });
+
+            const faqSearch = document.getElementById('faqSearch');
+            if (faqSearch) {
+                faqSearch.addEventListener('input', (event) => filterFaq(event.target.value));
+            }
+
+            const initialTab = window.location.hash ? window.location.hash.replace('#', '') : 'faq';
+            if (initialTab && initialTab !== 'faq' && document.getElementById(initialTab)) {
+                switchSupportTab(initialTab);
+            } else {
+                switchSupportTab('faq', { updateHash: false });
+                if (window.location.hash === '#faq') {
+                    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+                }
+                window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
+            }
+
+            window.addEventListener('pageshow', function () {
+                if (!window.location.hash) {
+                    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+                }
+            });
+
+            const responseForm = document.getElementById('responseForm');
+            if (responseForm) {
+                responseForm.addEventListener('submit', async function (event) {
+                    event.preventDefault();
+
+                    const submitButton = this.querySelector('button[type="submit"]');
+                    const originalText = submitButton.textContent;
+                    submitButton.textContent = 'Отправка...';
+                    submitButton.disabled = true;
+
+                    try {
+                        const response = await fetch(this.action, {
+                            method: 'POST',
+                            body: new FormData(this),
+                            headers: {
+                                'X-CSRFToken': getCsrfToken(),
+                            }
+                        });
+
+                        const data = await response.json();
+                        if (!response.ok || !data.success) {
+                            throw new Error(data.error || 'Не удалось отправить ответ');
+                        }
+
+                        showNotification(data.message || 'Ответ отправлен');
+                        closeResponseModal();
+                        closeTicketModal();
+                        setTimeout(() => window.location.reload(), 700);
+                    } catch (error) {
+                        console.error(error);
+                        showNotification(error.message || 'Ошибка при отправке ответа', 'error');
+                        submitButton.textContent = originalText;
+                        submitButton.disabled = false;
+                    }
+                });
+            }
+
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', event => {
+                    if (event.target === modal) {
+                        modal.classList.remove('is-open');
+                    }
+                });
+            });
+        });
+    </script>
+    {% include 'theme_toggle.html' %}
+</body>
+</html>

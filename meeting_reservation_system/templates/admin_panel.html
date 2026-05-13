@@ -193,6 +193,12 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
+        .role-owner {
+            background: rgba(99, 102, 241, 0.14);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.34);
+        }
+
         .role-manager {
             background: rgba(245, 158, 11, 0.1);
             color: var(--accent-warning);
@@ -223,6 +229,18 @@
 
         td {
             overflow-wrap: anywhere;
+        }
+
+        .user-email {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .user-activity-note {
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.45;
         }
 
         .btn-view {
@@ -259,6 +277,34 @@
         .btn-delete:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+        }
+
+        .btn-role:disabled,
+        .btn-delete:disabled {
+            transform: none !important;
+        }
+
+        .modal-content label.role-option-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: var(--bg-card);
+            border-style: dashed;
+        }
+
+        .modal-content label.role-option-disabled:hover {
+            background: var(--bg-card);
+        }
+
+        .modal-content label.role-option-disabled input {
+            pointer-events: none;
+        }
+
+        .modal-hint {
+            margin-top: -8px;
+            margin-bottom: 18px;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.45;
         }
 
         .last-login {
@@ -535,7 +581,7 @@
     </style>
     {% include 'theme_setup.html' %}
 </head>
-<body>
+<body class="admin-panel-page">
     <div class="container">
         {% csrf_token %}
 
@@ -551,6 +597,7 @@
                        placeholder="🔍 Поиск по логину..." onkeyup="filterUsers()">
                 <select id="roleSelect" class="role-select" onchange="filterUsers()">
                     <option value="">Все роли</option>
+                    <option value="owner">Владелец</option>
                     <option value="admin">Администратор</option>
                     <option value="manager">Менеджер</option>
                     <option value="user">Пользователь</option>
@@ -561,7 +608,7 @@
 
         <div class="users-table">
             <div class="table-header">
-                <h3>👥 Пользователи (<span id="usersCount">{{ users.count }}</span>)</h3>
+                <h3>👥 Пользователи (<span id="usersCount">{{ users|length }}</span>)</h3>
             </div>
 
             <table>
@@ -578,7 +625,12 @@
                 {% for user in users %}
                 <tr class="user-row" data-username="{{ user.username|lower }}" data-role="{{ user.role }}">
                     <td data-label="Логин"><strong>{{ user.username }}</strong></td>
-                    <td data-label="Email">{{ user.email|default:"Не указан" }}</td>
+                    <td data-label="Email">
+                        <div class="user-email">
+                            <span>{{ user.email|default:"Не указан" }}</span>
+                            <span class="user-activity-note">{{ user.admin_activity_summary }}</span>
+                        </div>
+                    </td>
                     <td data-label="Последний вход">
                         <div class="last-login">
                             {% if user.last_login %}
@@ -600,9 +652,13 @@
                     </td>
                     <td class="actions-cell" data-label="Действия">
                         <a href="{% url 'admin_user_profile' user.id %}" class="action-btn btn-view">👁️ Просмотр</a>
-                        <button class="action-btn btn-role" onclick="openRoleDialog({{ user.id }}, '{{ user.role }}')">✏️ Роль</button>
+                        <button class="action-btn btn-role"
+                                onclick="openRoleDialog({{ user.id }}, '{{ user.role }}', '{{ user.admin_policy.allowed_roles|join:"," }}')"
+                                {% if not user.admin_policy.can_change_role %}disabled title="{{ user.admin_policy.role_change_reason }}"{% else %}title="{{ user.admin_policy.role_change_reason|default:'Изменить роль пользователя' }}"{% endif %}>
+                            ✏️ Роль
+                        </button>
                         <button class="action-btn btn-delete" onclick="deleteUser({{ user.id }}, '{{ user.username }}')"
-                                {% if user.id == request.user.id or user.role == 'admin' %}disabled{% endif %}>
+                                {% if not user.admin_policy.can_delete %}disabled title="{{ user.admin_policy.delete_reason }}"{% else %}title="{{ user.admin_policy.delete_reason }}"{% endif %}>
                             🗑️ Удалить
                         </button>
                     </td>
@@ -618,7 +674,9 @@
         <div class="modal-content">
             <h3>Изменить роль</h3>
             <input type="hidden" id="roleUserId">
+            <div class="modal-hint" id="roleModalHint">Выберите новую роль для пользователя.</div>
 
+            <label><input type="radio" name="newrole" value="owner"> Владелец</label>
             <label><input type="radio" name="newrole" value="admin"> Администратор</label>
             <label><input type="radio" name="newrole" value="manager"> Менеджер</label>
             <label><input type="radio" name="newrole" value="user"> Пользователь</label>
@@ -684,15 +742,59 @@
             filterUsers();
         }
 
-        function openRoleDialog(userId, currentRole) {
+        function getRoleLabel(role) {
+            const labels = {
+                owner: 'Владелец',
+                admin: 'Администратор',
+                manager: 'Менеджер',
+                user: 'Пользователь',
+            };
+
+            return labels[role] || role;
+        }
+
+        function openRoleDialog(userId, currentRole, allowedRolesRaw) {
             document.getElementById("roleUserId").value = userId;
-            document.querySelectorAll("input[name='newrole']").forEach(r => {
-                r.checked = (r.value === currentRole);
+            const allowedRoles = (allowedRolesRaw || '')
+                .split(',')
+                .map(role => role.trim())
+                .filter(Boolean);
+            let hasCheckedRole = false;
+
+            document.querySelectorAll("input[name='newrole']").forEach(radio => {
+                const isAllowed = allowedRoles.includes(radio.value);
+                radio.disabled = !isAllowed;
+                radio.checked = isAllowed && radio.value === currentRole;
+                radio.closest('label').classList.toggle('role-option-disabled', !isAllowed);
+
+                if (radio.checked) {
+                    hasCheckedRole = true;
+                }
             });
+
+            if (!hasCheckedRole) {
+                const firstAllowedRole = document.querySelector("input[name='newrole']:not(:disabled)");
+                if (firstAllowedRole) {
+                    firstAllowedRole.checked = true;
+                }
+            }
+
+            const hint = document.getElementById("roleModalHint");
+            if (allowedRoles.length) {
+                hint.textContent = `Доступные роли: ${allowedRoles.map(getRoleLabel).join(', ')}.`;
+            } else {
+                hint.textContent = 'Для этого пользователя смена роли недоступна.';
+            }
+
             document.getElementById("roleModal").style.display = "flex";
         }
 
         function closeRoleModal() {
+            document.querySelectorAll("input[name='newrole']").forEach(radio => {
+                radio.disabled = false;
+                radio.checked = false;
+                radio.closest('label').classList.remove('role-option-disabled');
+            });
             document.getElementById("roleModal").style.display = "none";
         }
 

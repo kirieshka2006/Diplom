@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление правилами и инструкциями</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body.info-management-page {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .page {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .page-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .back-btn,
+        .public-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .public-btn {
+            background: var(--gradient-success, var(--gradient-primary));
+            color: #fff;
+            border-color: rgba(34, 197, 94, 0.24);
+            box-shadow: 0 16px 34px rgba(34, 197, 94, 0.18);
+        }
+
+        .back-btn:hover,
+        .public-btn:hover,
+        .btn:hover,
+        .btn-ghost:hover,
+        .btn-danger:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.96) 0%, rgba(18, 18, 20, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 22px;
+            box-shadow: 0 26px 48px rgba(4, 8, 16, 0.16);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto auto 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .hero h1 {
+            font-size: clamp(26px, 3.4vw, 38px);
+            line-height: 1.08;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            max-width: 880px;
+            color: var(--text-secondary);
+            line-height: 1.65;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-top: 22px;
+        }
+
+        .hero-stat {
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.96) 0%, rgba(21, 21, 25, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 18px 32px rgba(4, 8, 16, 0.12);
+        }
+
+        .hero-stat-value {
+            display: block;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .hero-stat-label {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .messages {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .message {
+            border-radius: 14px;
+            padding: 14px 16px;
+            border: 1px solid transparent;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message-success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #bbf7d0;
+            border-color: rgba(34, 197, 94, 0.26);
+        }
+
+        .message-error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.26);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 360px minmax(0, 1fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .sidebar-stack {
+            display: grid;
+            gap: 20px;
+        }
+
+        .create-shortcut-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .create-shortcut-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .create-shortcut-buttons .btn,
+        .create-shortcut-buttons .btn-ghost {
+            width: 100%;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.96) 0%, rgba(20, 20, 23, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 20px 36px rgba(4, 8, 16, 0.12);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .card-subtitle {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .form-group {
+            display: grid;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-control,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            border-radius: 14px;
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-input, var(--bg-card));
+            color: var(--text-primary);
+            padding: 13px 14px;
+            font: inherit;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--accent-success, #22c55e);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.16);
+        }
+
+        .checkbox-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 240px;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .info-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .info-card {
+            background: linear-gradient(180deg, rgba(24, 24, 27, 0.92) 0%, rgba(18, 18, 20, 0.92) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 16px 28px rgba(4, 8, 16, 0.1);
+        }
+
+        .info-card-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        .info-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, 0.14);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #d7f7e4;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .info-content {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+
+        .info-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .btn,
+        .btn-ghost,
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 14px;
+            border: 1px solid transparent;
+            padding: 11px 16px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn {
+            background: var(--gradient-primary);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-ghost {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .empty-state {
+            padding: 18px;
+            border-radius: 16px;
+            border: 1px dashed var(--border-color);
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.56);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 2000;
+        }
+
+        .modal.is-open {
+            display: flex;
+        }
+
+        .modal-window {
+            width: min(760px, 100%);
+            max-height: calc(100vh - 48px);
+            overflow: auto;
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.98) 0%, rgba(21, 21, 25, 0.98) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 24px 50px rgba(4, 8, 16, 0.22);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        html[data-theme='light'] body.info-management-page .create-shortcut-buttons .btn {
+            background: linear-gradient(135deg, #73b87e 0%, #5f9f74 55%, #86b68f 100%);
+            color: #ffffff;
+            border-color: rgba(96, 143, 102, 0.34);
+            box-shadow: 0 18px 34px rgba(99, 151, 107, 0.20);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.info-management-page .create-shortcut-buttons .btn-ghost {
+            background: rgba(255, 255, 255, 0.90);
+            color: #243228;
+            border-color: rgba(108, 137, 111, 0.28);
+            box-shadow: 0 14px 26px rgba(108, 137, 111, 0.10);
+        }
+
+        html[data-theme='dark'] body.info-management-page .create-shortcut-buttons .btn {
+            background: linear-gradient(135deg, #5f6fa8 0%, #6b60a4 58%, #587d96 100%);
+            color: #f7fbff;
+            border-color: rgba(128, 139, 205, 0.28);
+            box-shadow: 0 18px 32px rgba(82, 96, 168, 0.22);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.info-management-page .create-shortcut-buttons .btn-ghost {
+            background: rgba(24, 31, 43, 0.94);
+            color: #e6edf7;
+            border-color: rgba(114, 126, 160, 0.24);
+        }
+
+        html[data-theme='light'] body.info-management-page .card,
+        html[data-theme='light'] body.info-management-page .info-card,
+        html[data-theme='light'] body.info-management-page .hero,
+        html[data-theme='light'] body.info-management-page .hero-stat,
+        html[data-theme='light'] body.info-management-page .toolbar,
+        html[data-theme='light'] body.info-management-page .empty-state {
+            border-color: rgba(25, 41, 25, 0.60);
+            border-width: 2px;
+            box-shadow:
+                0 24px 42px rgba(89, 117, 90, 0.15),
+                inset 0 0 0 1px rgba(20, 32, 20, 0.06);
+        }
+
+        html[data-theme='light'] body.info-management-page .hero {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(242, 249, 237, 0.99) 100%);
+        }
+
+        html[data-theme='light'] body.info-management-page .card,
+        html[data-theme='light'] body.info-management-page .info-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(240, 247, 236, 0.99) 100%);
+        }
+
+        html[data-theme='light'] body.info-management-page .form-control,
+        html[data-theme='light'] body.info-management-page .form-select,
+        html[data-theme='light'] body.info-management-page .form-textarea {
+            background: rgba(255, 255, 255, 0.99);
+            border-color: rgba(45, 67, 46, 0.42);
+        }
+
+        html[data-theme='light'] body.info-management-page .modal-window {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(243, 250, 239, 1) 100%);
+            border-color: rgba(25, 41, 25, 0.68);
+            box-shadow:
+                0 30px 56px rgba(76, 103, 79, 0.22),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+        }
+
+        html[data-theme='light'] body.info-management-page .modal-close {
+            background: rgba(246, 251, 244, 1);
+            color: #213127;
+            border-color: rgba(25, 41, 25, 0.34);
+            box-shadow: 0 10px 18px rgba(102, 130, 106, 0.10);
+        }
+
+        html[data-theme='dark'] body.info-management-page .btn,
+        html[data-theme='dark'] body.info-management-page .btn-ghost {
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.info-management-page .btn {
+            background: linear-gradient(135deg, #5f6fa8 0%, #6b60a4 58%, #587d96 100%);
+            color: #f7fbff;
+            border-color: rgba(128, 139, 205, 0.28);
+            box-shadow: 0 18px 32px rgba(82, 96, 168, 0.22);
+        }
+
+        html[data-theme='dark'] body.info-management-page .btn-ghost {
+            background: rgba(24, 31, 43, 0.94);
+            color: #e6edf7;
+            border-color: rgba(114, 126, 160, 0.24);
+        }
+
+        html[data-theme='dark'] body.info-management-page .back-btn {
+            background: rgba(22, 28, 38, 0.96);
+            color: #ffffff;
+            border-color: rgba(127, 140, 178, 0.20);
+        }
+
+        html[data-theme='dark'] body.info-management-page .public-btn {
+            background: linear-gradient(135deg, #6563a9 0%, #7260ae 55%, #627da2 100%);
+            color: #ffffff;
+            border-color: rgba(132, 138, 201, 0.30);
+            box-shadow: 0 16px 34px rgba(85, 92, 162, 0.24);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.info-management-page .back-btn {
+            background: rgba(255, 255, 255, 0.96);
+            color: #1f3124;
+            border-color: rgba(25, 41, 25, 0.28);
+            box-shadow: 0 14px 26px rgba(89, 117, 90, 0.12);
+        }
+
+        html[data-theme='light'] body.info-management-page .public-btn {
+            background: linear-gradient(135deg, #7dc083 0%, #69ab74 55%, #93c49a 100%);
+            color: #ffffff;
+            border-color: rgba(70, 108, 73, 0.34);
+            box-shadow: 0 18px 34px rgba(95, 145, 103, 0.20);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.info-management-page .info-badge {
+            background: rgba(243, 249, 240, 1);
+            border-color: rgba(56, 85, 58, 0.42);
+            color: #1f3521;
+        }
+
+        html[data-theme='dark'] body.info-management-page .info-badge {
+            background: rgba(42, 53, 44, 0.82);
+            border-color: rgba(133, 149, 137, 0.22);
+            color: #edf8ee;
+        }
+
+        html[data-theme='light'] body.info-management-page .btn,
+        html[data-theme='light'] body.info-management-page .btn-ghost,
+        html[data-theme='light'] body.info-management-page .btn-danger {
+            border-width: 2px;
+        }
+
+        html[data-theme='light'] body.info-management-page .btn {
+            background: linear-gradient(135deg, #7ec084 0%, #6dad78 55%, #93c499 100%);
+            color: #ffffff;
+            border-color: rgba(70, 108, 73, 0.36);
+            box-shadow: 0 18px 30px rgba(95, 145, 103, 0.20);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.info-management-page .btn-ghost {
+            background: rgba(255, 255, 255, 0.96);
+            color: #203022;
+            border-color: rgba(25, 41, 25, 0.34);
+        }
+
+        html[data-theme='light'] body.info-management-page .btn-danger {
+            background: linear-gradient(135deg, #dd6b76 0%, #c44959 100%);
+            color: #ffffff;
+            border-color: rgba(177, 74, 88, 0.36);
+            box-shadow: 0 18px 32px rgba(196, 73, 89, 0.20);
+        }
+
+        html[data-theme='light'] body.info-management-page .modal-actions .btn {
+            background: linear-gradient(135deg, #88c58d 0%, #74b57e 55%, #5ea16f 100%);
+            color: #ffffff;
+            border-color: rgba(66, 104, 72, 0.30);
+            box-shadow: 0 18px 30px rgba(95, 145, 103, 0.20);
+            border-radius: 999px;
+            min-width: 170px;
+            padding: 12px 22px;
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.info-management-page .modal-actions .btn-ghost {
+            background: rgba(255, 255, 255, 0.92);
+            color: #223127;
+            border-color: rgba(36, 52, 37, 0.28);
+            border-radius: 999px;
+            min-width: 170px;
+            padding: 12px 22px;
+        }
+
+        @media (max-width: 1080px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            body.info-management-page {
+                padding: 16px;
+            }
+
+            .page-actions {
+                align-items: stretch;
+            }
+
+            .hero,
+            .card,
+            .modal-window {
+                padding: 20px;
+            }
+
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .info-card-top {
+                flex-direction: column;
+            }
+
+            .create-shortcut-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-actions .btn,
+            .modal-actions .btn-ghost {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
+    {% include 'theme_setup.html' %}
+</head>
+<body class="info-management-page">
+    <div class="page">
+        <div class="page-actions">
+            <a href="{% url 'info' %}" class="back-btn">← Назад к правилам</a>
+            <a href="{% url 'info' %}" class="public-btn">Открыть страницу для пользователей</a>
+        </div>
+
+        <section class="hero">
+            <h1>Управление правилами и инструкциями</h1>
+            <p>Это единый источник контента для страницы информации. Администратор может добавлять, редактировать и удалять блоки без правок кода.</p>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ info_total }}</span>
+                    <span class="hero-stat-label">Всего блоков</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ active_info_total }}</span>
+                    <span class="hero-stat-label">Активных блоков</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ info_sections|length }}</span>
+                    <span class="hero-stat-label">Разделов</span>
+                </div>
+            </div>
+        </section>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags|default:'success' }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="layout">
+            <aside class="sidebar-stack">
+                <div class="card">
+                    <div class="card-title">Создание</div>
+                    <div class="card-subtitle">Откройте отдельное окно для нового блока или раздела. Так экран остаётся компактным.</div>
+
+                    <div class="create-shortcut-buttons">
+                        <button type="button" class="btn" onclick="openCreateInfoBlockModal()">➕ Новый блок</button>
+                        <button type="button" class="btn-ghost" onclick="openCreateInfoSectionModal()">📚 Новый раздел</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Разделы информации</div>
+                    <div class="card-subtitle">Создавайте и редактируйте разделы страницы информации без правок кода.</div>
+
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <input type="text" id="infoSectionSearch" class="form-control" placeholder="🔍 Поиск раздела">
+                    </div>
+
+                    <div class="info-list">
+                        {% for section in info_section_cards %}
+                        <article class="info-card"
+                                 data-info-section-card
+                                 data-name="{{ section.name|lower }}"
+                                 data-slug="{{ section.slug|lower }}">
+                            <div class="info-card-top">
+                                <div>
+                                    <div class="info-title">{{ section.name }}</div>
+                                    <div class="info-meta">
+                                        <span class="info-badge">Slug: {{ section.slug }}</span>
+                                        <span class="info-badge">Порядок: {{ section.order }}</span>
+                                        <span class="info-badge">{% if section.is_active %}Активен{% else %}Скрыт{% endif %}</span>
+                                        <span class="info-badge">Блоков: {{ section.count }}</span>
+                                    </div>
+                                </div>
+                                <span class="info-badge">#{{ section.id }}</span>
+                            </div>
+
+                            {% if section.description %}
+                            <div class="info-content" style="margin-bottom: 14px;">{{ section.description|linebreaksbr }}</div>
+                            {% endif %}
+
+                            <div class="info-actions">
+                                <button type="button"
+                                        class="btn"
+                                        onclick="openEditInfoSectionModal({{ section.id }}, '{{ section.name|escapejs }}', '{{ section.slug|escapejs }}', '{{ section.description|escapejs }}', '{{ section.order }}', {% if section.is_active %}true{% else %}false{% endif %})">
+                                    Редактировать
+                                </button>
+                                <form method="POST" action="{% url 'delete_info_section' section.id %}" onsubmit="return confirm('Удалить этот раздел?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-danger">Удалить</button>
+                                </form>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+
+                    <div id="infoSectionEmptyFilter" class="empty-state" style="display:none; margin-top: 16px;">
+                        По текущему фильтру разделы не найдены.
+                    </div>
+                </div>
+            </aside>
+
+            <section class="card">
+                <div class="card-title">Список блоков</div>
+                <div class="card-subtitle">Используйте поиск и фильтр по разделу, чтобы быстро найти нужный блок.</div>
+
+                <div class="toolbar">
+                    <input type="text" id="infoSearch" class="form-control" placeholder="🔍 Поиск по заголовку или тексту">
+                    <select id="infoSectionFilter" class="form-select">
+                        <option value="">Все разделы</option>
+                        {% for section in info_categories %}
+                        <option value="{{ section.slug }}">{{ section.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if info_blocks %}
+                <div class="info-list" id="infoList">
+                    {% for block in info_blocks %}
+                    <article class="info-card"
+                             data-info-card
+                             data-section="{{ block.section }}"
+                             data-title="{{ block.title|lower }}"
+                             data-content="{{ block.content|lower }}">
+                        <div class="info-card-top">
+                            <div>
+                                <div class="info-title">{{ block.title|default:block.section_label }}</div>
+                                <div class="info-meta">
+                                    <span class="info-badge">{{ block.section_label }}</span>
+                                    <span class="info-badge">Порядок: {{ block.order }}</span>
+                                    <span class="info-badge">{% if block.is_active %}Активен{% else %}Скрыт{% endif %}</span>
+                                </div>
+                            </div>
+                            <span class="info-badge">#{{ block.id }}</span>
+                        </div>
+
+                        <div class="info-content">{{ block.content|linebreaksbr }}</div>
+
+                        <div class="info-actions">
+                            <button type="button"
+                                    class="btn"
+                                    onclick="openEditInfoModal({{ block.id }}, '{{ block.section }}', '{{ block.title|escapejs }}', '{{ block.content|escapejs }}', '{{ block.order }}', {% if block.is_active %}true{% else %}false{% endif %})">
+                                Редактировать
+                            </button>
+                            <form method="POST" action="{% url 'delete_info_block' block.id %}" onsubmit="return confirm('Удалить этот блок?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-danger">Удалить</button>
+                            </form>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+                <div id="infoEmptyFilter" class="empty-state" style="display:none; margin-top: 16px;">
+                    По текущему фильтру блоки не найдены.
+                </div>
+                {% else %}
+                <div class="empty-state">Пока не создано ни одного блока.</div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+
+    <div class="modal" id="createInfoBlockModal">
+        <div class="modal-window">
+            <button type="button" class="modal-close" onclick="closeCreateInfoBlockModal()">&times;</button>
+            <div class="card-title" style="margin-bottom: 8px;">Создать блок</div>
+            <div class="card-subtitle">Добавьте новый блок информации без перегруза страницы.</div>
+
+            <form method="POST" action="{% url 'create_info_block' %}" id="createInfoBlockForm" class="form-grid">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="infoSection">Раздел</label>
+                    <select id="infoSection" class="form-select" name="section" required>
+                        {% for section in info_categories %}
+                        <option value="{{ section.slug }}">{{ section.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="infoTitle">Заголовок</label>
+                    <input id="infoTitle" class="form-control" type="text" name="title" maxlength="200" placeholder="Необязательно для общей информации и инструкций">
+                </div>
+
+                <div class="form-group">
+                    <label for="infoContent">Текст</label>
+                    <textarea id="infoContent" class="form-textarea" name="content" required placeholder="Введите текст блока"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="infoOrder">Порядок</label>
+                    <div class="card-subtitle" style="margin: -4px 0 0; font-size: 12px;">Меньше число - выше блок на странице.</div>
+                    <input id="infoOrder" class="form-control" type="number" name="order" value="0">
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" name="is_active" checked>
+                    <span>Показывать на сайте</span>
+                </label>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" onclick="closeCreateInfoBlockModal()">Отмена</button>
+                    <button type="submit" class="btn">Добавить блок</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="createInfoSectionModal">
+        <div class="modal-window">
+            <button type="button" class="modal-close" onclick="closeCreateInfoSectionModal()">&times;</button>
+            <div class="card-title" style="margin-bottom: 8px;">Создать раздел</div>
+            <div class="card-subtitle">Создайте новый раздел и используйте его для блоков информации.</div>
+
+            <form method="POST" action="{% url 'create_info_section' %}" id="createInfoSectionForm" class="form-grid">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="infoSectionName">Название</label>
+                    <input id="infoSectionName" class="form-control" type="text" name="name" required maxlength="120" placeholder="Например: Правила">
+                </div>
+
+                <div class="form-group">
+                    <label for="infoSectionSlug">Slug</label>
+                    <input id="infoSectionSlug" class="form-control" type="text" name="slug" maxlength="80" placeholder="Оставьте пустым для автогенерации">
+                </div>
+
+                <div class="form-group">
+                    <label for="infoSectionDescription">Описание</label>
+                    <textarea id="infoSectionDescription" class="form-textarea" name="description" placeholder="Короткое пояснение для публичной страницы"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="infoSectionOrder">Порядок</label>
+                    <input id="infoSectionOrder" class="form-control" type="number" name="order" value="0">
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" name="is_active" checked>
+                    <span>Показывать на сайте</span>
+                </label>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" onclick="closeCreateInfoSectionModal()">Отмена</button>
+                    <button type="submit" class="btn">Добавить раздел</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="editInfoModal">
+        <div class="modal-window">
+            <button type="button" class="modal-close" onclick="closeEditInfoModal()">&times;</button>
+            <div class="card-title" style="margin-bottom: 8px;">Редактировать блок</div>
+            <div class="card-subtitle">Изменения сразу попадут на публичную страницу информации.</div>
+
+            <form method="POST" id="editInfoForm" class="form-grid">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="editInfoSection">Раздел</label>
+                    <select id="editInfoSection" class="form-select" name="section" required>
+                        {% for section in info_categories %}
+                        <option value="{{ section.slug }}">{{ section.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editInfoTitle">Заголовок</label>
+                    <input id="editInfoTitle" class="form-control" type="text" name="title" maxlength="200">
+                </div>
+
+                <div class="form-group">
+                    <label for="editInfoContent">Текст</label>
+                    <textarea id="editInfoContent" class="form-textarea" name="content" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editInfoOrder">Порядок</label>
+                    <div class="card-subtitle" style="margin: -4px 0 0; font-size: 12px;">Меньше число - выше блок на странице.</div>
+                    <input id="editInfoOrder" class="form-control" type="number" name="order" value="0">
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" id="editInfoActive" name="is_active">
+                    <span>Показывать на сайте</span>
+                </label>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" onclick="closeEditInfoModal()">Отмена</button>
+                    <button type="submit" class="btn">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="editInfoSectionModal">
+        <div class="modal-window">
+            <button type="button" class="modal-close" onclick="closeEditInfoSectionModal()">&times;</button>
+            <div class="card-title" style="margin-bottom: 8px;">Редактировать раздел</div>
+            <div class="card-subtitle">Изменения сразу попадут в список разделов информации.</div>
+
+            <form method="POST" id="editInfoSectionForm" class="form-grid">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="editInfoSectionName">Название</label>
+                    <input id="editInfoSectionName" class="form-control" type="text" name="name" required maxlength="120">
+                </div>
+
+                <div class="form-group">
+                    <label for="editInfoSectionSlug">Slug</label>
+                    <input id="editInfoSectionSlug" class="form-control" type="text" name="slug" maxlength="80">
+                </div>
+
+                <div class="form-group">
+                    <label for="editInfoSectionDescription">Описание</label>
+                    <textarea id="editInfoSectionDescription" class="form-textarea" name="description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editInfoSectionOrder">Порядок</label>
+                    <input id="editInfoSectionOrder" class="form-control" type="number" name="order" value="0">
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" id="editInfoSectionActive" name="is_active">
+                    <span>Показывать на сайте</span>
+                </label>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" onclick="closeEditInfoSectionModal()">Отмена</button>
+                    <button type="submit" class="btn">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditInfoModal(id, section, title, content, order, isActive) {
+            const form = document.getElementById('editInfoForm');
+            form.action = `/info/${id}/edit/`;
+            document.getElementById('editInfoSection').value = section;
+            document.getElementById('editInfoTitle').value = title;
+            document.getElementById('editInfoContent').value = content;
+            document.getElementById('editInfoOrder').value = order;
+            document.getElementById('editInfoActive').checked = isActive;
+            document.getElementById('editInfoModal').classList.add('is-open');
+        }
+
+        function closeEditInfoModal() {
+            document.getElementById('editInfoModal').classList.remove('is-open');
+        }
+
+        function openCreateInfoBlockModal() {
+            document.getElementById('createInfoBlockModal').classList.add('is-open');
+        }
+
+        function closeCreateInfoBlockModal() {
+            document.getElementById('createInfoBlockModal').classList.remove('is-open');
+        }
+
+        function openCreateInfoSectionModal() {
+            document.getElementById('createInfoSectionModal').classList.add('is-open');
+        }
+
+        function closeCreateInfoSectionModal() {
+            document.getElementById('createInfoSectionModal').classList.remove('is-open');
+        }
+
+        function openEditInfoSectionModal(id, name, slug, description, order, isActive) {
+            const form = document.getElementById('editInfoSectionForm');
+            form.action = `/info/section/${id}/edit/`;
+            document.getElementById('editInfoSectionName').value = name;
+            document.getElementById('editInfoSectionSlug').value = slug;
+            document.getElementById('editInfoSectionDescription').value = description;
+            document.getElementById('editInfoSectionOrder').value = order;
+            document.getElementById('editInfoSectionActive').checked = isActive;
+            document.getElementById('editInfoSectionModal').classList.add('is-open');
+        }
+
+        function closeEditInfoSectionModal() {
+            document.getElementById('editInfoSectionModal').classList.remove('is-open');
+        }
+
+        function filterInfoBlocks() {
+            const query = document.getElementById('infoSearch').value.trim().toLowerCase();
+            const section = document.getElementById('infoSectionFilter').value;
+            let visible = 0;
+
+            document.querySelectorAll('[data-info-card]').forEach(card => {
+                const matchesQuery = !query || card.dataset.title.includes(query) || card.dataset.content.includes(query);
+                const matchesSection = !section || card.dataset.section === section;
+                const shouldShow = matchesQuery && matchesSection;
+
+                card.style.display = shouldShow ? '' : 'none';
+                if (shouldShow) {
+                    visible += 1;
+                }
+            });
+
+            document.getElementById('infoEmptyFilter').style.display = visible ? 'none' : 'block';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('infoSearch')?.addEventListener('input', filterInfoBlocks);
+            document.getElementById('infoSectionFilter')?.addEventListener('change', filterInfoBlocks);
+            document.getElementById('editInfoModal')?.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeEditInfoModal();
+                }
+            });
+            document.getElementById('createInfoBlockModal')?.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeCreateInfoBlockModal();
+                }
+            });
+            document.getElementById('createInfoSectionModal')?.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeCreateInfoSectionModal();
+                }
+            });
+            document.getElementById('editInfoSectionModal')?.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeEditInfoSectionModal();
+                }
+            });
+        });
+    </script>
+    {% include 'theme_toggle.html' %}
+</body>
+</html>

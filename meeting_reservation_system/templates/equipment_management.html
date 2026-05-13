@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление оборудованием</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 32px 24px 56px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .page-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .page-title {
+            font-size: 34px;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 15px;
+            max-width: 720px;
+        }
+
+        .page-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .back-btn,
+        .add-btn,
+        .action-btn,
+        .modal-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .add-btn,
+        .modal-btn--save {
+            background: var(--gradient-success);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .action-btn--edit {
+            background: rgba(59, 130, 246, 0.14);
+            color: var(--text-primary);
+        }
+
+        .action-btn--delete,
+        .modal-btn--cancel {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+        }
+
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 18px;
+        }
+
+        .toolbar-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 22px;
+            padding: 18px;
+            border-radius: calc(var(--radius-lg) + 2px);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1 1 340px;
+            min-height: 48px;
+            padding: 0 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-box:focus-within {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10), var(--shadow-sm);
+        }
+
+        .search-box__icon {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .search-box input {
+            width: 100%;
+            min-width: 0;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .search-box__clear {
+            border: none;
+            outline: none;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            min-width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            transition: all 0.2s ease;
+        }
+
+        .search-box__clear:hover {
+            color: var(--text-primary);
+            transform: scale(1.04);
+        }
+
+        .search-box__clear.is-hidden {
+            display: none;
+        }
+
+        .toolbar-meta {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover {
+            transform: translateY(-1px);
+        }
+
+        .filter-chip.is-active {
+            background: var(--gradient-primary);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 12px 20px rgba(59, 130, 246, 0.18);
+        }
+
+        .equipment-card {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 18px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .equipment-card__head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .equipment-card__title {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .equipment-card__meta {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .equipment-card__tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .equipment-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 30px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .equipment-card__footer {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+
+        .empty-state {
+            padding: 48px 28px;
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--border-color);
+            background: var(--bg-card);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(8px);
+            padding: 24px;
+        }
+
+        .modal.is-open {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-dialog {
+            width: min(680px, 100%);
+            max-height: calc(100vh - 48px);
+            overflow: auto;
+            padding: 24px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .modal-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            min-height: 46px;
+            padding: 0 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .category-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .category-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .category-option input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent-primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px 40px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .page-actions {
+                width: 100%;
+            }
+
+            .page-actions > * {
+                flex: 1 1 auto;
+            }
+
+            .modal {
+                padding: 12px;
+            }
+
+            .modal-dialog {
+                padding: 18px;
+                max-height: calc(100vh - 24px);
+            }
+        }
+    </style>
+    {% include 'theme_setup.html' %}
+    <style>
+        html[data-theme='dark'] body.equipment-management-page {
+            background:
+                radial-gradient(circle at 8% 12%, rgba(78, 97, 196, 0.24) 0%, transparent 30%),
+                radial-gradient(circle at 90% 10%, rgba(118, 83, 214, 0.20) 0%, transparent 28%),
+                radial-gradient(circle at 50% 100%, rgba(70, 132, 207, 0.12) 0%, transparent 34%),
+                linear-gradient(180deg, #09111b 0%, #0b1420 48%, #0a1119 100%) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .page-header {
+            background: linear-gradient(180deg, rgba(24, 33, 48, 0.92) 0%, rgba(16, 22, 33, 0.94) 100%) !important;
+            border: 1px solid rgba(126, 149, 220, 0.14) !important;
+            border-radius: 26px !important;
+            box-shadow: 0 24px 42px rgba(2, 7, 16, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+            padding: 22px 24px !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .toolbar-panel {
+            background: linear-gradient(180deg, rgba(23, 31, 45, 0.94) 0%, rgba(16, 23, 34, 0.97) 100%) !important;
+            border-color: rgba(126, 149, 220, 0.12) !important;
+            box-shadow: 0 18px 34px rgba(2, 7, 16, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .search-box {
+            background: linear-gradient(180deg, rgba(31, 40, 57, 0.97) 0%, rgba(22, 29, 41, 0.99) 100%) !important;
+            border-color: rgba(126, 149, 220, 0.16) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 12px 22px rgba(2, 7, 16, 0.18) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .search-box:focus-within {
+            border-color: rgba(145, 169, 242, 0.28) !important;
+            box-shadow: 0 0 0 3px rgba(92, 102, 219, 0.16), 0 12px 22px rgba(2, 7, 16, 0.18) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .search-box__icon,
+        html[data-theme='dark'] body.equipment-management-page .toolbar-meta,
+        html[data-theme='dark'] body.equipment-management-page .page-subtitle,
+        html[data-theme='dark'] body.equipment-management-page .equipment-card__meta,
+        html[data-theme='dark'] body.equipment-management-page .modal-description {
+            color: #9eabc2 !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .search-box input,
+        html[data-theme='dark'] body.equipment-management-page .page-title,
+        html[data-theme='dark'] body.equipment-management-page .equipment-card__title,
+        html[data-theme='dark'] body.equipment-management-page .modal-title {
+            color: #edf3fb !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .search-box input,
+        html[data-theme='dark'] body.equipment-management-page .search-box input:focus,
+        html[data-theme='dark'] body.equipment-management-page .search-box input:focus-visible {
+            outline: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .search-box__clear {
+            background: linear-gradient(180deg, rgba(82, 98, 187, 0.18) 0%, rgba(65, 79, 153, 0.22) 100%) !important;
+            color: #e7edff !important;
+            border: 1px solid rgba(145, 169, 242, 0.14) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .search-box__clear:hover {
+            background: linear-gradient(180deg, rgba(94, 112, 208, 0.24) 0%, rgba(75, 91, 176, 0.28) 100%) !important;
+            color: #ffffff !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .filter-chip {
+            background: linear-gradient(180deg, rgba(31, 40, 57, 0.95) 0%, rgba(22, 29, 41, 0.98) 100%) !important;
+            border-color: rgba(126, 149, 220, 0.14) !important;
+            color: #dfe7f8 !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .filter-chip:hover {
+            background: linear-gradient(180deg, rgba(37, 48, 68, 0.98) 0%, rgba(28, 36, 52, 1) 100%) !important;
+            border-color: rgba(145, 169, 242, 0.22) !important;
+            color: #f7fbff !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .filter-chip.is-active {
+            background: linear-gradient(135deg, #4f63de 0%, #6a67e7 52%, #8965e8 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 14px 24px rgba(2, 7, 16, 0.24), 0 8px 16px rgba(99, 109, 226, 0.24) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .equipment-card,
+        html[data-theme='dark'] body.equipment-management-page .empty-state,
+        html[data-theme='dark'] body.equipment-management-page .modal-dialog {
+            background: linear-gradient(180deg, rgba(23, 31, 46, 0.98) 0%, rgba(16, 23, 34, 0.99) 100%) !important;
+            border-color: rgba(126, 149, 220, 0.14) !important;
+            box-shadow: 0 18px 34px rgba(2, 7, 16, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .equipment-card:hover {
+            border-color: rgba(147, 171, 247, 0.24) !important;
+            box-shadow: 0 22px 40px rgba(2, 7, 16, 0.26), 0 8px 18px rgba(97, 120, 217, 0.10) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .equipment-tag,
+        html[data-theme='dark'] body.equipment-management-page .category-option,
+        html[data-theme='dark'] body.equipment-management-page .form-group input[type="text"] {
+            background: linear-gradient(180deg, rgba(31, 40, 57, 0.96) 0%, rgba(23, 30, 43, 0.98) 100%) !important;
+            border-color: rgba(126, 149, 220, 0.14) !important;
+            color: #eaf0fb !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .category-option:hover {
+            background: linear-gradient(180deg, rgba(37, 48, 68, 0.98) 0%, rgba(28, 36, 52, 1) 100%) !important;
+            border-color: rgba(145, 169, 242, 0.20) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .form-group input[type="text"]:focus {
+            border-color: rgba(145, 169, 242, 0.28) !important;
+            box-shadow: 0 0 0 3px rgba(92, 102, 219, 0.16) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .back-btn,
+        html[data-theme='dark'] body.equipment-management-page .action-btn--edit,
+        html[data-theme='dark'] body.equipment-management-page .modal-btn--cancel {
+            background: linear-gradient(180deg, rgba(31, 41, 58, 0.96) 0%, rgba(22, 29, 41, 0.99) 100%) !important;
+            color: #edf2fb !important;
+            border-color: rgba(126, 149, 220, 0.16) !important;
+            box-shadow: 0 12px 22px rgba(2, 7, 16, 0.18) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .back-btn:hover,
+        html[data-theme='dark'] body.equipment-management-page .action-btn--edit:hover,
+        html[data-theme='dark'] body.equipment-management-page .modal-btn--cancel:hover {
+            background: linear-gradient(180deg, rgba(37, 48, 68, 0.98) 0%, rgba(28, 36, 52, 1) 100%) !important;
+            color: #ffffff !important;
+            border-color: rgba(145, 169, 242, 0.24) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .add-btn,
+        html[data-theme='dark'] body.equipment-management-page .modal-btn--save {
+            background: linear-gradient(135deg, #4f63de 0%, #6a67e7 52%, #8965e8 100%) !important;
+            color: #ffffff !important;
+            border-color: rgba(150, 170, 255, 0.14) !important;
+            box-shadow: 0 16px 30px rgba(2, 7, 16, 0.24), 0 8px 18px rgba(99, 109, 226, 0.24) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .add-btn:hover,
+        html[data-theme='dark'] body.equipment-management-page .modal-btn--save:hover {
+            background: linear-gradient(135deg, #596ce4 0%, #756fed 52%, #9670ec 100%) !important;
+            color: #ffffff !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .action-btn--delete {
+            background: linear-gradient(180deg, rgba(79, 34, 43, 0.70) 0%, rgba(58, 25, 32, 0.80) 100%) !important;
+            color: #ffd6db !important;
+            border-color: rgba(240, 120, 140, 0.20) !important;
+        }
+
+        html[data-theme='dark'] body.equipment-management-page .modal {
+            background: rgba(3, 8, 15, 0.76) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+    </style>
+</head>
+<body class="equipment-management-page">
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title-group">
+                <h1 class="page-title">Управление оборудованием</h1>
+                <p class="page-subtitle">Здесь формируется общий справочник оборудования. Потом эти позиции можно выбирать при создании и редактировании комнат.</p>
+            </div>
+            <div class="page-actions">
+                <a href="{% url 'room_management_main' %}" class="back-btn">← Назад к комнатам</a>
+                <button type="button" class="add-btn" id="openAddEquipmentModal">➕ Добавить оборудование</button>
+            </div>
+        </div>
+
+        <div class="toolbar-panel">
+            <div class="toolbar">
+                <label class="search-box" for="equipmentSearchInput">
+                    <span class="search-box__icon">⌕</span>
+                    <input type="text" id="equipmentSearchInput" placeholder="Поиск оборудования по названию">
+                    <button type="button" class="search-box__clear is-hidden" id="clearEquipmentSearch" aria-label="Очистить поиск">×</button>
+                </label>
+                <div class="toolbar-meta" id="equipmentSearchMeta">Всего позиций: 0</div>
+            </div>
+
+            <div class="filter-row" id="equipmentCategoryFilters">
+                <button type="button" class="filter-chip is-active" data-category-filter="all">Все</button>
+                <button type="button" class="filter-chip" data-category-filter="common">Общие</button>
+                {% for category_value, category_label in room_category_choices %}
+                <button type="button" class="filter-chip" data-category-filter="{{ category_value }}">{{ category_label }}</button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="equipmentGrid" class="equipment-grid"></div>
+    </div>
+
+    <div class="modal" id="equipmentModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 class="modal-title" id="equipmentModalTitle">Добавить оборудование</h2>
+                <p class="modal-description">Выбери название и категории комнат, где это оборудование доступно. Если категории не отмечены, оборудование считается доступным для всех.</p>
+            </div>
+
+            <form id="equipmentForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="equipmentName">Название оборудования</label>
+                    <input type="text" id="equipmentName" name="name" placeholder="Например: Проектор" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Доступно для категорий</label>
+                    <div class="category-picker">
+                        {% for category_value, category_label in room_category_choices %}
+                        <label class="category-option">
+                            <input type="checkbox" name="categories" value="{{ category_value }}">
+                            <span>{{ category_label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn--cancel" id="closeEquipmentModal">Отмена</button>
+                    <button type="submit" class="modal-btn modal-btn--save">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{ equipment_catalog|json_script:"equipmentCatalogData" }}
+
+    <script>
+        const equipmentGrid = document.getElementById('equipmentGrid');
+        const equipmentModal = document.getElementById('equipmentModal');
+        const equipmentForm = document.getElementById('equipmentForm');
+        const equipmentModalTitle = document.getElementById('equipmentModalTitle');
+        const equipmentSearchInput = document.getElementById('equipmentSearchInput');
+        const clearEquipmentSearch = document.getElementById('clearEquipmentSearch');
+        const equipmentSearchMeta = document.getElementById('equipmentSearchMeta');
+        const equipmentCategoryFilters = document.getElementById('equipmentCategoryFilters');
+        const equipmentCatalog = JSON.parse(document.getElementById('equipmentCatalogData').textContent);
+        let currentEquipmentId = null;
+        let activeCategoryFilter = 'all';
+
+        function matchesCategoryFilter(item) {
+            const categories = item.categories || [];
+
+            if (activeCategoryFilter === 'all') {
+                return true;
+            }
+
+            if (activeCategoryFilter === 'common') {
+                return !categories.length;
+            }
+
+            return !categories.length || categories.includes(activeCategoryFilter);
+        }
+
+        function getCategoryFilterLabel() {
+            if (activeCategoryFilter === 'all') {
+                return '';
+            }
+
+            if (activeCategoryFilter === 'common') {
+                return 'Общие позиции';
+            }
+
+            const activeButton = equipmentCategoryFilters.querySelector(`[data-category-filter="${activeCategoryFilter}"]`);
+            return activeButton ? activeButton.textContent.trim() : '';
+        }
+
+        function getFilteredEquipmentCatalog() {
+            const searchValue = (equipmentSearchInput.value || '').trim().toLowerCase();
+            return equipmentCatalog.filter(item => {
+                const matchesSearch = !searchValue || item.name.toLowerCase().includes(searchValue);
+                const matchesCategory = matchesCategoryFilter(item);
+                return matchesSearch && matchesCategory;
+            });
+        }
+
+        function renderEquipmentGrid() {
+            const filteredCatalog = getFilteredEquipmentCatalog();
+            const hasSearch = Boolean((equipmentSearchInput.value || '').trim());
+            const categoryLabel = getCategoryFilterLabel();
+
+            clearEquipmentSearch.classList.toggle('is-hidden', !hasSearch);
+
+            if (!equipmentCatalog.length) {
+                equipmentSearchMeta.textContent = 'Всего позиций: 0';
+                equipmentGrid.innerHTML = `
+                    <div class="empty-state">
+                        Справочник оборудования пока пуст. Добавь первые позиции и затем используй их в комнатах.
+                    </div>
+                `;
+                return;
+            }
+
+            if (hasSearch || categoryLabel) {
+                const metaParts = [`Найдено: ${filteredCatalog.length} из ${equipmentCatalog.length}`];
+                if (categoryLabel) {
+                    metaParts.push(`Фильтр: ${categoryLabel}`);
+                }
+                equipmentSearchMeta.textContent = metaParts.join(' • ');
+            } else {
+                equipmentSearchMeta.textContent = `Всего позиций: ${equipmentCatalog.length}`;
+            }
+
+            if (!filteredCatalog.length) {
+                equipmentGrid.innerHTML = `
+                    <div class="empty-state">
+                        Ничего не найдено${hasSearch ? ` по запросу «${equipmentSearchInput.value.trim()}»` : ''}${categoryLabel ? ` в разделе «${categoryLabel}»` : ''}.
+                    </div>
+                `;
+                return;
+            }
+
+            equipmentGrid.innerHTML = filteredCatalog.map(item => `
+                <article class="equipment-card">
+                    <div class="equipment-card__head">
+                        <div>
+                            <h3 class="equipment-card__title">${item.name}</h3>
+                            <div class="equipment-card__meta">Используется в комнатах: ${item.rooms_count ?? 0}</div>
+                        </div>
+                    </div>
+                    <div class="equipment-card__tags">
+                        ${
+                            item.category_labels?.length
+                                ? item.category_labels.map(label => `<span class="equipment-tag">${label}</span>`).join('')
+                                : '<span class="equipment-tag">Все категории</span>'
+                        }
+                    </div>
+                    <div class="equipment-card__footer">
+                        <button type="button" class="action-btn action-btn--edit" data-edit-equipment="${item.id}">Редактировать</button>
+                        <button type="button" class="action-btn action-btn--delete" data-delete-equipment="${item.id}">Удалить</button>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function openEquipmentModal(title) {
+            equipmentModalTitle.textContent = title;
+            equipmentModal.classList.add('is-open');
+        }
+
+        function closeEquipmentModal() {
+            equipmentModal.classList.remove('is-open');
+            equipmentForm.reset();
+            currentEquipmentId = null;
+        }
+
+        function openAddEquipmentModal() {
+            equipmentForm.reset();
+            currentEquipmentId = null;
+            openEquipmentModal('Добавить оборудование');
+        }
+
+        function openEditEquipmentModal(equipmentId) {
+            const item = equipmentCatalog.find(entry => entry.id === equipmentId);
+            if (!item) {
+                return;
+            }
+
+            equipmentForm.reset();
+            currentEquipmentId = equipmentId;
+            equipmentForm.querySelector('input[name="name"]').value = item.name;
+            equipmentForm.querySelectorAll('input[name="categories"]').forEach(input => {
+                input.checked = (item.categories || []).includes(input.value);
+            });
+            openEquipmentModal('Редактировать оборудование');
+        }
+
+        document.getElementById('openAddEquipmentModal').addEventListener('click', openAddEquipmentModal);
+        document.getElementById('closeEquipmentModal').addEventListener('click', closeEquipmentModal);
+        equipmentSearchInput.addEventListener('input', renderEquipmentGrid);
+        clearEquipmentSearch.addEventListener('click', function() {
+            equipmentSearchInput.value = '';
+            renderEquipmentGrid();
+            equipmentSearchInput.focus();
+        });
+        equipmentCategoryFilters.addEventListener('click', function(event) {
+            const filterButton = event.target.closest('[data-category-filter]');
+            if (!filterButton) {
+                return;
+            }
+
+            activeCategoryFilter = filterButton.dataset.categoryFilter;
+            equipmentCategoryFilters.querySelectorAll('[data-category-filter]').forEach(button => {
+                button.classList.toggle('is-active', button === filterButton);
+            });
+            renderEquipmentGrid();
+        });
+
+        equipmentModal.addEventListener('click', function(event) {
+            if (event.target === equipmentModal) {
+                closeEquipmentModal();
+            }
+        });
+
+        equipmentGrid.addEventListener('click', function(event) {
+            const editButton = event.target.closest('[data-edit-equipment]');
+            if (editButton) {
+                openEditEquipmentModal(Number(editButton.dataset.editEquipment));
+                return;
+            }
+
+            const deleteButton = event.target.closest('[data-delete-equipment]');
+            if (!deleteButton) {
+                return;
+            }
+
+            const equipmentId = Number(deleteButton.dataset.deleteEquipment);
+            const item = equipmentCatalog.find(entry => entry.id === equipmentId);
+            if (!item || !confirm(`Удалить оборудование "${item.name}"?`)) {
+                return;
+            }
+
+            fetch(`/api/equipment/${equipmentId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': equipmentForm.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Не удалось удалить оборудование.');
+                }
+            })
+            .catch(error => {
+                alert('Ошибка: ' + error);
+            });
+        });
+
+        equipmentForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(equipmentForm);
+            const url = currentEquipmentId
+                ? `/api/equipment/${currentEquipmentId}/edit/`
+                : '/api/equipment/add/';
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': equipmentForm.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Не удалось сохранить оборудование.');
+                }
+            })
+            .catch(error => {
+                alert('Ошибка: ' + error);
+            });
+        });
+
+        renderEquipmentGrid();
+    </script>
+    {% include 'theme_toggle.html' %}
+</body>
+</html>

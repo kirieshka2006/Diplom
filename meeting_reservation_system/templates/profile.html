@@ -1161,7 +1161,18 @@
             const formId = 'edit' + section.charAt(0).toUpperCase() + section.slice(1) + 'Form';
             const form = document.getElementById(formId);
             if (form) {
+                const willOpen = !form.classList.contains('active');
                 form.classList.toggle('active');
+
+                if (willOpen) {
+                    window.setTimeout(() => {
+                        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        const firstInput = form.querySelector('input, select, textarea');
+                        if (firstInput && window.innerWidth <= 768) {
+                            firstInput.focus({ preventScroll: true });
+                        }
+                    }, 180);
+                }
             }
         }
 

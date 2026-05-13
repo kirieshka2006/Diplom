@@ -1,0 +1,73 @@
+<div class="ticket-detail">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:22px;">
+        <div>
+            <h3 style="font-size:22px; font-weight:700; margin-bottom:8px;">{{ ticket.subject }}</h3>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; color:var(--text-muted, #71717a); font-size:13px;">
+                <span>👤 {{ ticket.user.username }}</span>
+                <span>📅 {{ ticket.created_at|date:"d.m.Y H:i" }}</span>
+                <span>💬 Ответов: {{ ticket.responses.count }}</span>
+            </div>
+        </div>
+        <div class="ticket-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</div>
+    </div>
+
+    <div style="background: var(--surface-card-soft, var(--bg-tertiary)); padding: 18px 20px; border-radius: 14px; border: 1px solid var(--border-color, #27272a); margin-bottom: 22px;">
+        <div style="font-size: 13px; color: var(--text-muted, #71717a); margin-bottom: 8px;">Описание проблемы</div>
+        <div style="line-height: 1.75; color: var(--text-secondary, #a1a1aa);">{{ ticket.message|linebreaks }}</div>
+    </div>
+
+    {% if ticket.status == 'in_progress' and ticket.auto_close_date %}
+    <div style="margin-bottom: 22px; padding: 14px 16px; border-radius: 12px; background: rgba(59, 130, 246, 0.10); color: var(--text-secondary, #a1a1aa); border: 1px solid rgba(59, 130, 246, 0.22);">
+        ⏰ При отсутствии новых ответов обращение будет автоматически закрыто после <strong style="color: var(--text-primary, #fafafa);">{{ ticket.auto_close_date|date:"d.m.Y H:i" }}</strong>.
+    </div>
+    {% elif ticket.status == 'closed' %}
+    <div style="margin-bottom: 22px; padding: 14px 16px; border-radius: 12px; background: rgba(34, 197, 94, 0.10); color: var(--text-secondary, #a1a1aa); border: 1px solid rgba(34, 197, 94, 0.22);">
+        ✅ Это обращение закрыто. Новые ответы не принимаются.
+    </div>
+    {% endif %}
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
+        <h4 style="font-size:18px; font-weight:700;">Диалог</h4>
+        {% if can_reply %}
+        <button type="button" onclick="showResponseForm({{ ticket.id }}, '{{ ticket.subject|escapejs }}')" class="btn">
+            Ответить
+        </button>
+        {% endif %}
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px;">
+        {% for response in ticket.responses.all %}
+        <div style="background: var(--surface-card-soft, var(--bg-tertiary)); border:1px solid var(--border-color, #27272a); border-radius: 14px; padding: 18px;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                <div style="width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; {% if response.user.is_management_role %}background: var(--accent-primary, #3b82f6);{% else %}background: var(--accent-success, #22c55e);{% endif %}">
+                    {% if response.user.is_management_role %}🛠️{% else %}👤{% endif %}
+                </div>
+                <div>
+                    <div style="font-weight:700; color: var(--text-primary, #fafafa);">
+                        {% if response.user.is_management_role %}Поддержка{% else %}{{ response.user.username }}{% endif %}
+                    </div>
+                    <div style="font-size:12px; color: var(--text-muted, #71717a);">{{ response.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+            </div>
+            <div style="background: var(--bg-input, #232326); border:1px solid var(--border-color, #27272a); border-radius: 10px; padding: 14px 16px; color: var(--text-secondary, #a1a1aa); line-height: 1.7;">
+                {{ response.message|linebreaks }}
+            </div>
+        </div>
+        {% empty %}
+        <div style="padding: 28px; border-radius: 14px; border: 1px dashed var(--border-color, #27272a); text-align: center; color: var(--text-muted, #71717a);">
+            Пока нет ответов по этому обращению.
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if user == ticket.user and ticket.status != 'closed' %}
+    <div style="margin-top: 26px; padding: 20px; border-radius: 14px; background: var(--surface-card-soft, var(--bg-tertiary)); border: 1px solid var(--border-color, #27272a);">
+        <div style="font-weight:700; margin-bottom:8px;">Проблема решена?</div>
+        <div style="color: var(--text-muted, #71717a); line-height: 1.6; margin-bottom: 14px;">Если вопрос закрыт, завершите обращение, чтобы оно не висело активным.</div>
+        <form method="POST" action="{% url 'close_ticket' ticket.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Закрыть обращение</button>
+        </form>
+    </div>
+    {% endif %}
+</div>

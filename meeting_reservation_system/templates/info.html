@@ -4,28 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Информация и правила</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        :root {
-            --bg-primary: #0a0a0b;
-            --bg-card: #18181b;
-            --bg-tertiary: #1c1c1f;
-            --border-color: #2e2e32;
-            --text-primary: #fafafa;
-            --text-secondary: #a1a1aa;
-            --text-muted: #71717a;
-            --accent-primary: #3b82f6;
-            --accent-success: #22c55e;
-            --accent-info: #06b6d4;
-            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            --radius-md: 12px;
-            --radius-lg: 16px;
         }
 
         body {
@@ -36,186 +20,440 @@
             padding: 24px;
         }
 
-        .container {
-            max-width: 900px;
+        .info-shell {
+            max-width: 1180px;
             margin: 0 auto;
         }
 
-        .back-btn {
+        .page-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .back-btn,
+        .manage-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 20px;
+            padding: 12px 18px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn {
             background: var(--bg-card);
             color: var(--text-primary);
-            text-decoration: none;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            margin-bottom: 24px;
         }
 
-        .back-btn:hover {
-            background: var(--bg-tertiary);
-            transform: translateX(-4px);
+        .manage-btn {
+            background: linear-gradient(135deg, #5f6fa8 0%, #6b60a4 58%, #587d96 100%);
+            color: #fff;
+            border-color: rgba(128, 139, 205, 0.24);
+            box-shadow: 0 16px 34px rgba(82, 96, 168, 0.18);
         }
 
-        .info-card {
-            background: var(--bg-card);
-            padding: 40px;
-            border-radius: var(--radius-lg);
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
+        .back-btn:hover,
+        .manage-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero {
             position: relative;
             overflow: hidden;
+            background: linear-gradient(180deg, rgba(24, 24, 27, 0.96) 0%, rgba(18, 18, 20, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 22px;
+            box-shadow: 0 26px 48px rgba(4, 8, 16, 0.16);
         }
 
-        .info-card::before {
-            content: '';
+        .hero::before {
+            content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            inset: 0 auto auto 0;
+            width: 100%;
             height: 4px;
             background: var(--gradient-primary);
         }
 
-        h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--accent-primary);
+        .hero h1 {
+            font-size: clamp(26px, 3.4vw, 38px);
+            line-height: 1.08;
+            margin-bottom: 12px;
         }
 
-        h2 {
-            color: var(--accent-primary);
-            font-size: 20px;
-            font-weight: 600;
-            margin-top: 32px;
-            margin-bottom: 16px;
-        }
-
-        p {
+        .hero p {
+            max-width: 820px;
             color: var(--text-secondary);
-            line-height: 1.7;
-            margin-bottom: 16px;
+            line-height: 1.65;
         }
 
-        .rule-item {
-            background: var(--bg-tertiary);
-            padding: 20px;
-            border-radius: var(--radius-md);
-            margin: 12px 0;
-            border-left: 4px solid var(--accent-success);
-        }
-
-        .rule-item strong {
-            display: block;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-
-        .rule-item p {
-            margin: 0;
-            color: var(--text-muted);
-        }
-
-        ol {
-            color: var(--text-secondary);
-            line-height: 2;
-            padding-left: 24px;
-        }
-
-        ol li {
-            margin-bottom: 8px;
-        }
-
-        .contact-info {
+        .hero-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin-top: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-top: 22px;
         }
 
-        .contact-item {
-            background: var(--bg-tertiary);
-            padding: 20px;
-            border-radius: var(--radius-md);
-            border-left: 4px solid var(--accent-info);
+        .hero-stat {
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.96) 0%, rgba(21, 21, 25, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 18px 32px rgba(4, 8, 16, 0.12);
         }
 
-        .contact-item strong {
+        .hero-stat-value {
             display: block;
-            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .hero-stat-label {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .content-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .section-card {
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.96) 0%, rgba(20, 20, 23, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 20px 36px rgba(4, 8, 16, 0.12);
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .section-head h2 {
+            font-size: 22px;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .section-head p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .info-paragraph {
+            color: var(--text-secondary);
+            line-height: 1.75;
+        }
+
+        .section-stack {
+            display: grid;
+            gap: 12px;
+        }
+
+        .rule-grid,
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 14px;
+        }
+
+        .rule-card,
+        .contact-card,
+        .step-card {
+            background: linear-gradient(180deg, rgba(24, 24, 27, 0.9) 0%, rgba(18, 18, 20, 0.9) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .rule-card {
+            border-left: 4px solid var(--accent-success, #22c55e);
+        }
+
+        .contact-card {
+            border-left: 4px solid var(--accent-info, #06b6d4);
+        }
+
+        .rule-card strong,
+        .contact-card strong,
+        .step-card strong {
+            display: block;
             margin-bottom: 8px;
+            color: var(--text-primary);
             font-size: 15px;
         }
 
-        .contact-item p {
-            margin: 0;
+        .rule-card p,
+        .contact-card p,
+        .step-card span {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .steps-list {
+            display: grid;
+            gap: 12px;
+            list-style: none;
+            counter-reset: info-step;
+        }
+
+        .step-card {
+            position: relative;
+            padding-left: 58px;
+            counter-increment: info-step;
+        }
+
+        .step-card::before {
+            content: counter(info-step);
+            position: absolute;
+            left: 18px;
+            top: 18px;
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: var(--gradient-primary);
+            color: #fff;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .empty-state {
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px dashed var(--border-color);
             color: var(--text-muted);
-            font-size: 14px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .manage-strip {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 18px;
+        }
+
+        html[data-theme='dark'] body.info-page .manage-btn {
+            background: linear-gradient(135deg, #5f6fa8 0%, #6b60a4 58%, #587d96 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(128, 139, 205, 0.28) !important;
+            box-shadow: 0 18px 32px rgba(82, 96, 168, 0.22);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.info-page .back-btn {
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 18px 32px rgba(96, 128, 102, 0.14);
+        }
+
+        html[data-theme='light'] body.info-page .manage-btn {
+            background: linear-gradient(135deg, #73b87e 0%, #5f9f74 55%, #86b68f 100%);
+            color: #ffffff;
+            border-color: rgba(96, 143, 102, 0.34);
+            box-shadow: 0 18px 34px rgba(99, 151, 107, 0.20);
+        }
+
+        html[data-theme='light'] body.info-page .hero,
+        html[data-theme='light'] body.info-page .section-card,
+        html[data-theme='light'] body.info-page .rule-card,
+        html[data-theme='light'] body.info-page .contact-card,
+        html[data-theme='light'] body.info-page .step-card,
+        html[data-theme='light'] body.info-page .empty-state {
+            box-shadow: 0 24px 42px rgba(105, 134, 109, 0.13);
+            border-color: rgba(55, 70, 55, 0.34);
+            border-width: 1.5px;
+        }
+
+        html[data-theme='light'] body.info-page .hero {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(243, 250, 240, 0.97) 100%);
+        }
+
+        html[data-theme='light'] body.info-page .section-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(241, 248, 239, 0.97) 100%);
+            border-color: rgba(55, 70, 55, 0.34);
+        }
+
+        html[data-theme='light'] body.info-page .hero-stat,
+        html[data-theme='light'] body.info-page .rule-card,
+        html[data-theme='light'] body.info-page .contact-card,
+        html[data-theme='light'] body.info-page .step-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(239, 247, 236, 0.96) 100%);
+            border-color: rgba(55, 70, 55, 0.30);
+        }
+
+        html[data-theme='light'] body.info-page .rule-card {
+            border-left-color: #7ab37b;
+        }
+
+        html[data-theme='light'] body.info-page .contact-card {
+            border-left-color: #6398d2;
+        }
+
+        html[data-theme='light'] body.info-page .step-card::before {
+            background: linear-gradient(135deg, #7ab37b 0%, #649a70 58%, #8dbd95 100%);
+            color: #ffffff;
+        }
+
+        html[data-theme='light'] body.info-page .empty-state {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 248, 239, 0.95) 100%);
+            border-color: rgba(55, 70, 55, 0.34);
+            color: #4b5a4b;
+        }
+
+        html[data-theme='light'] body.info-page .section-head h2,
+        html[data-theme='light'] body.info-page .rule-card strong,
+        html[data-theme='light'] body.info-page .contact-card strong,
+        html[data-theme='light'] body.info-page .step-card strong {
+            color: #253125;
+        }
+
+        html[data-theme='light'] body.info-page .section-head p,
+        html[data-theme='light'] body.info-page .info-paragraph,
+        html[data-theme='light'] body.info-page .rule-card p,
+        html[data-theme='light'] body.info-page .contact-card p,
+        html[data-theme='light'] body.info-page .step-card span {
+            color: #445344;
+        }
+
+        html[data-theme='light'] body.info-page .hero::before {
+            background: linear-gradient(135deg, #73b87e 0%, #5f9f74 55%, #86b68f 100%);
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 16px;
+            }
+
+            .page-actions {
+                align-items: stretch;
+            }
+
+            .hero,
+            .section-card {
+                padding: 20px;
+            }
+
+            .section-head {
+                flex-direction: column;
+            }
+
         }
     </style>
     {% include 'theme_setup.html' %}
 </head>
-<body>
-    <div class="container">
-        <a href="{% url 'home' %}" class="back-btn">← Назад на главную</a>
+<body class="info-page">
+    <div class="info-shell">
+        <div class="page-actions">
+            <a href="{% url 'home' %}" class="back-btn">← Назад на главную</a>
+            {% if can_manage_info %}
+            <a href="{% url 'info_management' %}" class="manage-btn">⚙️ Управление правилами</a>
+            {% endif %}
+        </div>
 
-        <div class="info-card">
-            <h1>ℹ️ Информация, правила и инструкции</h1>
+        <section class="hero">
+            <h1>Информация, правила и инструкции</h1>
+            <p>Эта страница теперь собирается из записей в базе. Администратор может менять тексты без правок кода, а пользователи видят актуальные правила, шаги бронирования и контакты поддержки.</p>
 
-            <h2>📋 Общая информация</h2>
-            <p>Система бронирования переговоров предназначена для сотрудников компании, а также и для обычных людей, которым надо обсудить деловые вещи.
-            Здесь вы можете забронировать переговорку для встреч, презентаций и других мероприятий.</p>
-
-            <h2>📝 Правила бронирования</h2>
-            <div class="rule-item">
-                <strong>⏱️ Время бронирования</strong>
-                <p>Максимальное время бронирования - 4 часа подряд</p>
-            </div>
-            <div class="rule-item">
-                <strong>📅 Планирование</strong>
-                <p>Бронируйте комнаты минимум за 2 часа до начала встречи</p>
-            </div>
-            <div class="rule-item">
-                <strong>🔒 Ответственность</strong>
-                <p>Вы несете ответственность за сохранность оборудования в комнате</p>
-            </div>
-            <div class="rule-item">
-                <strong>❌ Отмена брони</strong>
-                <p>Отменяйте бронь как минимум за 2 часа до начала, если планы изменились</p>
-            </div>
-
-            <h2>📖 Инструкция по бронированию</h2>
-            <ol>
-                <li>Выберите подходящую переговорную комнату из списка</li>
-                <li>Нажмите "Забронировать" и выберите дату и время</li>
-                <li>Введите контактные данные и далее нажмите "Забронировать" </li>
-                <li>Ожидайте подтверждения от менеджера, вся информация придет на вашу почту</li>
-                <li>Приходите в назначенное время</li>
-            </ol>
-
-            <h2>📞 Контакты поддержки</h2>
-            <div class="contact-info">
-                <div class="contact-item">
-                    <strong>📧 Email</strong>
-                    <p>testsite9356@gmail.com</p>
+            {% if can_manage_info %}
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ info_total }}</span>
+                    <span class="hero-stat-label">Активных блоков</span>
                 </div>
-                <div class="contact-item">
-                    <strong>📞 Телефон</strong>
-                    <p>+7 (993) 939-03-31</p>
-                </div>
-                <div class="contact-item">
-                    <strong>🕐 Время работы</strong>
-                    <p>Пн-Пт: 9:00-23:00</p>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ info_section_total }}</span>
+                    <span class="hero-stat-label">Разделов</span>
                 </div>
             </div>
+            {% endif %}
+        </section>
+
+        <div class="content-grid">
+            {% for section in info_sections %}
+            <section class="section-card">
+                <div class="section-head">
+                    <div>
+                        <h2>{{ section.label }}</h2>
+                        <p>
+                            {% if section.code == 'general' %}
+                                Общая информация о работе системы.
+                            {% elif section.code == 'rules' %}
+                                Основные правила бронирования и поведения в комнате.
+                            {% elif section.code == 'instructions' %}
+                                Пошаговый сценарий бронирования.
+                            {% else %}
+                                Каналы связи и часы работы поддержки.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                {% if section.items %}
+                    {% if section.code == 'general' %}
+                    <div class="rule-grid">
+                        {% for block in section.items %}
+                        <article class="rule-card">
+                            {% if block.title %}
+                            <strong>{{ block.title }}</strong>
+                            {% endif %}
+                            <p>{{ block.content|linebreaksbr }}</p>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    {% elif section.code == 'rules' %}
+                    <div class="rule-grid">
+                        {% for block in section.items %}
+                        <article class="rule-card">
+                            {% if block.title %}
+                            <strong>{{ block.title }}</strong>
+                            {% endif %}
+                            <p>{{ block.content|linebreaksbr }}</p>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    {% elif section.code == 'instructions' %}
+                    <ol class="steps-list">
+                        {% for block in section.items %}
+                        <li class="step-card">
+                            {% if block.title %}
+                            <strong>{{ block.title }}</strong>
+                            {% endif %}
+                            <span>{{ block.content|linebreaksbr }}</span>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                    {% else %}
+                    <div class="contact-grid">
+                        {% for block in section.items %}
+                        <article class="contact-card">
+                            <strong>{% if block.title %}{{ block.title }}{% else %}Контакт{% endif %}</strong>
+                            <p>{{ block.content|linebreaksbr }}</p>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-state">В этом разделе пока нет записей.</div>
+                {% endif %}
+            </section>
+            {% endfor %}
         </div>
     </div>
     {% include 'theme_toggle.html' %}

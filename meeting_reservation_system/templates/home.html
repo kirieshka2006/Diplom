@@ -2171,11 +2171,11 @@
             <div class="header-actions">
                 <!-- Проверяем авторизован ли пользователь -->
                 {% if user.is_authenticated %}
-                    {% if user.role == 'admin' or user.role == 'manager' %}
+                    {% if user.is_management_role or user.is_owner_role %}
                     <div class="admin-dropdown">
                         <button type="button" class="admin-btn" aria-label="Администрирование">⚙</button>
                         <div class="admin-menu">
-                            {% if user.role == 'admin' %}
+                            {% if user.is_admin_role %}
                             <a href="{% url 'admin_panel' %}">👥 Пользователи</a>
                             <a href="{% url 'room_management_main' %}">🚪 Комнаты</a>
                             <a href="{% url 'office_management' %}">🏢 Офисы</a>
@@ -2538,7 +2538,8 @@
                             </div>
                         </div>
 
-                        {% if user.is_authenticated and user.role == 'admin' or user.role == 'manager' %}
+                        {% if user.is_authenticated %}
+                        {% if user.is_management_role or user.is_owner_role %}
                         <div class="filter-group filter-group-status">
                             <label>
                                 Статус комнаты
@@ -2556,6 +2557,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
                         {% endif %}
                     </div>
                 </div>
@@ -2613,11 +2615,13 @@
                                     {% endif %}
                                 </span>
 
-                                {% if user.is_authenticated and user.role == 'admin' or user.role == 'manager' %}
+                                {% if user.is_authenticated %}
+                                {% if user.is_management_role or user.is_owner_role %}
                                 <!-- Показываем только active/hidden (maintenance будет считаться hidden) -->
                                 <span class="room-status-badge status-{{ room.status }}">
                                     {% if room.status == 'active' %}✅ Активна{% else %}🔒 Скрыта{% endif %}
                                 </span>
+                                {% endif %}
                                 {% endif %}
                             </div>
 

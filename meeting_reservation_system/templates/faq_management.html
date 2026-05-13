@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление FAQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-card: #1c1c1f;
+            --bg-tertiary: #18181b;
+            --bg-input: #232326;
+            --border-color: #3a3b43;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-danger: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+            --radius-md: 12px;
+            --radius-lg: 18px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .page {
+            max-width: 1240px;
+            margin: 0 auto;
+        }
+
+        .page-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .back-btn,
+        .support-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn,
+        .support-btn,
+        .hero,
+        .hero-stat,
+        .card,
+        .toolbar,
+        .faq-card,
+        .faq-badge,
+        .form-control,
+        .form-textarea,
+        .form-select,
+        .modal-window,
+        .btn,
+        .btn-success,
+        .btn-ghost,
+        .btn-danger {
+            border-width: 1.5px;
+        }
+
+        .back-btn {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .support-btn {
+            background: linear-gradient(135deg, #6677b8 0%, #735fad 100%);
+            color: #fff;
+            border-color: rgba(124, 126, 196, 0.22);
+            box-shadow: 0 14px 28px rgba(87, 90, 164, 0.18);
+        }
+
+        .back-btn:hover,
+        .support-btn:hover,
+        .btn:hover,
+        .btn-ghost:hover,
+        .btn-danger:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.96) 0%, rgba(21, 21, 25, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 26px 46px rgba(4, 8, 16, 0.18);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto auto 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            right: -90px;
+            top: -150px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-top: 22px;
+        }
+
+        .hero-stat {
+            background: linear-gradient(180deg, rgba(26, 26, 30, 0.94) 0%, rgba(20, 20, 24, 0.94) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            box-shadow: 0 16px 28px rgba(4, 8, 16, 0.12);
+        }
+
+        .hero-stat-value {
+            display: block;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .hero-stat-label {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .messages {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .message {
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            border: 1px solid transparent;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message-success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #bbf7d0;
+            border-color: rgba(34, 197, 94, 0.26);
+        }
+
+        .message-error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.26);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 360px minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .sidebar-stack {
+            display: grid;
+            gap: 20px;
+        }
+
+        .create-shortcut-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .create-shortcut-buttons .btn,
+        .create-shortcut-buttons .btn-success,
+        .create-shortcut-buttons .btn-ghost {
+            width: 100%;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.96) 0%, rgba(21, 21, 25, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: 0 22px 40px rgba(4, 8, 16, 0.16);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .card-subtitle {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-control,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .form-control:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.38);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .btn,
+        .btn-ghost,
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #6575b5 0%, #745fae 100%);
+            color: #fff;
+            border-color: rgba(123, 126, 197, 0.22);
+            box-shadow: 0 14px 28px rgba(87, 90, 164, 0.16);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #5f9d6f 0%, #4f8860 100%);
+            color: #fff;
+            border-color: rgba(89, 150, 107, 0.24);
+            box-shadow: 0 14px 28px rgba(79, 136, 96, 0.16);
+        }
+
+        .btn-ghost {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #da6673 0%, #bf4758 100%);
+            color: #ffffff;
+            border-color: rgba(177, 72, 88, 0.36);
+            box-shadow: 0 16px 28px rgba(191, 71, 88, 0.18);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 20px 34px rgba(191, 71, 88, 0.24);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 14px;
+            border-radius: calc(var(--radius-lg) - 2px);
+            border: 1.5px solid rgba(123, 126, 197, 0.12);
+            background: linear-gradient(180deg, rgba(25, 25, 29, 0.94) 0%, rgba(19, 19, 23, 0.94) 100%);
+            box-shadow: 0 18px 32px rgba(4, 8, 16, 0.12);
+        }
+
+        .toolbar .form-control,
+        .toolbar .form-select {
+            min-width: 220px;
+            flex: 1 1 220px;
+        }
+
+        .faq-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .faq-card {
+            background: linear-gradient(180deg, rgba(30, 30, 34, 0.96) 0%, rgba(23, 23, 27, 0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            box-shadow: 0 18px 32px rgba(4, 8, 16, 0.12);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .faq-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(109, 132, 228, 0.24);
+            box-shadow: 0 22px 38px rgba(8, 12, 22, 0.16);
+        }
+
+        .faq-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .faq-question {
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.45;
+        }
+
+        .faq-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .faq-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .faq-answer {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 14px;
+        }
+
+        .faq-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding-top: 14px;
+            border-top: 1.5px solid rgba(123, 126, 197, 0.10);
+        }
+
+        .empty-state {
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(6px);
+            padding: 24px;
+        }
+
+        .modal.is-open {
+            display: block;
+        }
+
+        .modal-window {
+            max-width: 760px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, rgba(28, 28, 31, 0.98) 0%, rgba(21, 21, 25, 0.98) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 30px 56px rgba(0, 0, 0, 0.34);
+        }
+
+        html[data-theme='light'] body.faq-management-page {
+            --bg-primary: #e9f1e5;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --bg-tertiary: #eef5ea;
+            --bg-input: #fbfef9;
+            --border-color: rgba(108, 137, 111, 0.34);
+            --text-primary: #1d3022;
+            --text-secondary: #395043;
+            --text-muted: #6b7f6f;
+            --accent-primary: #5f9f74;
+            --accent-success: #5e9c6d;
+            --accent-danger: #cb5b67;
+            --gradient-primary: linear-gradient(135deg, #78b17b 0%, #659f75 55%, #8cb696 100%);
+            --gradient-success: linear-gradient(135deg, #75b87b 0%, #619f70 100%);
+            background:
+                radial-gradient(circle at top left, rgba(129, 181, 119, 0.24) 0%, transparent 34%),
+                radial-gradient(circle at top right, rgba(147, 188, 157, 0.16) 0%, transparent 24%),
+                radial-gradient(circle at bottom right, rgba(172, 201, 165, 0.20) 0%, transparent 28%),
+                linear-gradient(180deg, #e9f1e5 0%, #dfe8dc 100%);
+        }
+
+        html[data-theme='dark'] body.faq-management-page {
+            --border-color: #485269;
+        }
+
+        html[data-theme='dark'] body.faq-management-page .support-btn,
+        html[data-theme='dark'] body.faq-management-page .btn {
+            background: linear-gradient(135deg, #5f6fa8 0%, #6b60a4 58%, #587d96 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(128, 139, 205, 0.28) !important;
+            box-shadow: 0 18px 32px rgba(82, 96, 168, 0.22);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.faq-management-page .btn-success {
+            background: linear-gradient(135deg, #6fbc80 0%, #5b9f6e 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(116, 179, 130, 0.30) !important;
+            box-shadow: 0 18px 32px rgba(79, 136, 96, 0.22);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.faq-management-page .btn-ghost {
+            background: rgba(24, 31, 43, 0.94);
+            color: #e6edf7;
+            border-color: rgba(114, 126, 160, 0.24);
+        }
+
+        html[data-theme='dark'] body.faq-management-page .create-shortcut-buttons .btn {
+            background: linear-gradient(135deg, #5f6fa8 0%, #6b60a4 58%, #587d96 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(128, 139, 205, 0.28) !important;
+            box-shadow: 0 18px 32px rgba(82, 96, 168, 0.22);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.faq-management-page .create-shortcut-buttons .btn-success {
+            background: linear-gradient(135deg, #6fbc80 0%, #5b9f6e 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(116, 179, 130, 0.30) !important;
+            box-shadow: 0 18px 32px rgba(79, 136, 96, 0.22);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.faq-management-page .create-shortcut-buttons .btn-ghost {
+            background: rgba(24, 31, 43, 0.94);
+            color: #e6edf7;
+            border-color: rgba(114, 126, 160, 0.24);
+        }
+
+        html[data-theme='dark'] body.faq-management-page .modal-actions .btn-success {
+            background: linear-gradient(135deg, #6fbc80 0%, #5b9f6e 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(116, 179, 130, 0.30) !important;
+            box-shadow: 0 18px 32px rgba(79, 136, 96, 0.22);
+            border-radius: 999px;
+            min-width: 170px;
+            padding: 12px 22px;
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='dark'] body.faq-management-page .modal-actions .btn {
+            background: linear-gradient(135deg, #6676b5 0%, #745eae 100%) !important;
+            color: #f7fbff !important;
+            border-color: rgba(123, 126, 197, 0.28) !important;
+            box-shadow: 0 18px 32px rgba(87, 90, 164, 0.18);
+            border-radius: 999px;
+            min-width: 170px;
+            padding: 12px 22px;
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.faq-management-page .create-shortcut-buttons .btn {
+            background: linear-gradient(135deg, #7ab980 0%, #669f75 58%, #90bf96 100%);
+            color: #ffffff;
+            border-color: rgba(108, 151, 113, 0.28);
+            box-shadow: 0 18px 30px rgba(104, 150, 111, 0.18);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.faq-management-page .create-shortcut-buttons .btn-success {
+            background: linear-gradient(135deg, #73b87d 0%, #609f73 100%);
+            color: #ffffff;
+            border-color: rgba(96, 143, 102, 0.30);
+            box-shadow: 0 18px 30px rgba(99, 151, 107, 0.18);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.faq-management-page .create-shortcut-buttons .btn-ghost {
+            background: rgba(255, 255, 255, 0.88);
+            border-color: rgba(108, 137, 111, 0.26);
+        }
+
+        html[data-theme='light'] body.faq-management-page .hero,
+        html[data-theme='light'] body.faq-management-page .card,
+        html[data-theme='light'] body.faq-management-page .faq-card,
+        html[data-theme='light'] body.faq-management-page .hero-stat,
+        html[data-theme='light'] body.faq-management-page .modal-window,
+        html[data-theme='light'] body.faq-management-page .toolbar {
+            border-color: rgba(36, 52, 37, 0.46);
+            border-width: 2px;
+            box-shadow:
+                0 24px 42px rgba(105, 134, 109, 0.13),
+                inset 0 0 0 1px rgba(34, 44, 34, 0.04);
+        }
+
+        html[data-theme='light'] body.faq-management-page .back-btn {
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 18px 32px rgba(96, 128, 102, 0.14);
+        }
+
+        html[data-theme='light'] body.faq-management-page .support-btn {
+            background: linear-gradient(135deg, #74b87e 0%, #5f9f74 55%, #88b890 100%);
+            color: #ffffff;
+            border-color: rgba(96, 143, 102, 0.34);
+            box-shadow: 0 18px 34px rgba(99, 151, 107, 0.20);
+        }
+
+        html[data-theme='light'] body.faq-management-page .hero,
+        html[data-theme='light'] body.faq-management-page .card,
+        html[data-theme='light'] body.faq-management-page .faq-card,
+        html[data-theme='light'] body.faq-management-page .hero-stat,
+        html[data-theme='light'] body.faq-management-page .modal-window,
+        html[data-theme='light'] body.faq-management-page .toolbar {
+            box-shadow: 0 24px 42px rgba(105, 134, 109, 0.13);
+        }
+
+        html[data-theme='light'] body.faq-management-page .modal-window {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(242, 249, 238, 0.99) 100%);
+            border-color: rgba(36, 52, 37, 0.52);
+            box-shadow:
+                0 30px 56px rgba(76, 103, 79, 0.18),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.20);
+        }
+
+        html[data-theme='light'] body.faq-management-page .modal-close {
+            background: rgba(247, 251, 245, 0.98);
+            color: #213127;
+            border-color: rgba(36, 52, 37, 0.26);
+            box-shadow: 0 10px 18px rgba(102, 130, 106, 0.10);
+        }
+
+        html[data-theme='light'] body.faq-management-page .hero {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(243, 250, 240, 0.97) 100%);
+        }
+
+        html[data-theme='light'] body.faq-management-page .card,
+        html[data-theme='light'] body.faq-management-page .faq-card,
+        html[data-theme='light'] body.faq-management-page .hero-stat,
+        html[data-theme='light'] body.faq-management-page .toolbar {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(239, 247, 236, 0.96) 100%);
+        }
+
+        html[data-theme='light'] body.faq-management-page .faq-card:hover {
+            border-color: rgba(112, 168, 123, 0.24);
+            box-shadow: 0 28px 42px rgba(105, 134, 109, 0.16);
+        }
+
+        html[data-theme='light'] body.faq-management-page .faq-badge {
+            background: rgba(245, 250, 243, 0.94);
+        }
+
+        html[data-theme='light'] body.faq-management-page .btn {
+            background: linear-gradient(135deg, #7ab980 0%, #669f75 58%, #90bf96 100%);
+            color: #ffffff;
+            border-color: rgba(108, 151, 113, 0.28);
+            box-shadow: 0 18px 30px rgba(104, 150, 111, 0.18);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.faq-management-page .btn-success {
+            background: linear-gradient(135deg, #73b87d 0%, #609f73 100%);
+            color: #ffffff;
+            border-color: rgba(96, 143, 102, 0.30);
+            box-shadow: 0 18px 30px rgba(99, 151, 107, 0.18);
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.faq-management-page .modal-actions .btn,
+        html[data-theme='light'] body.faq-management-page .modal-actions .btn-success {
+            background: linear-gradient(135deg, #88c58d 0%, #74b57e 55%, #5ea16f 100%);
+            color: #ffffff;
+            border-color: rgba(66, 104, 72, 0.30);
+            box-shadow: 0 18px 30px rgba(95, 145, 103, 0.20);
+            border-radius: 999px;
+            min-width: 170px;
+            padding: 12px 22px;
+            -webkit-text-fill-color: currentColor;
+        }
+
+        html[data-theme='light'] body.faq-management-page .btn-ghost {
+            background: rgba(255, 255, 255, 0.88);
+            border-color: rgba(108, 137, 111, 0.26);
+        }
+
+        html[data-theme='light'] body.faq-management-page .modal-actions .btn-ghost {
+            background: rgba(255, 255, 255, 0.92);
+            color: #223127;
+            border-color: rgba(36, 52, 37, 0.28);
+            border-radius: 999px;
+            min-width: 170px;
+            padding: 12px 22px;
+        }
+
+        html[data-theme='light'] body.faq-management-page .btn-danger {
+            background: linear-gradient(135deg, #dd6b76 0%, #c44959 100%);
+            color: #ffffff;
+            border-color: rgba(177, 74, 88, 0.36);
+            box-shadow: 0 18px 32px rgba(196, 73, 89, 0.20);
+        }
+
+        html[data-theme='light'] body.faq-management-page .btn-danger:hover {
+            box-shadow: 0 20px 36px rgba(196, 73, 89, 0.26);
+        }
+
+        html[data-theme='light'] body.faq-management-page .toolbar,
+        html[data-theme='light'] body.faq-management-page .faq-actions {
+            border-color: rgba(108, 137, 111, 0.18);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 0;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 960px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .hero,
+            .card {
+                padding: 20px;
+            }
+
+            .create-shortcut-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                padding: 12px;
+            }
+
+            .modal-window {
+                padding: 20px;
+            }
+
+            .modal-actions .btn,
+            .modal-actions .btn-success,
+            .modal-actions .btn-ghost {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
+    {% include 'theme_setup.html' %}
+</head>
+<body class="faq-management-page">
+    <div class="page">
+        <div class="page-actions">
+            <a href="{% url 'support' %}" class="back-btn">← Назад в поддержку</a>
+            <a href="{% url 'support' %}" class="support-btn">Открыть FAQ для пользователей</a>
+        </div>
+
+        <section class="hero">
+            <h1>Управление FAQ</h1>
+            <p>Здесь находится единственный источник истины для FAQ. Страница поддержки пользователей теперь строится только из этих записей.</p>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ faq_total }}</span>
+                    <span class="hero-stat-label">Всего FAQ</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ active_faq_total }}</span>
+                    <span class="hero-stat-label">Активных FAQ</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">{{ faq_sections|length }}</span>
+                    <span class="hero-stat-label">Категорий</span>
+                </div>
+            </div>
+        </section>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags|default:'success' }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="layout">
+            <aside class="sidebar-stack">
+                <div class="card">
+                    <div class="card-title">Создание</div>
+                    <div class="card-subtitle">Добавляйте новый FAQ или категорию отдельным окном, чтобы экран оставался компактным.</div>
+
+                    <div class="create-shortcut-buttons">
+                        <button type="button" class="btn" onclick="openCreateFaqModal()">➕ Новый FAQ</button>
+                        <button type="button" class="btn-success" onclick="openCreateFaqCategoryModal()">📚 Новая категория</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Категории FAQ</div>
+                    <div class="card-subtitle">Создавайте новые категории и меняйте существующие без правок кода.</div>
+
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <input type="text" id="faqCategorySearch" class="form-control" placeholder="🔍 Поиск категории">
+                    </div>
+
+                    <div class="faq-grid" style="grid-template-columns: 1fr; gap: 12px;">
+                        {% for category in faq_category_cards %}
+                        <article class="faq-card"
+                                 data-faq-category-card
+                                 data-name="{{ category.name|lower }}"
+                                 data-slug="{{ category.slug|lower }}">
+                            <div class="faq-card-top">
+                                <div class="faq-question">{{ category.name }}</div>
+                                <div class="faq-badge">#{{ category.id }}</div>
+                            </div>
+
+                            <div class="faq-meta">
+                                <span class="faq-badge">Slug: {{ category.slug }}</span>
+                                <span class="faq-badge">Порядок: {{ category.order }}</span>
+                                <span class="faq-badge">{% if category.is_active %}Активна{% else %}Скрыта{% endif %}</span>
+                                <span class="faq-badge">FAQ: {{ category.count }}</span>
+                            </div>
+
+                            <div class="faq-actions">
+                                <button type="button"
+                                        class="btn"
+                                        onclick="openEditFaqCategoryModal({{ category.id }}, '{{ category.name|escapejs }}', '{{ category.slug|escapejs }}', '{{ category.order }}', {% if category.is_active %}true{% else %}false{% endif %})">
+                                    Редактировать
+                                </button>
+                                <form method="POST" action="{% url 'delete_faq_category' category.id %}" onsubmit="return confirm('Удалить эту категорию?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-danger">Удалить</button>
+                                </form>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+
+                    <div id="faqCategoryEmptyFilter" class="empty-state" style="display:none; margin-top: 16px;">
+                        По текущему фильтру категории не найдены.
+                    </div>
+                </div>
+            </aside>
+
+            <section class="card">
+                <div class="card-title">Список FAQ</div>
+                <div class="card-subtitle">Фильтруйте вопросы, быстро редактируйте записи и скрывайте неактуальные ответы.</div>
+
+                <div class="toolbar">
+                    <input type="text" id="faqFilterInput" class="form-control" placeholder="🔍 Поиск по вопросу или ответу">
+                    <select id="faqFilterCategory" class="form-select">
+                        <option value="">Все категории</option>
+                        {% for category in faq_categories %}
+                        <option value="{{ category.slug }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if faqs %}
+                <div class="faq-grid" id="faqGrid">
+                    {% for faq in faqs %}
+                    <article class="faq-card"
+                             data-faq-card
+                             data-question="{{ faq.question|lower }}"
+                             data-answer="{{ faq.answer|striptags|lower }}"
+                             data-category="{{ faq.category }}"
+                             data-active="{% if faq.is_active %}yes{% else %}no{% endif %}">
+                        <div class="faq-card-top">
+                            <div class="faq-question">{{ faq.question }}</div>
+                            <div class="faq-badge">#{{ faq.id }}</div>
+                        </div>
+
+                        <div class="faq-meta">
+                            <span class="faq-badge">{{ faq.category_label }}</span>
+                            <span class="faq-badge">Порядок: {{ faq.order }}</span>
+                            <span class="faq-badge">{% if faq.is_active %}Активен{% else %}Скрыт{% endif %}</span>
+                        </div>
+
+                        <div class="faq-answer">{{ faq.answer|linebreaksbr }}</div>
+
+                        <div class="faq-actions">
+                            <button type="button"
+                                    class="btn"
+                                    onclick="openEditFaqModal({{ faq.id }}, '{{ faq.question|escapejs }}', '{{ faq.answer|escapejs }}', '{{ faq.category }}', '{{ faq.order }}', {% if faq.is_active %}true{% else %}false{% endif %})">
+                                Редактировать
+                            </button>
+                            <form method="POST" action="{% url 'delete_faq' faq.id %}" onsubmit="return confirm('Удалить этот FAQ?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-danger">Удалить</button>
+                            </form>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+                <div id="faqEmptyFilter" class="empty-state" style="display:none; margin-top: 16px;">
+                    По текущему фильтру FAQ не найден.
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    Пока нет ни одного FAQ.
+                </div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+
+    <div class="modal" id="createFaqModal">
+        <div class="modal-window">
+            <button type="button" class="modal-close" onclick="closeCreateFaqModal()">&times;</button>
+            <div class="card-title" style="margin-bottom: 8px;">Создать FAQ</div>
+            <div class="card-subtitle">Добавьте новый вопрос в базу знаний без перегруза страницы.</div>
+
+            <form method="POST" action="{% url 'create_faq' %}" id="createFaqForm" class="form-grid">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="faqQuestion">Вопрос</label>
+                    <input id="faqQuestion" class="form-control" type="text" name="question" required maxlength="200">
+                </div>
+
+                <div class="form-group">
+                    <label for="faqAnswer">Ответ</label>
+                    <textarea id="faqAnswer" class="form-textarea" name="answer" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="faqCategory">Категория</label>
+                    <select id="faqCategory" class="form-select" name="category" required>
+                        {% for category in faq_categories %}
+                        <option value="{{ category.slug }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="faqOrder">Порядок</label>
+                    <input id="faqOrder" class="form-control" type="number" name="order" value="0">
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" name="is_active" checked>
+                    <span>Показывать в FAQ</span>
+                </label>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" onclick="closeCreateFaqModal()">Отмена</button>
+                    <button type="submit" class="btn-success">Добавить FAQ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="createFaqCategoryModal">
+        <div class="modal-window">
+            <button type="button" class="modal-close" onclick="closeCreateFaqCategoryModal()">&times;</button>
+            <div class="card-title" style="margin-bottom: 8px;">Создать категорию</div>
+            <div class="card-subtitle">Добавьте новую категорию для FAQ без правок кода.</div>
+
+            <form method="POST" action="{% url 'create_faq_category' %}" id="createFaqCategoryForm" class="form-grid">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="faqCategoryName">Название</label>
+                    <input id="faqCategoryName" class="form-control" type="text" name="name" required maxlength="120" placeholder="Например: Доставка">
+                </div>
+
+                <div class="form-group">
+                    <label for="faqCategorySlug">Slug</label>
+                    <input id="faqCategorySlug" class="form-control" type="text" name="slug" maxlength="80" placeholder="Оставьте пустым для автогенерации">
+                </div>
+
+                <div class="form-group">
+                    <label for="faqCategoryOrder">Порядок</label>
+                    <input id="faqCategoryOrder" class="form-control" type="number" name="order" value="0">
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" name="is_active" checked>
+                    <span>Показывать в FAQ</span>
+                </label>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" onclick="closeCreateFaqCategoryModal()">Отмена</button>
+                    <button type="submit" class="btn-success">Добавить категорию</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="editFaqModal">
+        <div class="modal-window">
+            <button type="button" class="modal-close" onclick="closeEditFaqModal()">&times;</button>
+            <div class="card-title" style="margin-bottom: 8px;">Редактировать FAQ</div>
+            <div class="card-subtitle">Изменения сразу попадут на страницу поддержки.</div>
+
+            <form method="POST" id="editFaqForm" class="form-grid">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="editFaqQuestion">Вопрос</label>
+                    <input id="editFaqQuestion" class="form-control" type="text" name="question" required maxlength="200">
+                </div>
+
+                <div class="form-group">
+                    <label for="editFaqAnswer">Ответ</label>
+                    <textarea id="editFaqAnswer" class="form-textarea" name="answer" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editFaqCategory">Категория</label>
+                    <select id="editFaqCategory" class="form-select" name="category" required>
+                        {% for category in faq_categories %}
+                        <option value="{{ category.slug }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editFaqOrder">Порядок</label>
+                    <input id="editFaqOrder" class="form-control" type="number" name="order" value="0">
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" id="editFaqActive" name="is_active">
+                    <span>Показывать в FAQ</span>
+                </label>
+
+                <div style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
+                    <button type="button" class="btn-ghost" onclick="closeEditFaqModal()">Отмена</button>
+                    <button type="submit" class="btn">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="editFaqCategoryModal">
+        <div class="modal-window">
+            <button type="button" class="modal-close" onclick="closeEditFaqCategoryModal()">&times;</button>
+            <div class="card-title" style="margin-bottom: 8px;">Редактировать категорию</div>
+            <div class="card-subtitle">Изменения сразу попадут в список категорий FAQ.</div>
+
+            <form method="POST" id="editFaqCategoryForm" class="form-grid">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="editFaqCategoryName">Название</label>
+                    <input id="editFaqCategoryName" class="form-control" type="text" name="name" required maxlength="120">
+                </div>
+
+                <div class="form-group">
+                    <label for="editFaqCategorySlug">Slug</label>
+                    <input id="editFaqCategorySlug" class="form-control" type="text" name="slug" maxlength="80">
+                </div>
+
+                <div class="form-group">
+                    <label for="editFaqCategoryOrder">Порядок</label>
+                    <input id="editFaqCategoryOrder" class="form-control" type="number" name="order" value="0">
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" id="editFaqCategoryActive" name="is_active">
+                    <span>Показывать в FAQ</span>
+                </label>
+
+                <div style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
+                    <button type="button" class="btn-ghost" onclick="closeEditFaqCategoryModal()">Отмена</button>
+                    <button type="submit" class="btn">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditFaqModal(id, question, answer, category, order, isActive) {
+            document.getElementById('editFaqForm').action = `/support/faq/${id}/edit/`;
+            document.getElementById('editFaqQuestion').value = question;
+            document.getElementById('editFaqAnswer').value = answer;
+            document.getElementById('editFaqCategory').value = category;
+            document.getElementById('editFaqOrder').value = order;
+            document.getElementById('editFaqActive').checked = isActive;
+            document.getElementById('editFaqModal').classList.add('is-open');
+        }
+
+        function closeEditFaqModal() {
+            document.getElementById('editFaqModal').classList.remove('is-open');
+        }
+
+        function openCreateFaqModal() {
+            document.getElementById('createFaqModal').classList.add('is-open');
+        }
+
+        function closeCreateFaqModal() {
+            document.getElementById('createFaqModal').classList.remove('is-open');
+        }
+
+        function openCreateFaqCategoryModal() {
+            document.getElementById('createFaqCategoryModal').classList.add('is-open');
+        }
+
+        function closeCreateFaqCategoryModal() {
+            document.getElementById('createFaqCategoryModal').classList.remove('is-open');
+        }
+
+        function openEditFaqCategoryModal(id, name, slug, order, isActive) {
+            document.getElementById('editFaqCategoryForm').action = `/support/faq-category/${id}/edit/`;
+            document.getElementById('editFaqCategoryName').value = name;
+            document.getElementById('editFaqCategorySlug').value = slug;
+            document.getElementById('editFaqCategoryOrder').value = order;
+            document.getElementById('editFaqCategoryActive').checked = isActive;
+            document.getElementById('editFaqCategoryModal').classList.add('is-open');
+        }
+
+        function closeEditFaqCategoryModal() {
+            document.getElementById('editFaqCategoryModal').classList.remove('is-open');
+        }
+
+        function filterFaqCards() {
+            const query = document.getElementById('faqFilterInput').value.trim().toLowerCase();
+            const category = document.getElementById('faqFilterCategory').value;
+            let visible = 0;
+
+            document.querySelectorAll('[data-faq-card]').forEach(card => {
+                const matchesQuery = !query || card.dataset.question.includes(query) || card.dataset.answer.includes(query);
+                const matchesCategory = !category || card.dataset.category === category;
+                const shouldShow = matchesQuery && matchesCategory;
+
+                card.style.display = shouldShow ? '' : 'none';
+                if (shouldShow) {
+                    visible += 1;
+                }
+            });
+
+            document.getElementById('faqEmptyFilter').style.display = visible ? 'none' : 'block';
+        }
+
+        function filterFaqCategories() {
+            const query = document.getElementById('faqCategorySearch')?.value.trim().toLowerCase() || '';
+            let visible = 0;
+
+            document.querySelectorAll('[data-faq-category-card]').forEach(card => {
+                const matchesQuery = !query || card.dataset.name.includes(query) || card.dataset.slug.includes(query);
+                card.style.display = matchesQuery ? '' : 'none';
+                if (matchesQuery) {
+                    visible += 1;
+                }
+            });
+
+            const emptyState = document.getElementById('faqCategoryEmptyFilter');
+            if (emptyState) {
+                emptyState.style.display = visible ? 'none' : 'block';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('faqFilterInput')?.addEventListener('input', filterFaqCards);
+            document.getElementById('faqFilterCategory')?.addEventListener('change', filterFaqCards);
+            document.getElementById('faqCategorySearch')?.addEventListener('input', filterFaqCategories);
+            document.getElementById('createFaqModal')?.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeCreateFaqModal();
+                }
+            });
+            document.getElementById('createFaqCategoryModal')?.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeCreateFaqCategoryModal();
+                }
+            });
+            document.getElementById('editFaqModal')?.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeEditFaqModal();
+                }
+            });
+            document.getElementById('editFaqCategoryModal')?.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeEditFaqCategoryModal();
+                }
+            });
+        });
+    </script>
+    {% include 'theme_toggle.html' %}
+</body>
+</html>

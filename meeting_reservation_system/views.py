@@ -8,9 +8,10 @@ from django.contrib.auth import login, authenticate, logout, update_session_auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
-from django.db.models import Max
+from django.db import transaction
+from django.db.models import Max, Count
 from django.utils import timezone
-from .models import Room, RoomImage, User, EmailConfirmation, Booking, Office, Review
+from .models import Room, RoomImage, User, EmailConfirmation, Booking, Office, Review, ReviewReply, Equipment, FAQ, FAQCategory, InfoBlock, InfoSection
 from django.http import JsonResponse, FileResponse, Http404
 from datetime import datetime, timedelta
 from .models import SupportTicket, TicketResponse
@@ -18,6 +19,7 @@ import json
 from decimal import Decimal
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date
+from django.utils.text import slugify
 from django.conf import settings
 import pandas as pd
 import io
@@ -31,6 +33,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
 
 STATUS_CHOICES = dict(Booking.STATUS_CHOICES)
 
@@ -313,7 +316,7 @@ def apply_users_sorting(users, sort_by):
 
 @login_required
 def users_report(request):
-    if request.user.role not in ['admin', 'manager']:
+    if not _has_management_access(request.user):
         messages.error(request, 'Доступ запрещен!')
         return redirect('home')
 
@@ -326,6 +329,7 @@ def users_report(request):
     stats = {
         'total': all_users.count(),
         'users': all_users.filter(role='user').count(),
+        'owners': all_users.filter(role='owner').count(),
         'admins': all_users.filter(role='admin').count(),
         'managers': all_users.filter(role='manager').count(),
         'with_profile': all_users.exclude(first_name='', last_name='', phone='', birth_date__isnull=True).count(),
@@ -342,7 +346,7 @@ def users_report(request):
 
 @login_required
 def users_export_pdf(request):
-    if request.user.role not in ['admin', 'manager']:
+    if not _has_management_access(request.user):
         return HttpResponse('Доступ запрещен', status=403)
 
     users = get_filtered_users(request)
@@ -493,80 +497,238 @@ def ticket_response_form(request, ticket_id):
         return JsonResponse({'error': 'Тикет не найден'}, status=404)
 
 
+def _build_faq_sections(include_inactive=False, include_empty=False):
+    category_queryset = FAQCategory.objects.all() if include_inactive else FAQCategory.objects.filter(is_active=True)
+    categories = list(category_queryset.order_by('order', 'id'))
+    faq_queryset = FAQ.objects.all() if include_inactive else FAQ.objects.filter(is_active=True)
+    grouped_faqs = {category.slug: [] for category in categories}
+
+    for faq in faq_queryset.order_by('category', 'order', 'id'):
+        grouped_faqs.setdefault(faq.category, []).append(faq)
+
+    sections = []
+    seen_slugs = set()
+    for category in categories:
+        items = grouped_faqs.get(category.slug, [])
+        if items or include_empty:
+            sections.append({
+                'code': category.slug,
+                'slug': category.slug,
+                'label': category.name,
+                'items': items,
+                'count': len(items),
+            })
+        seen_slugs.add(category.slug)
+
+    for slug, items in grouped_faqs.items():
+        if slug not in seen_slugs and (items or include_empty):
+            sections.append({
+                'code': slug,
+                'slug': slug,
+                'label': slug.replace('-', ' ').title(),
+                'items': items,
+                'count': len(items),
+            })
+
+    return sections
+
+
+def _build_faq_categories():
+    categories = []
+    for category in FAQCategory.objects.all().order_by('order', 'id'):
+        categories.append({
+            'id': category.id,
+            'name': category.name,
+            'slug': category.slug,
+            'order': category.order,
+            'is_active': category.is_active,
+            'count': FAQ.objects.filter(category=category.slug).count(),
+        })
+    return categories
+
+
+def _extract_faq_form_data(request):
+    question = (request.POST.get('question') or '').strip()
+    answer = (request.POST.get('answer') or '').strip()
+    category = (request.POST.get('category') or 'general').strip()
+    is_active = request.POST.get('is_active') == 'on'
+
+    try:
+        order = int(request.POST.get('order') or 0)
+    except (TypeError, ValueError):
+        return None, 'Порядок должен быть числом.'
+
+    if not question:
+        return None, 'Вопрос обязателен.'
+    if len(question) < 8:
+        return None, 'Вопрос должен содержать минимум 8 символов.'
+    if not answer:
+        return None, 'Ответ обязателен.'
+    if len(answer) < 15:
+        return None, 'Ответ должен содержать минимум 15 символов.'
+    if not FAQCategory.objects.filter(slug=category).exists():
+        return None, 'Выбрана неверная категория FAQ.'
+
+    return {
+        'question': question,
+        'answer': answer,
+        'category': category,
+        'order': order,
+        'is_active': is_active,
+    }, None
+
+
+def _extract_faq_category_form_data(request, *, existing_category=None):
+    name = (request.POST.get('name') or '').strip()
+    slug_value = (request.POST.get('slug') or '').strip()
+    is_active = request.POST.get('is_active') == 'on'
+
+    try:
+        order = int(request.POST.get('order') or 0)
+    except (TypeError, ValueError):
+        return None, 'Порядок должен быть числом.'
+
+    if not name:
+        return None, 'Название категории обязательно.'
+
+    if not slug_value:
+        slug_value = slugify(name)
+
+    if not slug_value:
+        return None, 'Не удалось сформировать slug категории.'
+
+    existing_query = FAQCategory.objects.filter(slug=slug_value)
+    if existing_category is not None:
+        existing_query = existing_query.exclude(id=existing_category.id)
+    if existing_query.exists():
+        return None, 'Категория с таким slug уже существует.'
+
+    return {
+        'name': name,
+        'slug': slug_value,
+        'order': order,
+        'is_active': is_active,
+    }, None
+
+
 @login_required
+@require_POST
 def create_ticket(request):
     """Создание нового тикета"""
-    if request.method == 'POST':
-        subject = request.POST.get('subject')
-        message = request.POST.get('message')
+    subject = (request.POST.get('subject') or '').strip()
+    message = (request.POST.get('message') or '').strip()
 
-        ticket = SupportTicket.objects.create(
-            user=request.user,
-            subject=subject,
-            message=message
-        )
-        messages.success(request, '✅ Ваш вопрос отправлен в техподдержку!')
-
-        # ★★★ ПРАВИЛЬНЫЙ РЕДИРЕКТ С ЯКОРЕМ ★★★
+    if len(subject) < 5:
+        messages.error(request, '❌ Тема обращения должна содержать минимум 5 символов.')
         from django.http import HttpResponseRedirect
         from django.urls import reverse
-        return HttpResponseRedirect(reverse('support') + '#my-tickets')
+        return HttpResponseRedirect(reverse('support') + '#new-ticket')
 
-    return redirect('support')
+    if len(subject) > 200:
+        messages.error(request, '❌ Тема обращения не должна превышать 200 символов.')
+        from django.http import HttpResponseRedirect
+        from django.urls import reverse
+        return HttpResponseRedirect(reverse('support') + '#new-ticket')
+
+    if len(message) < 15:
+        messages.error(request, '❌ Опишите проблему подробнее: минимум 15 символов.')
+        from django.http import HttpResponseRedirect
+        from django.urls import reverse
+        return HttpResponseRedirect(reverse('support') + '#new-ticket')
+
+    SupportTicket.objects.create(
+        user=request.user,
+        subject=subject,
+        message=message,
+        auto_close_date=None,
+    )
+    messages.success(request, '✅ Ваш вопрос отправлен в техподдержку!')
+
+    from django.http import HttpResponseRedirect
+    from django.urls import reverse
+    return HttpResponseRedirect(reverse('support') + '#my-tickets')
 
 
 def support_view(request):
     """Страница техподдержки с FAQ"""
-    from .models import FAQ
+    faq_sections = _build_faq_sections()
+    my_tickets = SupportTicket.objects.none()
+
+    if request.user.is_authenticated:
+        my_tickets = SupportTicket.objects.filter(user=request.user).annotate(
+            response_count=Count('responses')
+        ).order_by('-last_activity', '-created_at')
+
+    can_manage_support = _has_management_access(request.user)
+    can_manage_faq = _has_admin_access(request.user)
+
     context = {
-        'my_tickets': SupportTicket.objects.filter(user=request.user).order_by(
-            '-created_at') if request.user.is_authenticated else [],
-        'faqs': FAQ.objects.filter(is_active=True),
-        'faq_categories': FAQ.CATEGORY_CHOICES,  # ★★★ ДОБАВИЛ КАТЕГОРИИ ★★★
+        'my_tickets': my_tickets,
+        'faq_sections': faq_sections,
+        'faq_total': sum(section['count'] for section in faq_sections),
+        'faq_category_total': len(faq_sections),
+        'can_manage_support': can_manage_support,
+        'can_manage_faq': can_manage_faq,
+        'open_my_tickets_count': my_tickets.exclude(status='closed').count() if request.user.is_authenticated else 0,
     }
 
-    if request.user.is_authenticated and request.user.role in ['admin', 'manager']:
-        context['all_tickets'] = SupportTicket.objects.all().order_by('-created_at')
+    if can_manage_support:
+        all_tickets = SupportTicket.objects.select_related('user').annotate(
+            response_count=Count('responses')
+        ).order_by('-last_activity', '-created_at')
+        context['all_tickets'] = all_tickets
+        context['open_tickets_count'] = all_tickets.exclude(status='closed').count()
 
-    return render(request, 'support.html', context)
+    return render(request, 'support_center.html', context)
 
 
 @login_required
 def ticket_detail(request, ticket_id):
     """Детальная страница тикета"""
     try:
-        ticket = SupportTicket.objects.get(id=ticket_id)
+        ticket = SupportTicket.objects.select_related('user').prefetch_related('responses__user').get(id=ticket_id)
+        can_manage_support = _has_management_access(request.user)
 
         # Проверяем доступ - разрешаем автору и менеджерам/админам
-        if ticket.user != request.user and request.user.role not in ['admin', 'manager']:
+        if ticket.user != request.user and not can_manage_support:
+            if request.method == 'POST':
+                return JsonResponse({'success': False, 'error': 'Доступ запрещен.'}, status=403)
             messages.error(request, '❌ Доступ запрещен!')
             return redirect('support')
 
         if request.method == 'POST':
-            response_text = request.POST.get('response')
-            if response_text:
-                # Проверяем что тикет не закрыт
-                if ticket.status == 'closed':
-                    messages.error(request, '❌ Тикет закрыт! Новые ответы невозможны.')
-                    return redirect('support')
+            response_text = (request.POST.get('response') or '').strip()
 
-                TicketResponse.objects.create(
-                    ticket=ticket,
-                    user=request.user,
-                    message=response_text
-                )
+            if ticket.status == 'closed':
+                return JsonResponse({'success': False, 'error': 'Тикет закрыт. Новые ответы невозможны.'}, status=400)
 
-                # Обновляем статус и активность
-                if request.user.role in ['admin', 'manager']:
-                    ticket.status = 'in_progress'
-                ticket.last_activity = timezone.now()
-                ticket.save()
+            if len(response_text) < 3:
+                return JsonResponse({'success': False, 'error': 'Ответ должен содержать минимум 3 символа.'}, status=400)
 
-                messages.success(request, '✅ Ответ отправлен!')
+            TicketResponse.objects.create(
+                ticket=ticket,
+                user=request.user,
+                message=response_text
+            )
 
-        return render(request, 'ticket_detail.html', {'ticket': ticket})
+            if can_manage_support:
+                ticket.status = 'in_progress'
+
+            ticket.last_activity = timezone.now()
+            ticket.auto_close_date = ticket.last_activity + timedelta(days=3) if ticket.status == 'in_progress' else None
+            ticket.save()
+
+            return JsonResponse({'success': True, 'message': 'Ответ отправлен!'})
+
+        return render(request, 'ticket_detail_modal.html', {
+            'ticket': ticket,
+            'can_manage_support': can_manage_support,
+            'can_reply': ticket.status != 'closed' and (can_manage_support or ticket.user == request.user),
+        })
 
     except SupportTicket.DoesNotExist:
+        if request.method == 'POST':
+            return JsonResponse({'success': False, 'error': 'Обращение не найдено.'}, status=404)
         messages.error(request, '❌ Обращение не найдено!')
         return redirect('support')
 
@@ -574,7 +736,7 @@ def ticket_detail(request, ticket_id):
 @login_required
 def update_ticket_status(request, ticket_id):
     """Обновление статуса тикета (для менеджеров)"""
-    if request.user.role not in ['admin', 'manager']:
+    if not _has_management_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'})
 
     try:
@@ -591,6 +753,7 @@ def update_ticket_status(request, ticket_id):
 
 
 @login_required
+@require_POST
 def close_ticket(request, ticket_id):
     """Закрытие тикета пользователем"""
     try:
@@ -603,6 +766,8 @@ def close_ticket(request, ticket_id):
 
         # Меняем статус на закрытый
         ticket.status = 'closed'
+        ticket.auto_close_date = None
+        ticket.last_activity = timezone.now()
         ticket.save()
 
         messages.success(request, '✅ Тикет закрыт! Спасибо за обращение.')
@@ -614,9 +779,10 @@ def close_ticket(request, ticket_id):
 
 
 @login_required
+@require_POST
 def delete_ticket(request, ticket_id):
     """Удаление тикета менеджером/админом"""
-    if request.user.role not in ['admin', 'manager']:
+    if not _has_management_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'})
 
     try:
@@ -638,9 +804,313 @@ def check_ticket_status(request, ticket_id):
     """Проверка статуса тикета для AJAX"""
     try:
         ticket = SupportTicket.objects.get(id=ticket_id)
+        if ticket.user != request.user and not _has_management_access(request.user):
+            return JsonResponse({'status': 'forbidden'}, status=403)
         return JsonResponse({'status': ticket.status})
     except SupportTicket.DoesNotExist:
         return JsonResponse({'status': 'not_found'})
+
+
+@login_required
+def faq_management(request):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('support')
+
+    faqs = FAQ.objects.all().order_by('category', 'order', 'id')
+    categories = FAQCategory.objects.all().order_by('order', 'id')
+
+    return render(request, 'faq_management.html', {
+        'faqs': faqs,
+        'faq_sections': _build_faq_sections(include_inactive=True, include_empty=True),
+        'faq_categories': categories,
+        'faq_category_cards': _build_faq_categories(),
+        'faq_total': faqs.count(),
+        'active_faq_total': faqs.filter(is_active=True).count(),
+        'faq_category_total': categories.count(),
+        'active_faq_category_total': categories.filter(is_active=True).count(),
+    })
+
+
+@login_required
+@require_POST
+def create_faq(request):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('support')
+
+    faq_data, error_message = _extract_faq_form_data(request)
+    if error_message:
+        messages.error(request, f'❌ {error_message}')
+        return redirect('faq_management')
+
+    FAQ.objects.create(**faq_data)
+    messages.success(request, '✅ FAQ добавлен.')
+    return redirect('faq_management')
+
+
+@login_required
+@require_POST
+def edit_faq(request, faq_id):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('support')
+
+    try:
+        faq = FAQ.objects.get(id=faq_id)
+    except FAQ.DoesNotExist:
+        messages.error(request, '❌ FAQ не найден.')
+        return redirect('faq_management')
+
+    faq_data, error_message = _extract_faq_form_data(request)
+    if error_message:
+        messages.error(request, f'❌ {error_message}')
+        return redirect('faq_management')
+
+    for field, value in faq_data.items():
+        setattr(faq, field, value)
+    faq.save()
+
+    messages.success(request, '✅ FAQ обновлён.')
+    return redirect('faq_management')
+
+
+@login_required
+@require_POST
+def delete_faq(request, faq_id):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('support')
+
+    try:
+        faq = FAQ.objects.get(id=faq_id)
+    except FAQ.DoesNotExist:
+        messages.error(request, '❌ FAQ не найден.')
+        return redirect('faq_management')
+
+    faq.delete()
+    messages.success(request, '✅ FAQ удалён.')
+    return redirect('faq_management')
+
+
+@login_required
+@require_POST
+def create_faq_category(request):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('support')
+
+    category_data, error_message = _extract_faq_category_form_data(request)
+    if error_message:
+        messages.error(request, f'❌ {error_message}')
+        return redirect('faq_management')
+
+    FAQCategory.objects.create(**category_data)
+    messages.success(request, '✅ Категория FAQ добавлена.')
+    return redirect('faq_management')
+
+
+@login_required
+@require_POST
+def edit_faq_category(request, category_id):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('support')
+
+    try:
+        category = FAQCategory.objects.get(id=category_id)
+    except FAQCategory.DoesNotExist:
+        messages.error(request, '❌ Категория FAQ не найдена.')
+        return redirect('faq_management')
+
+    category_data, error_message = _extract_faq_category_form_data(request, existing_category=category)
+    if error_message:
+        messages.error(request, f'❌ {error_message}')
+        return redirect('faq_management')
+
+    old_slug = category.slug
+    for field, value in category_data.items():
+        setattr(category, field, value)
+    category.save()
+
+    if old_slug != category.slug:
+        FAQ.objects.filter(category=old_slug).update(category=category.slug)
+
+    messages.success(request, '✅ Категория FAQ обновлена.')
+    return redirect('faq_management')
+
+
+@login_required
+@require_POST
+def delete_faq_category(request, category_id):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('support')
+
+    try:
+        category = FAQCategory.objects.get(id=category_id)
+    except FAQCategory.DoesNotExist:
+        messages.error(request, '❌ Категория FAQ не найдена.')
+        return redirect('faq_management')
+
+    if FAQ.objects.filter(category=category.slug).exists():
+        messages.error(request, '❌ Сначала перенесите или удалите FAQ из этой категории.')
+        return redirect('faq_management')
+
+    category.delete()
+    messages.success(request, '✅ Категория FAQ удалена.')
+    return redirect('faq_management')
+
+
+@login_required
+def info_management(request):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('info')
+
+    info_blocks = InfoBlock.objects.all().order_by('section', 'order', 'id')
+    sections = InfoSection.objects.all().order_by('order', 'id')
+
+    return render(request, 'info_management.html', {
+        'info_blocks': info_blocks,
+        'info_sections': _build_info_sections(include_inactive=True, include_empty=True),
+        'info_categories': sections,
+        'info_section_cards': _build_info_section_cards(),
+        'info_total': info_blocks.count(),
+        'active_info_total': info_blocks.filter(is_active=True).count(),
+        'info_section_total': sections.count(),
+        'active_info_section_total': sections.filter(is_active=True).count(),
+    })
+
+
+@login_required
+@require_POST
+def create_info_block(request):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('info')
+
+    info_data, error_message = _extract_info_block_form_data(request)
+    if error_message:
+        messages.error(request, f'❌ {error_message}')
+        return redirect('info_management')
+
+    InfoBlock.objects.create(**info_data)
+    messages.success(request, '✅ Блок информации добавлен.')
+    return redirect('info_management')
+
+
+@login_required
+@require_POST
+def edit_info_block(request, info_id):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('info')
+
+    try:
+        info_block = InfoBlock.objects.get(id=info_id)
+    except InfoBlock.DoesNotExist:
+        messages.error(request, '❌ Блок информации не найден.')
+        return redirect('info_management')
+
+    info_data, error_message = _extract_info_block_form_data(request)
+    if error_message:
+        messages.error(request, f'❌ {error_message}')
+        return redirect('info_management')
+
+    for field, value in info_data.items():
+        setattr(info_block, field, value)
+    info_block.save()
+
+    messages.success(request, '✅ Блок информации обновлён.')
+    return redirect('info_management')
+
+
+@login_required
+@require_POST
+def delete_info_block(request, info_id):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('info')
+
+    try:
+        info_block = InfoBlock.objects.get(id=info_id)
+    except InfoBlock.DoesNotExist:
+        messages.error(request, '❌ Блок информации не найден.')
+        return redirect('info_management')
+
+    info_block.delete()
+    messages.success(request, '✅ Блок информации удалён.')
+    return redirect('info_management')
+
+
+@login_required
+@require_POST
+def create_info_section(request):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('info')
+
+    section_data, error_message = _extract_info_section_form_data(request)
+    if error_message:
+        messages.error(request, f'❌ {error_message}')
+        return redirect('info_management')
+
+    InfoSection.objects.create(**section_data)
+    messages.success(request, '✅ Раздел информации добавлен.')
+    return redirect('info_management')
+
+
+@login_required
+@require_POST
+def edit_info_section(request, section_id):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('info')
+
+    try:
+        section = InfoSection.objects.get(id=section_id)
+    except InfoSection.DoesNotExist:
+        messages.error(request, '❌ Раздел информации не найден.')
+        return redirect('info_management')
+
+    section_data, error_message = _extract_info_section_form_data(request, existing_section=section)
+    if error_message:
+        messages.error(request, f'❌ {error_message}')
+        return redirect('info_management')
+
+    old_slug = section.slug
+    for field, value in section_data.items():
+        setattr(section, field, value)
+    section.save()
+
+    if old_slug != section.slug:
+        InfoBlock.objects.filter(section=old_slug).update(section=section.slug)
+
+    messages.success(request, '✅ Раздел информации обновлён.')
+    return redirect('info_management')
+
+
+@login_required
+@require_POST
+def delete_info_section(request, section_id):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('info')
+
+    try:
+        section = InfoSection.objects.get(id=section_id)
+    except InfoSection.DoesNotExist:
+        messages.error(request, '❌ Раздел информации не найден.')
+        return redirect('info_management')
+
+    if InfoBlock.objects.filter(section=section.slug).exists():
+        messages.error(request, '❌ Сначала перенесите или удалите блоки из этого раздела.')
+        return redirect('info_management')
+
+    section.delete()
+    messages.success(request, '✅ Раздел информации удалён.')
+    return redirect('info_management')
 
 
 def login_view(request):
@@ -946,9 +1416,135 @@ def register(request):
     })
 
 
+def _build_info_sections(include_inactive=False, include_empty=False):
+    section_queryset = InfoSection.objects.all() if include_inactive else InfoSection.objects.filter(is_active=True)
+    sections_list = list(section_queryset.order_by('order', 'id'))
+    info_queryset = InfoBlock.objects.all() if include_inactive else InfoBlock.objects.filter(is_active=True)
+    grouped_blocks = {section.slug: [] for section in sections_list}
+
+    for block in info_queryset.order_by('section', 'order', 'id'):
+        grouped_blocks.setdefault(block.section, []).append(block)
+
+    sections = []
+    seen_slugs = set()
+    for section in sections_list:
+        items = grouped_blocks.get(section.slug, [])
+        if items or include_empty:
+            sections.append({
+                'code': section.slug,
+                'slug': section.slug,
+                'label': section.name,
+                'description': section.description,
+                'items': items,
+                'count': len(items),
+            })
+        seen_slugs.add(section.slug)
+
+    for slug, items in grouped_blocks.items():
+        if slug not in seen_slugs and (items or include_empty):
+            sections.append({
+                'code': slug,
+                'slug': slug,
+                'label': slug.replace('-', ' ').title(),
+                'description': '',
+                'items': items,
+                'count': len(items),
+            })
+
+    return sections
+
+
+def _build_info_section_cards():
+    cards = []
+    for section in InfoSection.objects.all().order_by('order', 'id'):
+        cards.append({
+            'id': section.id,
+            'name': section.name,
+            'slug': section.slug,
+            'description': section.description,
+            'order': section.order,
+            'is_active': section.is_active,
+            'count': InfoBlock.objects.filter(section=section.slug).count(),
+        })
+    return cards
+
+
+def _extract_info_block_form_data(request):
+    section = (request.POST.get('section') or 'general').strip()
+    title = (request.POST.get('title') or '').strip()
+    content = (request.POST.get('content') or '').strip()
+    is_active = request.POST.get('is_active') == 'on'
+
+    try:
+        order = int(request.POST.get('order') or 0)
+    except (TypeError, ValueError):
+        return None, 'Порядок должен быть числом.'
+
+    if not InfoSection.objects.filter(slug=section).exists():
+        return None, 'Выбран неверный раздел.'
+    if not content:
+        return None, 'Текст обязателен.'
+    if len(content) < 5:
+        return None, 'Текст должен содержать минимум 5 символов.'
+    if section in {'rules', 'contacts'} and not title:
+        return None, 'Для этого раздела нужен заголовок.'
+
+    return {
+        'section': section,
+        'title': title,
+        'content': content,
+        'order': order,
+        'is_active': is_active,
+    }, None
+
+
+def _extract_info_section_form_data(request, *, existing_section=None):
+    name = (request.POST.get('name') or '').strip()
+    slug_value = (request.POST.get('slug') or '').strip()
+    description = (request.POST.get('description') or '').strip()
+    is_active = request.POST.get('is_active') == 'on'
+
+    try:
+        order = int(request.POST.get('order') or 0)
+    except (TypeError, ValueError):
+        return None, 'Порядок должен быть числом.'
+
+    if not name:
+        return None, 'Название раздела обязательно.'
+
+    if not slug_value:
+        slug_value = slugify(name)
+
+    if not slug_value:
+        return None, 'Не удалось сформировать slug раздела.'
+
+    existing_query = InfoSection.objects.filter(slug=slug_value)
+    if existing_section is not None:
+        existing_query = existing_query.exclude(id=existing_section.id)
+    if existing_query.exists():
+        return None, 'Раздел с таким slug уже существует.'
+
+    return {
+        'name': name,
+        'slug': slug_value,
+        'description': description,
+        'order': order,
+        'is_active': is_active,
+    }, None
+
+
 def info_page(request):
-    """Страница с информацией и правилами"""
-    return render(request, 'info.html')
+    """Страница с информацией, правилами и инструкциями"""
+    info_sections = _build_info_sections(include_empty=True)
+    can_manage_info = _has_admin_access(request.user)
+    active_info_blocks = sum(section['count'] for section in info_sections)
+
+    return render(request, 'info.html', {
+        'info_sections': info_sections,
+        'info_total': active_info_blocks,
+        'info_section_total': len(info_sections),
+        'can_manage_info': can_manage_info,
+    })
 
 
 def home(request):
@@ -958,7 +1554,7 @@ def home(request):
     office_id = request.GET.get('office')
 
     # Подгружаем office заранее
-    if request.user.is_authenticated and request.user.role in ['admin', 'manager']:
+    if _has_management_access(request.user):
         rooms = Room.objects.select_related("office").all()
     else:
         rooms = Room.objects.select_related("office").filter(status='active')
@@ -1045,6 +1641,87 @@ def _parse_gallery_order(raw_value):
         return []
 
     return _parse_gallery_image_ids([chunk.strip() for chunk in str(raw_value).split(',') if chunk.strip()])
+
+
+def _parse_equipment_ids(raw_value):
+    if not raw_value:
+        return []
+
+    if isinstance(raw_value, (list, tuple)):
+        raw_chunks = raw_value
+    else:
+        raw_chunks = [chunk.strip() for chunk in str(raw_value).split(',') if chunk.strip()]
+
+    parsed_ids = []
+    seen_ids = set()
+
+    for raw_chunk in raw_chunks:
+        equipment_id = _parse_optional_int(raw_chunk)
+        if equipment_id is None or equipment_id in seen_ids:
+            continue
+        parsed_ids.append(equipment_id)
+        seen_ids.add(equipment_id)
+
+    return parsed_ids
+
+
+def _serialize_equipment_catalog(equipment_queryset=None):
+    if equipment_queryset is None:
+        equipment_queryset = Equipment.objects.filter(is_active=True).order_by('name')
+    room_categories = dict(Room.CATEGORY_CHOICES)
+
+    return [
+        {
+            'id': equipment.id,
+            'name': equipment.name,
+            'categories': equipment.categories or [],
+            'category_labels': [room_categories.get(category, category) for category in (equipment.categories or [])],
+            'is_active': equipment.is_active,
+            'rooms_count': getattr(equipment, 'rooms_count', None),
+        }
+        for equipment in equipment_queryset
+    ]
+
+
+def _resolve_selected_equipment(raw_value, category):
+    selected_equipment_ids = _parse_equipment_ids(raw_value)
+    if not selected_equipment_ids:
+        return []
+
+    equipment_by_id = {
+        equipment.id: equipment
+        for equipment in Equipment.objects.filter(id__in=selected_equipment_ids, is_active=True)
+    }
+
+    missing_ids = [equipment_id for equipment_id in selected_equipment_ids if equipment_id not in equipment_by_id]
+    if missing_ids:
+        raise ValueError('Часть выбранного оборудования не найдена или уже отключена.')
+
+    selected_equipment = [equipment_by_id[equipment_id] for equipment_id in selected_equipment_ids]
+    unavailable_equipment = [equipment.name for equipment in selected_equipment if not equipment.is_available_for_category(category)]
+
+    if unavailable_equipment:
+        raise ValueError(
+            'Для этой категории комнаты недоступно оборудование: ' + ', '.join(unavailable_equipment)
+        )
+
+    return selected_equipment
+
+
+def _sync_room_equipment(room, selected_equipment):
+    selected_equipment = selected_equipment or []
+    room.equipment = '\n'.join(equipment.name for equipment in selected_equipment)
+    room.save(update_fields=['equipment'])
+    room.equipment_items.set(selected_equipment)
+
+
+def _sync_rooms_equipment(room_ids):
+    if not room_ids:
+        return
+
+    for room in Room.objects.filter(id__in=room_ids).prefetch_related('equipment_items'):
+        room.equipment = '\n'.join(room.equipment_items.order_by('name').values_list('name', flat=True))
+        room.save(update_fields=['equipment'])
 
 
 def _validate_room_image_limit(room, primary_image=None, extra_images=None, removed_gallery_ids=None):
@@ -1176,7 +1853,7 @@ def _get_visible_room(request, room_id):
         messages.error(request, '❌ Комната не найдена!')
         return None
 
-    if not request.user.is_authenticated or request.user.role not in ['admin', 'manager']:
+    if not _has_management_access(request.user):
         if room.status != 'active':
             messages.error(request, '❌ Эта комната временно недоступна!')
             return None
@@ -1239,23 +1916,193 @@ def profile_view(request):
     })
 
 
+def _build_user_activity_maps(user_ids):
+    user_ids = list(user_ids)
+    if not user_ids:
+        return {}
+
+    bookings_map = {
+        row['user_id']: row['total']
+        for row in Booking.objects.filter(user_id__in=user_ids).values('user_id').annotate(total=Count('id'))
+    }
+    tickets_map = {
+        row['user_id']: row['total']
+        for row in SupportTicket.objects.filter(user_id__in=user_ids).values('user_id').annotate(total=Count('id'))
+    }
+    ticket_responses_map = {
+        row['user_id']: row['total']
+        for row in TicketResponse.objects.filter(user_id__in=user_ids).values('user_id').annotate(total=Count('id'))
+    }
+    reviews_map = {
+        row['user_id']: row['total']
+        for row in Review.objects.filter(user_id__in=user_ids).values('user_id').annotate(total=Count('id'))
+    }
+    review_replies_map = {
+        row['user_id']: row['total']
+        for row in ReviewReply.objects.filter(user_id__in=user_ids).values('user_id').annotate(total=Count('id'))
+    }
+
+    activity_maps = {}
+    for user_id in user_ids:
+        activity_snapshot = {
+            'bookings': bookings_map.get(user_id, 0),
+            'tickets': tickets_map.get(user_id, 0),
+            'ticket_responses': ticket_responses_map.get(user_id, 0),
+            'reviews': reviews_map.get(user_id, 0),
+            'review_replies': review_replies_map.get(user_id, 0),
+        }
+        activity_snapshot['has_activity'] = any(activity_snapshot.values())
+        activity_maps[user_id] = activity_snapshot
+
+    return activity_maps
+
+
+def _format_user_activity_summary(activity_snapshot):
+    activity_snapshot = activity_snapshot or {}
+    summary_parts = []
+
+    if activity_snapshot.get('bookings'):
+        summary_parts.append(f"броней: {activity_snapshot['bookings']}")
+    if activity_snapshot.get('tickets'):
+        summary_parts.append(f"тикетов: {activity_snapshot['tickets']}")
+    if activity_snapshot.get('ticket_responses'):
+        summary_parts.append(f"ответов ТП: {activity_snapshot['ticket_responses']}")
+    if activity_snapshot.get('reviews'):
+        summary_parts.append(f"отзывов: {activity_snapshot['reviews']}")
+    if activity_snapshot.get('review_replies'):
+        summary_parts.append(f"ответов на отзывы: {activity_snapshot['review_replies']}")
+
+    if not summary_parts:
+        return 'Связанных данных нет'
+
+    return ', '.join(summary_parts)
+
+
+def _has_admin_access(user):
+    return bool(getattr(user, 'is_authenticated', False)) and (
+        getattr(user, 'is_superuser', False) or getattr(user, 'role', None) in ['owner', 'admin']
+    )
+
+
+def _has_management_access(user):
+    return bool(getattr(user, 'is_authenticated', False)) and (
+        getattr(user, 'is_superuser', False) or getattr(user, 'role', None) in ['owner', 'admin', 'manager']
+    )
+
+
+def _build_admin_user_policy(actor, target_user, activity_snapshot=None, admin_count=None):
+    activity_snapshot = activity_snapshot or {}
+    owner_count = User.objects.filter(role='owner').count()
+    admin_count = admin_count if admin_count is not None else User.objects.filter(role='admin').count()
+
+    policy = {
+        'can_view': _has_admin_access(actor),
+        'can_change_role': False,
+        'can_delete': False,
+        'allowed_roles': [],
+        'role_change_reason': '',
+        'delete_reason': '',
+        'activity_summary': _format_user_activity_summary(activity_snapshot),
+        'has_activity': bool(activity_snapshot.get('has_activity')),
+    }
+
+    if not _has_admin_access(actor):
+        policy['role_change_reason'] = 'Только администратор может менять роли.'
+        policy['delete_reason'] = 'Только администратор может удалять пользователей.'
+        return policy
+
+    if target_user.is_superuser:
+        policy['role_change_reason'] = 'Суперпользователь управляется отдельно.'
+        policy['delete_reason'] = 'Суперпользователь через панель не удаляется.'
+        return policy
+
+    if target_user.id == actor.id:
+        if getattr(actor, 'role', None) == 'admin' and owner_count == 0:
+            policy['can_change_role'] = True
+            policy['allowed_roles'] = ['owner']
+            policy['role_change_reason'] = 'Owner ещё не создан. Можно назначить owner самому себе.'
+        else:
+            policy['role_change_reason'] = 'Нельзя менять роль самому себе.'
+        policy['delete_reason'] = 'Нельзя удалить свой аккаунт.'
+        return policy
+
+    if target_user.role == 'owner':
+        if getattr(actor, 'role', None) == 'owner':
+            policy['can_change_role'] = True
+            policy['allowed_roles'] = ['admin', 'manager', 'user']
+            policy['role_change_reason'] = 'Владельца можно понизить, но нельзя назначать еще одного владельца.'
+            policy['delete_reason'] = 'Владельца можно понизить, но нельзя удалить через панель.'
+            return policy
+
+        policy['role_change_reason'] = 'Владелец управляется отдельно.'
+        policy['delete_reason'] = 'Владелец через панель не удаляется.'
+        return policy
+
+    if getattr(actor, 'role', None) == 'owner':
+        policy['can_change_role'] = True
+        policy['allowed_roles'] = ['admin', 'manager', 'user']
+        policy['role_change_reason'] = 'Владелец может менять роли администраторов, менеджеров и пользователей, но не создавать второго владельца.'
+
+        if activity_snapshot.get('has_activity'):
+            policy['delete_reason'] = f"Нельзя удалить пользователя с историей: {policy['activity_summary']}."
+        else:
+            policy['can_delete'] = True
+            policy['delete_reason'] = 'Пользователь может быть удалён, связанных данных нет.'
+        return policy
+
+    if target_user.role == 'admin':
+        if admin_count > 1:
+            policy['role_change_reason'] = 'Обычный админ не управляет другими администраторами.'
+        else:
+            policy['role_change_reason'] = 'Последнего администратора нельзя понизить.'
+
+        policy['delete_reason'] = 'Администраторы через панель не удаляются.'
+        return policy
+
+    policy['can_change_role'] = True
+    policy['allowed_roles'] = ['manager', 'user']
+    policy['role_change_reason'] = 'Администратор может менять роли менеджеров и пользователей.'
+
+    if activity_snapshot.get('has_activity'):
+        policy['delete_reason'] = f"Нельзя удалить пользователя с историей: {policy['activity_summary']}."
+    else:
+        policy['can_delete'] = True
+        policy['delete_reason'] = 'Пользователь может быть удалён, связанных данных нет.'
+
+    return policy
+
+
 @login_required
 def admin_panel(request):
     """Админ-панель управления системой"""
     # Проверяем что пользователь админ
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         messages.error(request, '❌ Доступ запрещен!')
         return redirect('home')
 
-    # Получаем всех пользователей для управления
-    users = User.objects.all()
+    role_order = {'owner': 0, 'admin': 1, 'manager': 2, 'user': 3}
+    users = list(User.objects.all())
+    users.sort(key=lambda user: (role_order.get(user.role, 99), user.username.lower()))
+    admin_count = sum(1 for user in users if user.role == 'admin')
+    activity_maps = _build_user_activity_maps([user.id for user in users])
+
+    for user in users:
+        admin_policy = _build_admin_user_policy(
+            actor=request.user,
+            target_user=user,
+            activity_snapshot=activity_maps.get(user.id, {}),
+            admin_count=admin_count,
+        )
+        user.admin_policy = admin_policy
+        user.admin_activity_summary = admin_policy['activity_summary']
+
     return render(request, 'admin_panel.html', {'users': users})
 
 
 @login_required
 def manager_panel(request):
     """Менеджерская панель для подтверждения бронирований"""
-    if request.user.role not in ['manager', 'admin']:
+    if not _has_management_access(request.user):
         messages.error(request, '❌ Доступ запрещен!')
         return redirect('home')
 
@@ -1284,7 +2131,7 @@ def manager_panel(request):
 @login_required
 def delete_booking(request, booking_id):
     """Удаление бронирования (для менеджеров)"""
-    if request.user.role not in ['admin', 'manager']:
+    if not _has_management_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'})
 
     try:
@@ -1300,7 +2147,7 @@ def delete_booking(request, booking_id):
 
 @login_required
 def update_booking_status(request, booking_id):
-    if request.user.role not in ['admin', 'manager']:
+    if not _has_management_access(request.user):
         return JsonResponse({'success': False, 'error': 'Нет доступа'})
 
     try:
@@ -1339,12 +2186,18 @@ def update_booking_status(request, booking_id):
 @login_required
 def admin_user_profile(request, user_id):
     """Просмотр профиля пользователя для админа"""
-    if request.user.role not in ['admin', 'manager'] and not request.user.is_superuser:
+    if not _has_admin_access(request.user):
         messages.error(request, '❌ Доступ запрещен!')
-        return redirect('admin_panel')
+        return redirect('home')
 
     try:
         user = User.objects.get(id=user_id)
+        admin_policy = _build_admin_user_policy(
+            actor=request.user,
+            target_user=user,
+            activity_snapshot=_build_user_activity_maps([user.id]).get(user.id, {}),
+            admin_count=User.objects.filter(role='admin').count(),
+        )
 
         # Получаем бронирования пользователя
         user_bookings = Booking.objects.filter(user=user).order_by('-created_at')
@@ -1355,6 +2208,7 @@ def admin_user_profile(request, user_id):
 
         return render(request, 'admin_user_profile.html', {
             'target_user': user,
+            'admin_policy': admin_policy,
             'user_bookings': user_bookings,
             'bookings_count': bookings_count,
             'active_bookings_count': active_bookings_count,
@@ -1711,7 +2565,7 @@ def update_avatar(request):
 @login_required
 def add_room(request):
     """Добавление новой комнаты - только админ"""
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
 
     if request.method == 'POST':
@@ -1722,6 +2576,9 @@ def add_room(request):
             price_per_hour = request.POST.get('price_per_hour')
             equipment = request.POST.get('equipment', '')
             category = request.POST.get('category', 'standard')
+            selected_equipment = _resolve_selected_equipment(request.POST.get('equipment_ids'), category)
+            if selected_equipment:
+                equipment = '\n'.join(item.name for item in selected_equipment)
             primary_image, extra_images = _extract_room_image_uploads(request)
 
             _validate_room_image_limit(
@@ -1749,6 +2606,9 @@ def add_room(request):
 
             room.save()
 
+            if selected_equipment:
+                room.equipment_items.set(selected_equipment)
+
             if primary_image:
                 room.image = _save_room_image_file(primary_image)
                 room.save(update_fields=['image'])
@@ -1767,7 +2627,7 @@ def add_room(request):
 @login_required
 def edit_room(request, room_id):
     """Редактирование комнаты - админ и менеджер"""
-    if request.user.role not in ['admin', 'manager']:
+    if not _has_management_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
 
     try:
@@ -1775,18 +2635,25 @@ def edit_room(request, room_id):
 
         if request.method == 'POST':
             # Админ может менять всё, менеджер только цену и оборудование
-            if request.user.role == 'admin':
+            if _has_admin_access(request.user):
                 room.name = request.POST.get('name', room.name)
                 room.location = request.POST.get('location', room.location)
                 office_id = request.POST.get("office")
                 room.office_id = office_id if office_id else None
                 room.capacity = request.POST.get('capacity', room.capacity)
+                room.category = request.POST.get('category', room.category)
 
             room.price_per_hour = request.POST.get('price_per_hour', room.price_per_hour)
-            room.equipment = request.POST.get('equipment', room.equipment)
+            selected_equipment = None
+            submitted_equipment_ids = request.POST.get('equipment_ids')
+            if submitted_equipment_ids is not None:
+                selected_equipment = _resolve_selected_equipment(submitted_equipment_ids, room.category)
+                room.equipment = '\n'.join(item.name for item in selected_equipment)
+            else:
+                room.equipment = request.POST.get('equipment', room.equipment)
 
             # Обработка изображения (только админ)
-            if request.user.role == 'admin':
+            if _has_admin_access(request.user):
                 primary_image, extra_images = _extract_room_image_uploads(request, allow_gallery_fallback=False)
                 removed_gallery_ids = _parse_gallery_image_ids(request.POST.getlist('remove_gallery_image_ids'))
                 selected_gallery_cover_id = _parse_optional_int(request.POST.get('selected_gallery_cover_id'))
@@ -1808,7 +2675,10 @@ def edit_room(request, room_id):
 
             room.save()
 
-            if request.user.role == 'admin':
+            if selected_equipment is not None:
+                room.equipment_items.set(selected_equipment)
+
+            if _has_admin_access(request.user):
                 if selected_gallery_cover_id and not primary_image:
                     if removed_gallery_ids:
                         room.gallery_images.filter(id__in=removed_gallery_ids).delete()
@@ -1837,7 +2707,7 @@ def edit_room(request, room_id):
 @login_required
 def get_all_rooms(request):
     """Получить все комнаты для управления"""
-    if request.user.role not in ['admin', 'manager']:
+    if not _has_management_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен'})
 
     rooms = Room.objects.all()
@@ -1849,7 +2719,7 @@ def get_all_rooms(request):
             'location': room.location,
             'capacity': room.capacity,
             'price_per_hour': str(room.price_per_hour),
-            'equipment': room.equipment,  # ← ВОТ ЭТО ВАЖНО
+            'equipment': room.equipment,
             'image': room.image.url if room.image else None,
             'image_count': (1 if room.image else 0) + room.gallery_images.count(),
         })
@@ -1861,17 +2731,19 @@ def get_all_rooms(request):
 def get_room_data(request, room_id):
     """Получить данные комнаты для редактирования"""
     try:
-        room = Room.objects.select_related('office').prefetch_related('gallery_images').get(id=room_id)
+        room = Room.objects.select_related('office').prefetch_related('gallery_images', 'equipment_items').get(id=room_id)
         return JsonResponse({
             'success': True,
             'room': {
                 'id': room.id,
                 'name': room.name,
                 'location': room.location,
+                'category': room.category,
                 "office_id": room.office.id if room.office else None,
                 'capacity': room.capacity,
                 'price_per_hour': str(room.price_per_hour),
                 'equipment': room.equipment,
+                'equipment_ids': list(room.equipment_items.values_list('id', flat=True)),
                 'image': room.image.url if room.image else None,
                 'gallery_images': _build_room_gallery_payload(room),
                 'image_limit': Room.MAX_TOTAL_IMAGES,
@@ -1885,7 +2757,7 @@ def get_room_data(request, room_id):
 @login_required
 def delete_room(request, room_id):
     """Удаление комнаты - только админ"""
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
 
     try:
@@ -1932,7 +2804,7 @@ def change_password(request):
 @login_required
 def room_management_main(request):
     """Главная страница управления комнатами - выбор категории"""
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         messages.error(request, '❌ Доступ запрещен!')
         return redirect('home')
 
@@ -1945,13 +2817,19 @@ def room_management_main(request):
         'luxury': Room.objects.filter(category='luxury').count(),
     }
 
-    return render(request, 'room_management_main.html', {'categories': categories})
+    equipment_catalog = _serialize_equipment_catalog()
+
+    return render(request, 'room_management_main.html', {
+        'categories': categories,
+        'equipment_catalog': equipment_catalog,
+        'room_category_choices': Room.CATEGORY_CHOICES,
+    })
 
 
 @login_required
 def room_management_category(request, category):
     """Страница управления комнатами конкретной категории"""
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         messages.error(request, '❌ Доступ запрещен!')
         return redirect('home')
 
@@ -1977,6 +2855,7 @@ def room_management_category(request, category):
     }
 
     capacity_range = CAPACITY_RANGES.get(category, [])
+    equipment_catalog = _serialize_equipment_catalog()
 
     return render(request, 'room_management_category.html', {
         'rooms': rooms,
@@ -1984,13 +2863,117 @@ def room_management_category(request, category):
         'category_display': category_display,
         'offices': offices,
         'capacity_range': capacity_range,  # ✅ ВОТ ОНО
+        'equipment_catalog': equipment_catalog,
+        'room_category_choices': Room.CATEGORY_CHOICES,
     })
+
+
+@login_required
+def equipment_management(request):
+    if not _has_admin_access(request.user):
+        messages.error(request, '❌ Доступ запрещен!')
+        return redirect('home')
+
+    equipment_items = Equipment.objects.all().annotate(rooms_count=Count('rooms')).order_by('name')
+
+    return render(request, 'equipment_management.html', {
+        'equipment_catalog': _serialize_equipment_catalog(equipment_items),
+        'room_category_choices': Room.CATEGORY_CHOICES,
+    })
+
+
+@login_required
+def add_equipment(request):
+    if not _has_admin_access(request.user):
+        return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Неверный метод запроса'})
+
+    name = (request.POST.get('name') or '').strip()
+    categories = [category for category in request.POST.getlist('categories') if category]
+
+    if not name:
+        return JsonResponse({'success': False, 'error': 'Название оборудования обязательно.'})
+
+    valid_categories = {category for category, _ in Room.CATEGORY_CHOICES}
+    if any(category not in valid_categories for category in categories):
+        return JsonResponse({'success': False, 'error': 'Указана неверная категория оборудования.'})
+
+    if Equipment.objects.filter(name__iexact=name).exists():
+        return JsonResponse({'success': False, 'error': 'Такое оборудование уже существует.'})
+
+    equipment = Equipment.objects.create(name=name, categories=categories, is_active=True)
+    return JsonResponse({'success': True, 'equipment': _serialize_equipment_catalog([equipment])[0]})
+
+
+@login_required
+def edit_equipment(request, equipment_id):
+    if not _has_admin_access(request.user):
+        return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
+
+    try:
+        equipment = Equipment.objects.get(id=equipment_id)
+    except Equipment.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Оборудование не найдено.'})
+
+    if request.method == 'GET':
+        return JsonResponse({
+            'success': True,
+            'equipment': _serialize_equipment_catalog([equipment])[0]
+        })
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Неверный метод запроса'})
+
+    name = (request.POST.get('name') or '').strip()
+    categories = [category for category in request.POST.getlist('categories') if category]
+    valid_categories = {category for category, _ in Room.CATEGORY_CHOICES}
+
+    if not name:
+        return JsonResponse({'success': False, 'error': 'Название оборудования обязательно.'})
+
+    if any(category not in valid_categories for category in categories):
+        return JsonResponse({'success': False, 'error': 'Указана неверная категория оборудования.'})
+
+    if Equipment.objects.filter(name__iexact=name).exclude(id=equipment.id).exists():
+        return JsonResponse({'success': False, 'error': 'Такое оборудование уже существует.'})
+
+    equipment.name = name
+    equipment.categories = categories
+    equipment.save(update_fields=['name', 'categories'])
+    _sync_rooms_equipment(list(equipment.rooms.values_list('id', flat=True)))
+
+    return JsonResponse({
+        'success': True,
+        'equipment': _serialize_equipment_catalog([equipment])[0]
+    })
+
+
+@login_required
+def delete_equipment(request, equipment_id):
+    if not _has_admin_access(request.user):
+        return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Неверный метод запроса'})
+
+    try:
+        equipment = Equipment.objects.get(id=equipment_id)
+    except Equipment.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Оборудование не найдено.'})
+
+    related_room_ids = list(equipment.rooms.values_list('id', flat=True))
+    equipment.delete()
+    _sync_rooms_equipment(related_room_ids)
+
+    return JsonResponse({'success': True})
 
 
 @login_required
 def toggle_room_status(request, room_id):
     """Переключение статуса комнаты (активна/скрыта)"""
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
 
     try:
@@ -2010,19 +2993,23 @@ def toggle_room_status(request, room_id):
 @login_required
 def delete_user(request, user_id):
     """Удаление пользователя (только для админа)"""
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Неверный метод запроса'})
 
     try:
         user_to_delete = User.objects.get(id=user_id)
+        policy = _build_admin_user_policy(
+            actor=request.user,
+            target_user=user_to_delete,
+            activity_snapshot=_build_user_activity_maps([user_to_delete.id]).get(user_to_delete.id, {}),
+            admin_count=User.objects.filter(role='admin').count(),
+        )
 
-        # Нельзя<bos> удалить самого себя
-        if user_to_delete.id == request.user.id:
-            return JsonResponse({'success': False, 'error': 'Нельзя удалить свой аккаунт!'})
-
-        # Нельзя удалить других админов
-        if user_to_delete.role == 'admin':
-            return JsonResponse({'success': False, 'error': 'Нельзя удалить администратора!'})
+        if not policy['can_delete']:
+            return JsonResponse({'success': False, 'error': policy['delete_reason']})
 
         user_to_delete.delete()
         return JsonResponse({'success': True})
@@ -2061,7 +3048,7 @@ def offices_view(request):
 @login_required
 def office_management(request):
     """Управление офисами для админа"""
-    if request.user.role != 'admin':  # ← ИЗМЕНИЛ НА ТОТ ЖЕ СТАНДАРТ
+    if not _has_admin_access(request.user):  # ← ИЗМЕНИЛ НА ТОТ ЖЕ СТАНДАРТ
         messages.error(request, '❌ Доступ запрещен!')
         return redirect('home')
 
@@ -2071,7 +3058,7 @@ def office_management(request):
 
 @login_required
 def edit_office(request, office_id):
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
 
     try:
@@ -2122,7 +3109,7 @@ def edit_office(request, office_id):
 
 @login_required
 def add_office(request):
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
 
     if request.method == 'POST':
@@ -2154,7 +3141,7 @@ def add_office(request):
 @login_required
 def delete_office(request, office_id):
     """Удаление офиса"""
-    if request.user.role != 'admin':  # ← ИЗМЕНИЛ НА ТОТ ЖЕ СТАНДАРТ
+    if not _has_admin_access(request.user):  # ← ИЗМЕНИЛ НА ТОТ ЖЕ СТАНДАРТ
         return JsonResponse({'success': False, 'error': 'Доступ запрещен!'})
 
     try:
@@ -2169,7 +3156,7 @@ def delete_office(request, office_id):
 @login_required
 def database_backup_view(request):
     """Страница управления резервными копиями БД"""
-    if not hasattr(request.user, 'role') or request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         messages.error(request, 'Доступ запрещен! Только для администраторов.')
         return redirect('home')
 
@@ -2218,7 +3205,7 @@ def database_backup_view(request):
 @login_required
 def create_backup(request):
     """Создание резервной копии базы данных"""
-    if not hasattr(request.user, 'role') or request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         messages.error(request, 'Доступ запрещен!')
         return redirect('home')
 
@@ -2267,7 +3254,7 @@ def create_backup(request):
 @login_required
 def download_backup(request, backup_id):
     """Скачивание резервной копии"""
-    if not hasattr(request.user, 'role') or request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'error': 'Доступ запрещен'}, status=403)
 
     backup_dir = os.path.join(settings.BASE_DIR, 'backups')
@@ -2287,7 +3274,7 @@ def download_backup(request, backup_id):
 @login_required
 def delete_backup(request, backup_id):
     """Удаление резервной копии"""
-    if not hasattr(request.user, 'role') or request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'error': 'Доступ запрещен'}, status=403)
 
     if request.method != 'POST':
@@ -2310,7 +3297,7 @@ def delete_backup(request, backup_id):
 @login_required
 def export_json_backup(request):
     """Экспорт всех данных в JSON"""
-    if not hasattr(request.user, 'role') or request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'error': 'Доступ запрещен'}, status=403)
 
     try:
@@ -2356,14 +3343,14 @@ def format_file_size(size_bytes):
 @login_required
 def change_user_role(request, user_id):
     """Смена роли пользователя — только для админов"""
-    if request.user.role != 'admin':
+    if not _has_admin_access(request.user):
         return JsonResponse({'success': False, 'error': 'Нет прав'}, status=403)
 
     if request.method != "POST":
         return JsonResponse({'success': False, 'error': 'Неверный метод'}, status=400)
 
     new_role = request.POST.get("role")
-    if new_role not in ['admin', 'manager', 'user']:
+    if new_role not in ['owner', 'admin', 'manager', 'user']:
         return JsonResponse({'success': False, 'error': 'Неверная роль'}, status=400)
 
     from django.contrib.auth import get_user_model
@@ -2371,13 +3358,32 @@ def change_user_role(request, user_id):
 
     try:
         user = User.objects.get(id=user_id)
+        policy = _build_admin_user_policy(
+            actor=request.user,
+            target_user=user,
+            activity_snapshot=_build_user_activity_maps([user.id]).get(user.id, {}),
+            admin_count=User.objects.filter(role='admin').count(),
+        )
 
-        # Админа другим админом менять нельзя
-        if user.role == "admin" and request.user.id != user.id:
-            return JsonResponse({'success': False, 'error': 'Нельзя изменить роль другого админа'}, status=400)
+        if not policy['can_change_role']:
+            return JsonResponse({'success': False, 'error': policy['role_change_reason']}, status=400)
 
-        user.role = new_role
-        user.save()
+        if new_role not in policy['allowed_roles']:
+            return JsonResponse({'success': False, 'error': 'Эту роль нельзя назначить выбранному пользователю.'}, status=400)
+
+        if new_role == 'owner':
+            owner_count = User.objects.filter(role='owner').exclude(id=user.id).count()
+            if user.id == request.user.id and getattr(request.user, 'role', None) == 'admin' and owner_count == 0:
+                user.role = 'owner'
+                user.save(update_fields=['role'])
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Назначить владельца можно только самому себе и только если владельца еще нет.',
+                }, status=400)
+        else:
+            user.role = new_role
+            user.save(update_fields=['role'])
 
         return JsonResponse({'success': True})
 

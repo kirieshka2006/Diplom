@@ -3763,6 +3763,398 @@
         }
     }
 
+    html[data-theme='dark'] body.equipment-management-page,
+    html[data-theme='dark'] body.room-management-main-page,
+    html[data-theme='dark'] body.room-management-category-page {
+        background:
+            radial-gradient(circle at 12% 12%, rgba(86, 108, 205, 0.16) 0%, transparent 34%),
+            radial-gradient(circle at 88% 10%, rgba(119, 87, 214, 0.13) 0%, transparent 30%),
+            radial-gradient(circle at 50% 100%, rgba(61, 123, 188, 0.08) 0%, transparent 36%),
+            linear-gradient(180deg, #09111a 0%, #0b131d 48%, #09111a 100%) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .page-header,
+        body.room-management-main-page .header-actions,
+        body.room-management-category-page .header-actions
+    ) {
+        background: linear-gradient(180deg, rgba(23, 31, 45, 0.92) 0%, rgba(16, 22, 33, 0.94) 100%) !important;
+        border: 1px solid rgba(121, 145, 217, 0.14) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 20px 38px rgba(2, 7, 16, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+        padding: 20px 24px !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .page-title,
+        body.room-management-main-page .page-title,
+        body.room-management-category-page .page-title
+    ) {
+        color: #eef3fb !important;
+    }
+
+    html[data-theme='dark'] body.equipment-management-page .page-subtitle {
+        color: #a2aec5 !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .back-btn,
+        body.room-management-main-page .back-btn,
+        body.room-management-category-page .back-btn,
+        body.room-management-main-page .btn-directory,
+        body.room-management-category-page .btn-directory,
+        body.room-management-category-page .filter-toggle-btn
+    ) {
+        background: linear-gradient(180deg, rgba(31, 41, 58, 0.96) 0%, rgba(22, 29, 41, 0.99) 100%) !important;
+        color: #edf2fb !important;
+        border-color: rgba(125, 147, 215, 0.18) !important;
+        box-shadow: 0 12px 22px rgba(2, 7, 16, 0.18) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .back-btn:hover,
+        body.room-management-main-page .back-btn:hover,
+        body.room-management-category-page .back-btn:hover,
+        body.room-management-main-page .btn-directory:hover,
+        body.room-management-category-page .btn-directory:hover,
+        body.room-management-category-page .filter-toggle-btn:hover
+    ) {
+        background: linear-gradient(180deg, rgba(38, 49, 69, 0.98) 0%, rgba(27, 36, 51, 1) 100%) !important;
+        color: #f8fbff !important;
+        border-color: rgba(145, 169, 242, 0.26) !important;
+        box-shadow: 0 16px 28px rgba(2, 7, 16, 0.22), 0 4px 12px rgba(97, 120, 217, 0.12) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .add-btn,
+        body.equipment-management-page .modal-btn--save,
+        body.room-management-category-page .btn-add,
+        body.room-management-main-page .btn-create,
+        body.room-management-main-page .btn-save,
+        body.room-management-category-page .btn-save
+    ) {
+        background: linear-gradient(135deg, #4c61d8 0%, #6b63dc 52%, #8760dd 100%) !important;
+        color: #fafcff !important;
+        border-color: rgba(150, 170, 255, 0.16) !important;
+        box-shadow: 0 16px 30px rgba(2, 7, 16, 0.26), 0 8px 18px rgba(92, 102, 219, 0.24) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .add-btn:hover,
+        body.equipment-management-page .modal-btn--save:hover,
+        body.room-management-category-page .btn-add:hover,
+        body.room-management-main-page .btn-create:hover,
+        body.room-management-main-page .btn-save:hover,
+        body.room-management-category-page .btn-save:hover
+    ) {
+        background: linear-gradient(135deg, #556ae0 0%, #756cea 52%, #9469e8 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 20px 36px rgba(2, 7, 16, 0.30), 0 10px 22px rgba(101, 112, 229, 0.28) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .modal-btn--cancel,
+        body.room-management-main-page .btn-cancel,
+        body.room-management-category-page .btn-cancel,
+        body.equipment-management-page .action-btn--edit,
+        body.room-management-category-page .btn-edit
+    ) {
+        background: linear-gradient(180deg, rgba(36, 45, 62, 0.96) 0%, rgba(27, 35, 48, 0.98) 100%) !important;
+        color: #ecf2ff !important;
+        border-color: rgba(125, 147, 215, 0.16) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .action-btn--delete,
+        body.room-management-category-page .btn-delete
+    ) {
+        background: linear-gradient(180deg, rgba(79, 34, 43, 0.70) 0%, rgba(58, 25, 32, 0.80) 100%) !important;
+        color: #ffd6db !important;
+        border-color: rgba(240, 120, 140, 0.20) !important;
+    }
+
+    html[data-theme='dark'] body.room-management-category-page .btn-toggle {
+        background: linear-gradient(180deg, rgba(86, 66, 24, 0.66) 0%, rgba(67, 50, 18, 0.76) 100%) !important;
+        color: #ffe4a8 !important;
+        border-color: rgba(247, 196, 98, 0.22) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .equipment-card,
+        body.equipment-management-page .empty-state,
+        body.equipment-management-page .modal-dialog,
+        body.room-management-main-page .category-card,
+        body.room-management-main-page .modal-content,
+        body.room-management-main-page .picker-modal__dialog,
+        body.room-management-category-page .filters,
+        body.room-management-category-page .room-card,
+        body.room-management-category-page .modal-content,
+        body.room-management-category-page .picker-modal__dialog
+    ) {
+        background: linear-gradient(180deg, rgba(22, 30, 44, 0.98) 0%, rgba(15, 21, 32, 0.99) 100%) !important;
+        border-color: rgba(121, 145, 217, 0.14) !important;
+        box-shadow: 0 18px 34px rgba(2, 7, 16, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+    }
+
+    html[data-theme='dark'] body.room-management-main-page .category-card:hover,
+    html[data-theme='dark'] body.room-management-category-page .room-card:hover,
+    html[data-theme='dark'] body.equipment-management-page .equipment-card:hover {
+        border-color: rgba(142, 166, 244, 0.24) !important;
+        box-shadow: 0 22px 40px rgba(2, 7, 16, 0.26), 0 8px 18px rgba(97, 120, 217, 0.10) !important;
+    }
+
+    html[data-theme='dark'] body.room-management-main-page .category-count {
+        color: #d8e0ff !important;
+        text-shadow: 0 6px 18px rgba(87, 107, 214, 0.24) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.room-management-main-page .category-card h3,
+        body.room-management-category-page .room-title-container h3,
+        body.equipment-management-page .equipment-card__title,
+        body.equipment-management-page .modal-title,
+        body.room-management-category-page .modal-content h3,
+        body.room-management-main-page .modal-content h3,
+        body.room-management-category-page .picker-modal__title,
+        body.room-management-main-page .picker-modal__title
+    ) {
+        color: #eef3fb !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.room-management-main-page .category-card small,
+        body.equipment-management-page .equipment-card__meta,
+        body.equipment-management-page .modal-description,
+        body.room-management-category-page .filter-section-title,
+        body.room-management-category-page .filter-group label,
+        body.room-management-category-page .info-block strong
+    ) {
+        color: #9aa7bf !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .equipment-tag,
+        body.equipment-management-page .category-option,
+        body.room-management-category-page .filter-section,
+        body.room-management-category-page .info-block,
+        body.room-management-main-page .equipment-picker,
+        body.room-management-category-page .equipment-picker,
+        body.room-management-main-page .picker-option,
+        body.room-management-category-page .picker-option
+    ) {
+        background: linear-gradient(180deg, rgba(31, 40, 57, 0.95) 0%, rgba(23, 30, 43, 0.98) 100%) !important;
+        border-color: rgba(121, 145, 217, 0.14) !important;
+        color: #edf2fb !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.room-management-category-page .filter-section:hover,
+        body.room-management-main-page .picker-option:hover,
+        body.room-management-category-page .picker-option:hover,
+        body.equipment-management-page .category-option:hover
+    ) {
+        border-color: rgba(145, 169, 242, 0.22) !important;
+        background: linear-gradient(180deg, rgba(35, 45, 63, 0.98) 0%, rgba(26, 34, 48, 1) 100%) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .form-group input[type="text"],
+        body.room-management-main-page .form-grid input,
+        body.room-management-main-page .form-grid select,
+        body.room-management-main-page .form-grid textarea,
+        body.room-management-category-page .form-group input,
+        body.room-management-category-page .form-group textarea,
+        body.room-management-category-page .form-group select,
+        body.room-management-category-page .filter-group input,
+        body.room-management-category-page .filter-group select
+    ) {
+        background: linear-gradient(180deg, rgba(35, 44, 61, 0.96) 0%, rgba(25, 32, 46, 0.98) 100%) !important;
+        border-color: rgba(121, 145, 217, 0.14) !important;
+        color: #f0f4fb !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.equipment-management-page .form-group input[type="text"]:focus,
+        body.room-management-main-page .form-grid input:focus,
+        body.room-management-main-page .form-grid select:focus,
+        body.room-management-main-page .form-grid textarea:focus,
+        body.room-management-category-page .form-group input:focus,
+        body.room-management-category-page .form-group textarea:focus,
+        body.room-management-category-page .form-group select:focus,
+        body.room-management-category-page .filter-group input:focus,
+        body.room-management-category-page .filter-group select:focus
+    ) {
+        border-color: rgba(145, 169, 242, 0.30) !important;
+        box-shadow: 0 0 0 3px rgba(92, 102, 219, 0.16) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.room-management-main-page .equipment-picker__button,
+        body.room-management-category-page .equipment-picker__button
+    ) {
+        background: linear-gradient(180deg, rgba(83, 99, 193, 0.20) 0%, rgba(68, 82, 163, 0.22) 100%) !important;
+        border-color: rgba(145, 169, 242, 0.20) !important;
+        color: #eef3ff !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.room-management-main-page .equipment-picker__button:hover,
+        body.room-management-category-page .equipment-picker__button:hover
+    ) {
+        background: linear-gradient(180deg, rgba(93, 112, 214, 0.26) 0%, rgba(77, 91, 180, 0.28) 100%) !important;
+        border-color: rgba(155, 177, 249, 0.28) !important;
+    }
+
+    html[data-theme='dark'] :is(
+        body.room-management-category-page .info-block .value,
+        body.room-management-category-page .status-active,
+        body.room-management-category-page .status-hidden,
+        body.room-management-main-page .equipment-pill,
+        body.room-management-category-page .equipment-pill
+    ) {
+        color: #eef3fb !important;
+    }
+
+    html[data-theme='dark'] body.room-management-category-page .room-image {
+        border-color: rgba(121, 145, 217, 0.16) !important;
+        box-shadow: 0 18px 30px rgba(2, 7, 16, 0.22) !important;
+    }
+
+    html[data-theme='dark'] body.room-management-category-page .filter-actions {
+        border-top-color: rgba(121, 145, 217, 0.12) !important;
+    }
+
+    html[data-theme='dark'] body.room-management-category-page .btn-reset {
+        background: linear-gradient(180deg, rgba(31, 41, 58, 0.96) 0%, rgba(22, 29, 41, 0.99) 100%) !important;
+        color: #d9e2f6 !important;
+        border-color: rgba(121, 145, 217, 0.16) !important;
+    }
+
+    html[data-theme='dark'] body.room-management-category-page .btn-reset:hover {
+        background: linear-gradient(180deg, rgba(37, 48, 68, 0.98) 0%, rgba(28, 36, 52, 1) 100%) !important;
+        color: #f7fbff !important;
+        border-color: rgba(145, 169, 242, 0.24) !important;
+    }
+
+    html[data-theme='light'] body.admin-panel-page .btn-view {
+        background: linear-gradient(135deg, rgba(206, 239, 216, 0.98) 0%, rgba(175, 226, 191, 0.98) 100%) !important;
+        color: #1d4e32 !important;
+        border: 1px solid rgba(98, 176, 123, 0.34) !important;
+        box-shadow: 0 12px 24px rgba(98, 176, 123, 0.14) !important;
+    }
+
+    html[data-theme='light'] body.admin-panel-page .btn-view:hover:not(:disabled) {
+        background: linear-gradient(135deg, rgba(191, 231, 202, 0.98) 0%, rgba(159, 216, 177, 0.98) 100%) !important;
+        color: #143b24 !important;
+        border-color: rgba(82, 160, 107, 0.40) !important;
+        box-shadow: 0 14px 28px rgba(82, 160, 107, 0.18) !important;
+    }
+
+    html[data-theme='light'] body.admin-panel-page .btn-role:not(:disabled) {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.95) 0%, rgba(22, 163, 74, 0.95) 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(34, 197, 94, 0.96) !important;
+        box-shadow: 0 14px 30px rgba(34, 197, 94, 0.20) !important;
+    }
+
+    html[data-theme='light'] body.admin-panel-page .btn-role:hover:not(:disabled) {
+        background: linear-gradient(135deg, rgba(29, 183, 86, 0.98) 0%, rgba(21, 148, 69, 0.98) 100%) !important;
+        color: #ffffff !important;
+        border-color: rgba(24, 156, 73, 1) !important;
+        box-shadow: 0 16px 32px rgba(29, 183, 86, 0.24) !important;
+    }
+
+    html[data-theme='light'] body.admin-panel-page .btn-delete:not(:disabled) {
+        background: linear-gradient(180deg, #cf5663 0%, #b93f4d 100%) !important;
+        color: #ffffff !important;
+        border-color: rgba(155, 45, 59, 0.42) !important;
+        box-shadow: 0 12px 28px rgba(185, 63, 77, 0.18) !important;
+    }
+
+    html[data-theme='light'] body.admin-panel-page .btn-delete:hover:not(:disabled) {
+        background: linear-gradient(180deg, #c74f5c 0%, #ae3845 100%) !important;
+        border-color: rgba(147, 39, 52, 0.46) !important;
+        box-shadow: 0 14px 30px rgba(174, 56, 69, 0.22) !important;
+    }
+
+    html[data-theme='dark'] body.admin-panel-page .btn-view:not(:disabled) {
+        background: linear-gradient(180deg, rgba(100, 118, 235, 0.96) 0%, rgba(77, 95, 214, 1) 100%) !important;
+        color: #f8fbff !important;
+        border: 1px solid rgba(158, 174, 255, 0.24) !important;
+        box-shadow: 0 16px 34px rgba(66, 78, 170, 0.26) !important;
+    }
+
+    html[data-theme='dark'] body.admin-panel-page .btn-view:hover:not(:disabled) {
+        background: linear-gradient(180deg, rgba(112, 129, 244, 0.98) 0%, rgba(88, 107, 229, 1) 100%) !important;
+        border-color: rgba(182, 194, 255, 0.30) !important;
+        box-shadow: 0 18px 38px rgba(74, 88, 188, 0.30) !important;
+    }
+
+    html[data-theme='dark'] body.admin-panel-page .btn-role:not(:disabled) {
+        background: linear-gradient(180deg, rgba(126, 96, 234, 0.98) 0%, rgba(99, 74, 216, 1) 100%) !important;
+        color: #fbf8ff !important;
+        border: 1px solid rgba(201, 182, 255, 0.22) !important;
+        box-shadow: 0 16px 34px rgba(87, 63, 184, 0.28) !important;
+    }
+
+    html[data-theme='dark'] body.admin-panel-page .btn-role:hover:not(:disabled) {
+        background: linear-gradient(180deg, rgba(139, 109, 246, 1) 0%, rgba(109, 82, 225, 1) 100%) !important;
+        border-color: rgba(216, 200, 255, 0.30) !important;
+        box-shadow: 0 18px 38px rgba(94, 69, 196, 0.32) !important;
+    }
+
+    html[data-theme='dark'] body.admin-panel-page .btn-delete:not(:disabled) {
+        background: linear-gradient(180deg, rgba(185, 88, 157, 0.98) 0%, rgba(155, 69, 130, 1) 100%) !important;
+        color: #fff7fb !important;
+        border: 1px solid rgba(250, 197, 230, 0.18) !important;
+        box-shadow: 0 16px 34px rgba(121, 43, 95, 0.30) !important;
+    }
+
+    html[data-theme='dark'] body.admin-panel-page .btn-delete:hover:not(:disabled) {
+        background: linear-gradient(180deg, rgba(196, 96, 166, 1) 0%, rgba(166, 74, 140, 1) 100%) !important;
+        border-color: rgba(255, 212, 238, 0.24) !important;
+        box-shadow: 0 18px 38px rgba(128, 48, 101, 0.34) !important;
+    }
+
+    html[data-theme] body.admin-panel-page :is(.btn-role:disabled, .btn-delete:disabled) {
+        background: rgba(124, 137, 158, 0.12) !important;
+        color: rgba(101, 113, 132, 0.92) !important;
+        border-color: rgba(124, 137, 158, 0.2) !important;
+        box-shadow: none !important;
+        opacity: 1 !important;
+        filter: saturate(0.4) !important;
+        transform: none !important;
+        cursor: not-allowed !important;
+    }
+
+    html[data-theme] body.admin-panel-page .btn-view:disabled {
+        background: rgba(124, 137, 158, 0.12) !important;
+        color: rgba(101, 113, 132, 0.92) !important;
+        border-color: rgba(124, 137, 158, 0.2) !important;
+        box-shadow: none !important;
+        opacity: 1 !important;
+        filter: saturate(0.4) !important;
+        transform: none !important;
+        cursor: not-allowed !important;
+    }
+
+    html[data-theme] body.admin-panel-page .modal-content label.role-option-disabled {
+        background: rgba(124, 137, 158, 0.08) !important;
+        color: rgba(124, 137, 158, 0.9) !important;
+        border-color: rgba(124, 137, 158, 0.14) !important;
+    }
+
+    html[data-theme='dark'] body.equipment-management-page .modal,
+    html[data-theme='dark'] body.room-management-main-page .modal,
+    html[data-theme='dark'] body.room-management-category-page .modal,
+    html[data-theme='dark'] body.room-management-main-page .picker-modal,
+    html[data-theme='dark'] body.room-management-category-page .picker-modal {
+        background: rgba(3, 8, 15, 0.76) !important;
+        backdrop-filter: blur(10px) !important;
+    }
+
     @media (max-width: 520px) {
         html[data-theme] .page-title {
             font-size: 22px !important;

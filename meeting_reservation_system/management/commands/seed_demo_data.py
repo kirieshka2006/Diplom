@@ -10,6 +10,8 @@ from django.utils import timezone
 from meeting_reservation_system.models import (
     Booking,
     FAQ,
+    FAQCategory,
+    InfoSection,
     Office,
     Review,
     ReviewReply,
@@ -31,6 +33,8 @@ class Command(BaseCommand):
             users = self._seed_users()
             offices = self._seed_offices()
             rooms = self._seed_rooms(offices)
+            self._seed_faq_categories()
+            self._seed_info_sections()
             self._seed_faq()
             self._seed_bookings(users, rooms)
             self._seed_reviews(users, rooms)
@@ -371,6 +375,63 @@ class Command(BaseCommand):
                     "answer": spec["answer"],
                     "category": spec["category"],
                     "order": spec["order"],
+                    "is_active": True,
+                },
+            )
+
+    def _seed_faq_categories(self):
+        category_specs = [
+            {"name": "Общее", "slug": "general", "order": 1},
+            {"name": "Бронирование", "slug": "booking", "order": 2},
+            {"name": "Оплата", "slug": "payment", "order": 3},
+            {"name": "Технические вопросы", "slug": "technical", "order": 4},
+        ]
+
+        for spec in category_specs:
+            FAQCategory.objects.update_or_create(
+                slug=spec["slug"],
+                defaults={
+                    "name": spec["name"],
+                    "order": spec["order"],
+                    "is_active": True,
+                },
+            )
+
+    def _seed_info_sections(self):
+        section_specs = [
+            {
+                "name": "Общая информация",
+                "slug": "general",
+                "order": 1,
+                "description": "Краткие пояснения о работе системы и офисов.",
+            },
+            {
+                "name": "Правила бронирования",
+                "slug": "rules",
+                "order": 2,
+                "description": "Что можно и что нельзя делать при бронировании комнат.",
+            },
+            {
+                "name": "Инструкции",
+                "slug": "instructions",
+                "order": 3,
+                "description": "Пошаговый сценарий бронирования и действий на сайте.",
+            },
+            {
+                "name": "Контакты поддержки",
+                "slug": "contacts",
+                "order": 4,
+                "description": "Как связаться с поддержкой и в какие часы она работает.",
+            },
+        ]
+
+        for spec in section_specs:
+            InfoSection.objects.update_or_create(
+                slug=spec["slug"],
+                defaults={
+                    "name": spec["name"],
+                    "order": spec["order"],
+                    "description": spec["description"],
                     "is_active": True,
                 },
             )

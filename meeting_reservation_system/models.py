@@ -6,17 +6,26 @@ from datetime import timedelta
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
+class FAQCategory(models.Model):
+    name = models.CharField(max_length=120, verbose_name="Название")
+    slug = models.SlugField(max_length=80, unique=True, verbose_name="Slug")
+    order = models.IntegerField(default=0, verbose_name="Порядок отображения")
+    is_active = models.BooleanField(default=True, verbose_name="Активно")
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Категория FAQ"
+        verbose_name_plural = "Категории FAQ"
+
+    def __str__(self):
+        return self.name
+
+
 class FAQ(models.Model):
-    CATEGORY_CHOICES = [
-        ('general', '📋 Общие вопросы'),
-        ('booking', '📅 Бронирование'),
-        ('payment', '💳 Оплата'),
-        ('technical', '🛠️ Технические вопросы'),
-    ]
 
     question = models.CharField(max_length=200, verbose_name="Вопрос")
     answer = models.TextField(verbose_name="Ответ")
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='general')
+    category = models.CharField(max_length=80, default='general')
     order = models.IntegerField(default=0, verbose_name="Порядок отображения")
     is_active = models.BooleanField(default=True, verbose_name="Активно")
 
@@ -26,9 +35,57 @@ class FAQ(models.Model):
     def __str__(self):
         return self.question
 
+    @property
+    def category_label(self):
+        category = FAQCategory.objects.filter(slug=self.category).only('name').first()
+        if category:
+            return category.name
+        return self.category.replace('-', ' ').title()
+
+
+class InfoSection(models.Model):
+    name = models.CharField(max_length=120, verbose_name="Название")
+    slug = models.SlugField(max_length=80, unique=True, verbose_name="Slug")
+    order = models.IntegerField(default=0, verbose_name="Порядок отображения")
+    description = models.CharField(max_length=255, blank=True, verbose_name="Описание")
+    is_active = models.BooleanField(default=True, verbose_name="Активно")
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Раздел информации"
+        verbose_name_plural = "Разделы информации"
+
+    def __str__(self):
+        return self.name
+
+
+class InfoBlock(models.Model):
+
+    section = models.CharField(max_length=80, default='general', verbose_name="Раздел")
+    title = models.CharField(max_length=200, blank=True, verbose_name="Заголовок")
+    content = models.TextField(verbose_name="Текст")
+    order = models.IntegerField(default=0, verbose_name="Порядок отображения")
+    is_active = models.BooleanField(default=True, verbose_name="Активно")
+
+    class Meta:
+        ordering = ['section', 'order', 'id']
+        verbose_name = "Блок информации"
+        verbose_name_plural = "Блоки информации"
+
+    def __str__(self):
+        return self.title or self.section_label
+
+    @property
+    def section_label(self):
+        section = InfoSection.objects.filter(slug=self.section).only('name').first()
+        if section:
+            return section.name
+        return self.section.replace('-', ' ').title()
+
 
 class User(AbstractUser):
     ROLE_CHOICES = [
+        ('owner', 'Владелец'),
         ('admin', 'Администратор'),
         ('manager', 'Менеджер'),
         ('user', 'Пользователь'),
@@ -66,6 +123,18 @@ class User(AbstractUser):
         related_name='custom_user_set',
         related_query_name='user',
     )
+
+    @property
+    def is_owner_role(self):
+        return self.role == 'owner'
+
+    @property
+    def is_admin_role(self):
+        return self.role in ['owner', 'admin']
+
+    @property
+    def is_management_role(self):
+        return self.role in ['owner', 'admin', 'manager']
 
 
 class SupportTicket(models.Model):
@@ -133,6 +202,31 @@ class Office(models.Model):
         return self.name
 
 
+class Equipment(models.Model):
+    name = models.CharField(max_length=120, unique=True, verbose_name="Название")
+    categories = models.JSONField(default=list, blank=True, verbose_name="Категории комнат")
+    is_active = models.BooleanField(default=True, verbose_name="Активно")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name', 'id']
+        verbose_name = "Оборудование"
+        verbose_name_plural = "Оборудование"
+
+    def __str__(self):
+        return self.name
+
+    def is_available_for_category(self, category):
+        if not self.categories:
+            return True
+        return category in self.categories
+
+    @property
+    def category_labels(self):
+        room_categories = dict(Room.CATEGORY_CHOICES)
+        return [room_categories.get(category, category) for category in self.categories]
+
+
 class Room(models.Model):
     MAX_TOTAL_IMAGES = 8
 
@@ -171,6 +265,12 @@ class Room(models.Model):
         blank=True,
         help_text="Вводите каждый пункт с новой строки."
     )
+    equipment_items = models.ManyToManyField(
+        'Equipment',
+        blank=True,
+        related_name='rooms',
+        verbose_name="Справочник оборудования"
+    )
     price_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to='rooms/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -181,6 +281,11 @@ class Room(models.Model):
 
     @property
     def equipment_list(self):
+        if self.pk:
+            equipment_items = list(self.equipment_items.order_by('name').values_list('name', flat=True))
+            if equipment_items:
+                return equipment_items
+
         if self.equipment:
             return [item.strip() for item in self.equipment.split('\n') if item.strip()]
         return []

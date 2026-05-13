@@ -681,3 +681,200 @@
 - Verification: шаг документальный, код проекта и runtime-логика не менялись.
 - Result: идея с автосменой фотографий теперь тоже зафиксирована в основном backlog и не потеряется.
 - Next: когда дойдём до доработки галереи, можно будет решать уже конкретику UX: интервал переключения, паузу на hover/click и поведение на мобильных.
+
+### 2026-05-12 14:37
+- Request: переключить проект обратно на локальный `SQLite` и реализовать справочник оборудования: отдельную страницу управления оборудованием, новую таблицу для оборудования и выбор оборудования через окно со списком при создании и редактировании комнаты вместо ручного ввода через `Enter`.
+- Done: в `bron/settings.py` активирован локальный `SQLite`, а серверный `MySQL` оставлен закомментированным рядом. В `meeting_reservation_system/models.py` добавлена новая модель `Equipment` и связь `Room.equipment_items`, при этом старое текстовое поле `Room.equipment` сохранено для совместимости. Сгенерирована и дополнена миграция `meeting_reservation_system/migrations/0003_equipment_room_equipment_items.py`: она создаёт таблицу оборудования, связь `many-to-many` и автоматически переносит старые текстовые значения оборудования комнат в новый справочник с привязкой к категориям. В `meeting_reservation_system/views.py` добавлены helpers для сериализации каталога, проверки допустимого оборудования по категории комнаты, синхронизации legacy-поля `equipment` и CRUD-view для страницы управления оборудованием. В `bron/urls.py` добавлены маршруты страницы оборудования и API для добавления/редактирования/удаления оборудования. Создан новый шаблон `meeting_reservation_system/templates/equipment_management.html`, а в `meeting_reservation_system/templates/room_management_main.html` и `meeting_reservation_system/templates/room_management_category.html` ручной ввод оборудования заменён на выбор через modal-окно со списком и сохранением выбранных позиций.
+- Files: `bron/settings.py`, `meeting_reservation_system/models.py`, `meeting_reservation_system/views.py`, `bron/urls.py`, `meeting_reservation_system/templates/equipment_management.html`, `meeting_reservation_system/templates/room_management_main.html`, `meeting_reservation_system/templates/room_management_category.html`, `meeting_reservation_system/migrations/0003_equipment_room_equipment_items.py`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py migrate` успешно применил `0003_equipment_room_equipment_items`; `./.venv/bin/python manage.py check` без ошибок; Django test client под админом отдал `200` для `/equipment-management/`, `/room-management/` и `/room-management/economy/`; отдельная проверка API создания оборудования тоже прошла успешно.
+- Result: оборудование теперь можно вести через отдельный справочник и выбирать его в комнату из списка, а старые комнаты с текстовым оборудованием автоматически подхватились в новую схему без ручной правки данных.
+- Next: открыть в браузере страницу управления оборудованием и оба room-management экрана, проверить реальный UX выбора оборудования, а затем уже решать следующий функциональный блок из плана.
+
+### 2026-05-12 14:58
+- Request: доработать тёмную тему для новых экранов, потому что `/equipment-management/`, `/room-management/`, `/room-management/<category>/` и modal-окна редактирования на них выглядят слишком тёмно и плохо читаются.
+- Done: в шаблоны `meeting_reservation_system/templates/equipment_management.html`, `meeting_reservation_system/templates/room_management_main.html` и `meeting_reservation_system/templates/room_management_category.html` добавлены page-level body classes для точечного scoping. В `meeting_reservation_system/templates/theme_setup.html` добавлен отдельный dark-pass для этих трёх экранов: переработаны фон страницы, header-блоки, secondary-кнопки, CTA-кнопки, карточки, modals, filters, input/select поля, picker-окна оборудования, category cards, room cards, info-blocks и upload/edit поверхности. Цель правок — не просто осветлить фон, а развести слои по глубине и повысить читаемость текста и controls в тёмной теме.
+- Files: `meeting_reservation_system/templates/theme_setup.html`, `meeting_reservation_system/templates/equipment_management.html`, `meeting_reservation_system/templates/room_management_main.html`, `meeting_reservation_system/templates/room_management_category.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; Django test client под админом отдаёт `200` для `/equipment-management/`, `/room-management/` и `/room-management/economy/`; `git diff --check` чистый.
+- Result: новые страницы управления оборудованием и комнатами в dark-режиме теперь должны лучше разделяться по слоям, а modal-окна и элементы выбора — выглядеть менее “проваленными в чёрный”.
+- Next: открыть эти страницы в браузере и точечно отметить, если какой-то один блок всё ещё слишком тёмный — тогда уже добивать не весь экран, а конкретную карточку, фильтр или modal-секцию.
+
+### 2026-05-12 15:05
+- Request: добавить на страницу `/equipment-management/` поиск по названию оборудования, чтобы было проще находить нужные позиции в справочнике.
+- Done: в `meeting_reservation_system/templates/equipment_management.html` добавлена верхняя toolbar-зона с поисковой строкой и счётчиком найденных позиций. JS-рендер списка оборудования переведён на фильтрацию по `name` на клиенте: без запроса к backend список мгновенно фильтруется по введённой строке, а при отсутствии совпадений показывается отдельное пустое состояние.
+- Files: `meeting_reservation_system/templates/equipment_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; Django test client под админом возвращает `200` для `/equipment-management/`.
+- Result: справочник оборудования теперь можно быстро фильтровать по названию прямо на странице без перезагрузки.
+- Next: при необходимости можно добавить следующий уровень удобства — фильтрацию ещё и по категориям комнат или сортировку по использованию в комнатах.
+
+### 2026-05-12 15:17
+- Request: сделать тёмную тему страницы оборудования приятнее и не такой глухо-тёмной, а саму фильтрацию — интереснее, чем просто одна строка поиска.
+- Done: `meeting_reservation_system/templates/equipment_management.html` заметно переработан визуально. Для dark-режима добавлен отдельный page-specific слой: фон страницы, header, toolbar, карточки, модалка, input, chip-кнопки и action-кнопки получили более глубокую indigo/blue/violet палитру и лучшую разделённость по слоям. Фильтрация тоже расширена: кроме строки поиска добавлены `clear`-кнопка и быстрые category chips (`Все`, `Общие`, категории комнат). Фильтрация теперь комбинирует текстовый поиск и категорийный отбор на клиенте, а счётчик сверху показывает найденные элементы и активный фильтр.
+- Files: `meeting_reservation_system/templates/equipment_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый; страница `/equipment-management/` под админом отдаёт `200`.
+- Result: страница оборудования в тёмной теме должна выглядеть заметно живее, а фильтрация — ощущаться уже как полноценный toolbar, а не просто поле ввода.
+- Next: открыть страницу в браузере и, если понадобится, точечно дожать только один блок — например, карточки, модалку или filter chips — без нового глобального перебора.
+
+### 2026-05-12 15:36
+- Request: перейти к пункту 3 плана — разобраться с админ-панелью пользователей: кого админ может удалять, что видит по пользователю и какие действия вообще доступны.
+- Done: в `meeting_reservation_system/views.py` добавлены helper-ы для сбора активности пользователя (`броней`, `тикетов`, `ответов ТП`, `отзывов`, `ответов на отзывы`) и единая политика действий администратора над учёткой. На этой базе `admin_panel` теперь готовит для каждого пользователя понятные флаги и причины блокировки, `admin_user_profile` стал доступен только администратору и получает сводку разрешённых/запрещённых действий, `delete_user` теперь принимает только `POST` и запрещает удаление себя, администраторов, суперпользователей и любых пользователей с историей данных, а `change_user_role` запрещает менять роль самому себе, суперпользователю и последнему администратору. В `meeting_reservation_system/templates/admin_panel.html` добавлены подсказки по активности и disabled-state с причинами для кнопок `Роль` и `Удалить`. В `meeting_reservation_system/templates/admin_user_profile.html` добавлен отдельный блок со сводкой админских действий: можно ли менять роль, можно ли удалить пользователя и есть ли у него связанные данные.
+- Files: `meeting_reservation_system/views.py`, `meeting_reservation_system/templates/admin_panel.html`, `meeting_reservation_system/templates/admin_user_profile.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый; под админом `/admin-panel/` и `/admin-panel/user/<id>/` отдают `200`; API-проверки показали, что самоудаление и самопонижение блокируются, удаление пользователя с историей блокируется, а “пустой” тестовый пользователь удаляется успешно; для менеджера доступ к `/admin-panel/user/<id>/` редиректится на главную.
+- Result: в админ-панели теперь есть внятная и более безопасная модель действий: админ сразу видит, почему конкретную учётку можно или нельзя трогать, а backend больше не позволяет опасные операции “в обход” интерфейса.
+- Next: открыть `admin-panel` и конкретный профиль пользователя в браузере и посмотреть уже глазами, хватает ли текущих подсказок, или нужно ещё дожать UX — например, сделать это более наглядным цветом, отдельными иконками или дополнительной колонкой.
+
+### 2026-05-12 16:24
+- Request: улучшить блок пользователей в админ-панели: сделать кнопку `Удалить` заметнее в светлой теме, убрать “активный” вид у недоступной кнопки смены роли и ввести отдельную роль `owner`, чтобы было понятно, кто главный администратор.
+- Done: в `meeting_reservation_system/models.py` к ролям пользователя добавлен `owner` и свойства `is_owner_role`, `is_admin_role`, `is_management_role` для более чистых проверок в шаблонах. В `meeting_reservation_system/views.py` добита единая иерархия доступа: `owner` и `admin` входят в админский контур, `owner/admin/manager` — в управленческий; `admin_panel` теперь сортирует пользователей в порядке `owner -> admin -> manager -> user`, `delete_equipment`, `toggle_room_status`, `delete_user` и `change_user_role` переведены на общие access-check helpers. В `change_user_role` добавлена поддержка роли `owner`, а также безопасная передача владения: текущий `owner` может назначить `owner` другому пользователю, при этом сам автоматически становится `admin`, чтобы не плодить “главных” администраторов. В `meeting_reservation_system/views_reviews.py` роль `owner` включена в контур модерации отзывов. В `meeting_reservation_system/templates/admin_panel.html` добавлены `owner` в фильтр и в modal смены роли, логика доступных ролей в modal, подсказка с разрешёнными ролями, отдельный badge `owner`, а disabled-состояния кнопок визуально приглушены. В `meeting_reservation_system/templates/admin_user_profile.html`, `meeting_reservation_system/templates/users_report.html` и `meeting_reservation_system/templates/home.html` роль `owner` добавлена в отображение и доступ к админским/менеджерским зонам. В `meeting_reservation_system/templates/theme_setup.html` добавлены page-specific overrides для `admin-panel`: в светлой теме `Удалить` теперь контрастнее, а недоступные `Роль/Удалить` выглядят реально выключенными. Сгенерирована и применена миграция `meeting_reservation_system/migrations/0004_alter_user_role.py`.
+- Files: `meeting_reservation_system/models.py`, `meeting_reservation_system/views.py`, `meeting_reservation_system/views_reviews.py`, `meeting_reservation_system/templates/admin_panel.html`, `meeting_reservation_system/templates/admin_user_profile.html`, `meeting_reservation_system/templates/home.html`, `meeting_reservation_system/templates/users_report.html`, `meeting_reservation_system/templates/theme_setup.html`, `meeting_reservation_system/migrations/0004_alter_user_role.py`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py makemigrations meeting_reservation_system` создал `0004_alter_user_role`; `./.venv/bin/python manage.py migrate` успешно применил миграцию; `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый; через Django test client `/admin-panel/` отдаёт `200`, в HTML панели есть опция `owner`, самоповышение `admin -> owner` через `/api/change-role/<id>/` возвращает `{'success': True}`, а передача владения от `owner` другому пользователю тоже проходит успешно и меняет роли ожидаемо.
+- Result: теперь в системе есть явный “главный админ” (`owner`), а не просто набор одинаковых админов; при этом интерфейс админ-панели лучше объясняет, что можно делать, а что нельзя, и не вводит в заблуждение цветами/disabled-кнопками.
+- Next: открыть `admin-panel` глазами в светлой и тёмной теме, проверить модалку смены роли и решить, нужна ли ещё более строгая бизнес-логика по `owner` (например, дополнительные ограничения на передачу владения или отдельная визуальная маркировка в списках/отчётах).
+
+### 2026-05-12 17:42
+- Request: сделать FAQ и поддержку полноценными и понятными, потому что в текущем состоянии там была путаница: часть FAQ жила в базе, часть была захардкожена в шаблоне, а support-flow местами работал неочевидно и небезопасно.
+- Done: в `meeting_reservation_system/views.py` support-блок переработан: добавлены helper-ы `_build_faq_sections()` и `_extract_faq_form_data()`, `create_ticket` переведён на `login_required + require_POST` с валидацией темы/описания, `support_view` теперь строит FAQ только из записей `FAQ` в базе и подаёт в шаблон сгруппированные секции, а не смешивает model-data с хардкодом. `ticket_detail` переписан на разделение GET/POST: GET отдаёт новый modal-template, POST возвращает уже корректный JSON для fetch-ответов, валидирует текст ответа, защищает закрытые обращения и обновляет `last_activity/auto_close_date`. `close_ticket` и `delete_ticket` переведены на `POST-only`, `check_ticket_status` теперь проверяет права доступа к обращению. Добавлены новые admin-view для базы знаний: `faq_management`, `create_faq`, `edit_faq`, `delete_faq`. В `bron/urls.py` добавлены маршруты управления FAQ. Вместо старых путаных шаблонов flow переведён на новые: `meeting_reservation_system/templates/support_center.html` для пользовательской поддержки, `meeting_reservation_system/templates/ticket_detail_modal.html` для диалога по обращению и `meeting_reservation_system/templates/faq_management.html` для админского CRUD по FAQ. Новая поддержка показывает FAQ только из БД, имеет понятные вкладки, корректный поиск по вопросам/ответам, ясные карточки обращений и отдельную admin-кнопку управления FAQ.
+- Files: `meeting_reservation_system/views.py`, `bron/urls.py`, `meeting_reservation_system/templates/support_center.html`, `meeting_reservation_system/templates/ticket_detail_modal.html`, `meeting_reservation_system/templates/faq_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый; через Django test client `/support/` отдаёт `200` и использует новый support-template, `/support/faq-management/` под админом отдаёт `200`, GET `/support/ticket/<id>/` отдаёт новый modal-template, POST-ответ пользователя по тикету возвращает `{'success': True, 'message': 'Ответ отправлен!'}`, ответ менеджера переводит тикет в `in_progress` и выставляет `auto_close_date`, guest POST на `/support/create-ticket/` редиректится на login, а admin POST на `/support/faq/create/` реально создаёт FAQ-запись.
+- Result: теперь FAQ и поддержка перестали быть смесью из базы, жёстко вшитого HTML и неявного JS-поведения. FAQ живёт в одном месте, админ управляет им через отдельный CRUD, а support-flow работает как единый понятный сценарий для пользователя и менеджера.
+- Next: открыть `/support/` и `/support/faq-management/` глазами, посмотреть, устраивает ли визуально новый layout; если нужно, следующим проходом уже дожать не логику, а UX — например, визуал карточек, статусов или управления FAQ.
+
+### 2026-05-12 18:03
+- Request: переработать дизайн базы знаний и страницы управления FAQ, потому что knowledge-base выглядела плоско и выцветше, а кнопка `Удалить` почти сливалась и в FAQ, и в поддержке.
+- Done: в `meeting_reservation_system/templates/support_center.html` усилен визуальный слой FAQ и поддержки: `hero`, панели, группы FAQ, карточки вопросов, ответы, пустые состояния и модалки получили более собранные градиенты, тени и разделение по слоям. Категории FAQ теперь помечаются class-ами `faq-group--{{ section.code }}`, за счёт чего заголовки категорий знаний получили разные акцентные палитры. Для светлой темы support-страницы переписаны page-specific overrides: фон стал менее выцветшим, карточки и поиск стали объёмнее, а активные/hover-состояния FAQ читаются лучше. В `meeting_reservation_system/templates/faq_management.html` переработаны `hero`, карточки, toolbar фильтрации, FAQ-карточки и модалка редактирования, а для light-theme добавлен отдельный, более живой green palette вместо блеклой бело-серой плоскости. На обеих страницах усилена кнопка `Удалить`: теперь это не полупрозрачный красный ghost, а читаемый контрастный danger-button с нормальным текстом и тенью.
+- Files: `meeting_reservation_system/templates/support_center.html`, `meeting_reservation_system/templates/faq_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый.
+- Result: база знаний и FAQ-менеджмент выглядят заметно живее и структурнее, light-theme больше не кажется выцветшей, а destructive-action теперь читается сразу и не теряется на фоне карточек.
+- Next: открыть `/support/` и `/support/faq-management/` глазами в light/dark theme и решить, нужно ли дальше дожать отдельные детали — например, search-bar, hover карточек или цвет конкретных category chips.
+
+### 2026-05-12 18:12
+- Request: добить support-страницу после визуального прохода: active-tab подписи в light-theme выглядели как “пустые”, границы карточек и блоков были слишком бледными, а кнопка `Управление FAQ` почти терялась.
+- Done: в `meeting_reservation_system/templates/support_center.html` усилен `--border-color` для page-local palette, добавлен общий `border-width: 1.5px` для основных support-элементов, отдельно усилены границы карточек/панелей/полей, а для light-theme переписан active-state табов: теперь вкладки получают более читаемый green-gradient и тёмный текст вместо “пустого белого” состояния. Для top-button `Управление FAQ` добавлен отдельный light-theme override с более заметным градиентом и shadow.
+- Files: `meeting_reservation_system/templates/support_center.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый.
+- Result: support-tabs должны читаться корректно при переключении, границы стали заметнее и в light, и в dark theme, а кнопка перехода в FAQ management больше не теряется на светлом фоне.
+- Next: открыть `/support/` и уже глазами проверить, достаточно ли текущей толщины/контраста границ, или нужно отдельно дожать только search-bar и ticket-card borders.
+
+### 2026-05-12 18:19
+- Request: доработать ещё один визуальный слой для FAQ/support: в тёмной теме кнопка перехода к FAQ management на support-странице выглядела слишком режущей, а на самой странице `faq-management` границы и кнопки в light/dark theme всё ещё выглядели спорно.
+- Done: в `meeting_reservation_system/templates/support_center.html` верхняя кнопка `Управление FAQ` переведена на более спокойный indigo/violet gradient в dark-theme, чтобы она не выбивалась кислотно. В `meeting_reservation_system/templates/faq_management.html` усилены page-local border colors, добавлен `border-width: 1.5px` для основных карточек/полей/кнопок, toolbar и action-row получили более видимые separator/border, а кнопки `Редактировать`, `Добавить FAQ`, `Открыть FAQ для пользователей` и secondary-кнопки приведены к более цельной палитре в обеих темах. Для light-theme top action button и основные action-кнопки получили более читаемый green palette без выцветания.
+- Files: `meeting_reservation_system/templates/support_center.html`, `meeting_reservation_system/templates/faq_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый.
+- Result: support-страница и FAQ management теперь ближе друг к другу по визуальному языку, а кнопки и рамки должны восприниматься увереннее и в light, и в dark theme.
+- Next: открыть `/support/` и `/support/faq-management/` и посмотреть, не нужно ли отдельно дожать одну конкретную кнопку или только рамки карточек FAQ.
+
+### 2026-05-12 18:28
+- Request: исправить два UX-момента: на `/support/` дефолтный FAQ открывался не с самого верха страницы, а в профиле на телефоне кнопка `Редактировать` открывала форму ниже без прокрутки, из-за чего пользователь мог вообще не понять, что форма появилась.
+- Done: в `meeting_reservation_system/templates/support_center.html` переработана инициализация табов: для дефолтного `faq` больше не фиксируется hash в URL, при первом открытии support-страница принудительно ставится на верх, а hash оставлен только для не-default вкладок (`new-ticket`, `my-tickets`, `all-tickets`). В `meeting_reservation_system/templates/profile.html` функция `toggleEditSection()` теперь после открытия формы мягко прокручивает экран к началу edit-блока и на мобильной ширине переводит фокус в первое поле без дополнительного прыжка страницы.
+- Files: `meeting_reservation_system/templates/support_center.html`, `meeting_reservation_system/templates/profile.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый.
+- Result: support должен открываться сверху, а редактирование профиля на телефоне теперь сразу становится видимым и понятным пользователю.
+- Next: открыть `/support/` и `/profile/` на телефоне или в mobile emulation и проверить, достаточно ли текущего поведения, или нужно ещё сильнее поднимать edit-form в поле зрения.
+
+### 2026-05-12 18:36
+- Request: переключить проект обратно на `MySQL` перед серверным деплоем.
+- Done: в `bron/settings.py` активирован боевой `DATABASES`-блок на `django_prometheus.db.backends.mysql`, а локальный `SQLite`-вариант оставлен ниже закомментированным как запасной dev-режим.
+- Files: `bron/settings.py`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `git diff --check` чистый; локальный `./.venv/bin/python manage.py check` не проходит, потому что в текущем `.venv` отсутствует `mysqlclient/MySQLdb`.
+- Result: конфиг снова в боевом MySQL-виде для сервера, но локально на этих настройках Django не стартует, пока не установлен MySQL-драйвер.
+- Next: если понадобится снова локальная проверка на ноутбуке, либо временно вернуть `SQLite`, либо установить `mysqlclient` в `.venv`.
+
+### 2026-05-13 00:00
+- Request: исправить два момента сразу: `owner` должен видеть верхнюю кнопку настроек как администратор, а галерея комнаты должна сама листаться, быть плавной и удобной на телефоне со свайпом вместо стрелок.
+- Done: в `meeting_reservation_system/templates/home.html` верхняя шестерня теперь показывается для `owner` явно, без двусмысленной проверки только через management-role. В `meeting_reservation_system/templates/room_detail.html` галерея получила автопереключение фото каждые 12 секунд, а после любого ручного действия таймер откладывает следующий переход на 30 секунд. Добавлена мягкая fade-анимация смены изображения, на мобильной ширине стрелки скрываются, а основной блок галереи принимает свайпы влево/вправо для переключения фото.
+- Files: `meeting_reservation_system/templates/home.html`, `meeting_reservation_system/templates/room_detail.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `git diff --check` чистый; локальный `./.venv/bin/python manage.py check` здесь не запускался из-за отсутствующего `mysqlclient/MySQLdb` в текущем `.venv`.
+- Result: `owner` должен видеть тот же gear-меню, что и администратор, а фотогалерея комнаты стала самостоятельным слайдером с понятным поведением и на десктопе, и на телефоне.
+- Next: проверить на живом сайте роль `owner` в шапке и галерею комнаты на телефоне, а затем решить, нужна ли ещё пауза автосмены при наведении мыши на десктопе.
+
+### 2026-05-13 00:10
+- Request: временно переключить проект обратно на `SQLite`, чтобы можно было снова запускать локальные проверки без `mysqlclient`.
+- Done: в `bron/settings.py` активирован `django.db.backends.sqlite3`, а MySQL-блок оставлен закомментированным выше как боевой вариант для сервера.
+- Files: `bron/settings.py`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый.
+- Result: локально проект снова стартует на SQLite и его можно использовать как dev-окружение для дальнейших правок.
+- Next: если потребуется снова готовить серверный деплой, вернуть MySQL-блок в `settings.py` и прогнать миграции на боевой базе.
+
+### 2026-05-13 00:18
+- Request: убрать возможность создавать второго владельца и разрешить нормальное понижение владельца обратно до `admin/manager/user`; дополнительно сделать доступ к шестерне в шапке явным для `owner`.
+- Done: в `meeting_reservation_system/views.py` политика ролей для `owner` пересмотрена: владелец больше не передаётся другому пользователю, а назначение `owner` разрешено только для первичной самоназначенной активации, если владельца ещё нет. При этом владелец теперь может понизить другого владельца до `admin`, `manager` или `user`, без удаления и без назначения нового owner. В `meeting_reservation_system/templates/home.html` условие показа верхней шестерни и связанных management-элементов сделано явным для `owner`.
+- Files: `meeting_reservation_system/views.py`, `meeting_reservation_system/templates/home.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check` без ошибок; `git diff --check` чистый; через Django shell подтверждено, что policy для owner->owner теперь даёт допустимые роли `['admin', 'manager', 'user']`.
+- Result: owner больше не может создавать второго владельца, но может откатить ошибочно назначенного owner обратно в обычную роль, а шестерня в шапке отображается для owner без неявных условий.
+- Next: открыть сайт под owner-аккаунтом и проверить, что шестерня видна, а в админке у owner действительно доступны только понижающие роли.
+
+### 2026-05-13 00:27
+- Request: сделать страницу "Правила и инструкции" полноценной и управляемой через сайт без правок кода.
+- Done: добавлен модельный слой `InfoBlock` с секциями `general/rules/instructions/contacts`, публичная страница `info.html` теперь собирается из записей БД, а для админа добавлена отдельная страница управления `info_management.html` с CRUD, поиском и фильтром по разделу. В `0005_infoblock.py` добавлены стартовые записи, повторяющие прежнее содержимое статической страницы.
+- Files: `meeting_reservation_system/models.py`, `meeting_reservation_system/views.py`, `bron/urls.py`, `meeting_reservation_system/templates/info.html`, `meeting_reservation_system/templates/info_management.html`, `meeting_reservation_system/migrations/0005_infoblock.py`, `bron/settings.py`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py makemigrations meeting_reservation_system`; `./.venv/bin/python manage.py migrate`; `./.venv/bin/python manage.py check`; публичная страница `/info/` отвечает `200`; админская `/info/management/` отвечает `200` под `admin_demo`.
+- Result: администратор теперь может менять правила, инструкции и контакты через сайт без правок шаблона, а публичная страница не зависит от статического HTML.
+- Next: при необходимости можно дополировать визуал страниц `info`/`info_management` или добавить отдельные подтипы блоков для более строгой структуры контента.
+
+### 2026-05-13 00:34
+- Request: показать заголовок и описание в разделе "Общая информация", а также сделать поле "Порядок" понятнее.
+- Done: в `info.html` общий раздел теперь рендерит карточки так же, как остальные блоки, поэтому если у записи заполнен `title`, он отображается на публичной странице. В `info_management.html` к полю `Порядок` добавлена подсказка, что меньшая цифра поднимает блок выше.
+- Files: `meeting_reservation_system/templates/info.html`, `meeting_reservation_system/templates/info_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check`; `git diff --check`; `/info/` и `/info/management/` отвечают `200`.
+- Result: заголовок больше не теряется в общем разделе, а порядок отображения стал очевиднее для админа.
+- Next: если нужно, можно ещё уменьшить визуальную тяжесть страницы или разделить общую информацию на отдельные подблоки.
+
+### 2026-05-13 00:39
+- Request: убрать цифры справа от заголовков разделов на публичной странице `info`, чтобы они не отвлекали пользователей.
+- Done: из `info.html` убран badge с количеством блоков у каждого раздела, оставлены только названия и поясняющий текст.
+- Files: `meeting_reservation_system/templates/info.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check`; `git diff --check`; `/info/` отвечает `200`.
+- Result: заголовки разделов стали визуально чище, без счётчика справа.
+- Next: если потребуется, можно ещё упростить саму hero-секцию или смягчить цветовые акценты на публичной странице.
+
+### 2026-05-13 00:43
+- Request: скрыть служебную статистику FAQ и страницы "Правила и инструкции" для обычных пользователей, но оставить её для админов.
+- Done: в `support_center.html` блок с числами теперь показывается только для ролей с доступом к управлению FAQ/поддержкой; в `info.html` статистика активных блоков и разделов видна только управляющим пользователям.
+- Files: `meeting_reservation_system/templates/support_center.html`, `meeting_reservation_system/templates/info.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check`; `git diff --check`; `/support/` и `/info/` отвечают `200`; через Django shell подтверждено, что `admin_demo` видит статистику, а обычный пользователь нет.
+- Result: у обычных пользователей страницы стали чище и не показывают служебные счётчики, а администраторы по-прежнему видят метрики.
+- Next: если нужно, можно дальше убрать ещё и числовые бейджи внутри отдельных FAQ-категорий или смягчить hero-секции.
+
+### 2026-05-13 01:02
+- Request: дать админу возможность создавать новые категории FAQ и разделы страницы "Правила и инструкции", а также привести светлую тему `info` к более живому стилю FAQ.
+- Done: добавлены модели `FAQCategory` и `InfoSection`, переведены FAQ и блоки информации на динамические категории/разделы, добавлены CRUD-страницы управления категориями и разделами, а публичная страница `info.html` получила светлую green/white-палитру по мотивам FAQ и более мягкую тёмную кнопку `Управление правилами`. Старые `get_*_display()` заменены на явные лейблы моделей, а демо-данные теперь сидят с дефолтными категориями и разделами.
+- Files: `meeting_reservation_system/models.py`, `meeting_reservation_system/views.py`, `bron/urls.py`, `meeting_reservation_system/templates/faq_management.html`, `meeting_reservation_system/templates/info_management.html`, `meeting_reservation_system/templates/info.html`, `meeting_reservation_system/management/commands/seed_demo_data.py`, `meeting_reservation_system/migrations/0006_faqcategory_infosection_alter_faq_category_and_more.py`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py makemigrations meeting_reservation_system`; `./.venv/bin/python manage.py migrate`; `./.venv/bin/python manage.py check`; Django test client подтвердил `200` для `/info/`, `/support/`, `/info/management/` и `/support/faq-management/`.
+- Result: категории FAQ и разделы информации теперь редактируются через сайт, а публичная страница `info` больше не выглядит почти целиком тёмной в светлой теме.
+- Next: при желании можно ещё отдельно дожать визуал `info_management`, но функционально CRUD уже готов.
+
+### 2026-05-13 01:20
+- Request: упростить страницу управления правилами и инструкциями, чтобы создание нового блока или раздела открывалось отдельным окном по кнопке.
+- Done: inline-формы создания вынесены из левого сайдбара в модальные окна, а на странице оставлены только компактные кнопки `Новый блок` и `Новый раздел`. Список разделов и список блоков остались на месте, но экран стал заметно чище и понятнее.
+- Files: `meeting_reservation_system/templates/info_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check`; `git diff --check`; Django test client подтвердил `200` для `/info/management/` под `admin_demo`.
+- Result: создание контента теперь запускается через отдельные окна, без лишней визуальной нагрузки на страницу управления.
+- Next: если нужно, можно аналогично упростить и управление FAQ-категориями.
+
+### 2026-05-13 01:35
+- Request: сделать кнопки создания FAQ и категорий удобнее и красивее через отдельные окна, усилить контраст кнопок в тёмной теме на `info/management`, а на публичной `info` сделать светлую тему с более заметными границами.
+- Done: в `faq_management.html` inline-формы создания FAQ и категорий заменены на кнопки `Новый FAQ` и `Новая категория`, открывающие модальные окна с тем же набором полей; на `info_management.html` усилены кнопки создания в тёмной теме и сохранён мобильный адаптивный layout; на `info.html` в светлой теме сделаны более заметные, тёмные границы карточек и блоков, чтобы интерфейс не выглядел выцветшим.
+- Files: `meeting_reservation_system/templates/faq_management.html`, `meeting_reservation_system/templates/info_management.html`, `meeting_reservation_system/templates/info.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check`; `git diff --check`; Django test client подтвердил `200` для `/info/`, `/info/management/` и `/support/faq-management/` под `admin_demo`.
+- Result: создание FAQ и категорий стало компактнее и понятнее, а публичная `info` в light theme стала визуально плотнее и чище.
+- Next: если захочешь, можно ещё отдельно подровнять цветовые акценты внутри самих FAQ-карточек.
+
+### 2026-05-13 01:45
+- Request: в светлой теме исправить чёрные модальные окна при создании FAQ и новых категорий, сделать кнопку добавления зелёной и более естественной, а на страницах FAQ и правил/инструкций усилить границы в light theme.
+- Done: на `faq_management.html` и `info_management.html` светлые модалки получили свой светло-зелёный фон, более выраженные рамки и круглые submit-кнопки с нормальным зелёным акцентом; на `faq_management.html` и `info_management.html` утолщены и затемнены границы карточек и блоков в светлой теме, чтобы контуры не терялись.
+- Files: `meeting_reservation_system/templates/faq_management.html`, `meeting_reservation_system/templates/info_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check`; `git diff --check`.
+- Result: окна создания больше не выглядят чёрными в light theme, а кнопки и границы стали заметнее и чище.
+
+### 2026-05-13 01:55
+- Request: привести `/info/management/` в светлой теме к нормальному green/white виду, убрать чёрные участки, сделать `info-badge` читаемыми, а в тёмной теме ослабить конфликт у `public-btn` и вернуть чисто белый текст у `back-btn`; дополнительно утолщить и затемнить границы.
+- Done: на `info_management.html` светлая тема получила более светлые модалки, плотные границы, нормальные зелёные кнопки и видимые `info-badge`; в тёмной теме верхние кнопки перенастроены на более спокойную палитру, а `back-btn` получил белый текст.
+- Files: `meeting_reservation_system/templates/info_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check`; `git diff --check`.
+- Result: `/info/management/` стал визуально плотнее и читабельнее в light theme, а тёмная тема перестала резать глаз в верхней панели.
+
+### 2026-05-13 02:05
+- Request: исправить чёрное окно диалога на `/support/#all-tickets` в светлой теме и сделать кнопку `Добавить` в тёмных модалках FAQ более естественной и читаемой.
+- Done: на `support_center.html` светлый modal-window и внутренний `response-ticket` получили светлый фон, более тёмную рамку и читабельные управляющие кнопки; на `faq_management.html` кнопки `Добавить FAQ` и `Добавить категорию` в тёмной теме переведены в более цельный зелёный pill-стиль с лучшим контрастом.
+- Files: `meeting_reservation_system/templates/support_center.html`, `meeting_reservation_system/templates/faq_management.html`, `REQUESTS_AND_CHANGES_LOG.md`
+- Verification: `./.venv/bin/python manage.py check`; `git diff --check`.
+- Result: светлый диалог тикетов больше не выглядит чёрным, а тёмные submit-кнопки FAQ стали заметнее и аккуратнее.

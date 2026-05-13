@@ -301,11 +301,17 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s ease;
+            transition: transform 0.5s ease, opacity 0.35s ease;
+            will-change: transform, opacity;
         }
 
         .room-image-wrapper:hover .room-image {
             transform: scale(1.05);
+        }
+
+        .room-image.is-transitioning {
+            opacity: 0;
+            transform: scale(1.02);
         }
 
         .room-gallery-nav {
@@ -1490,6 +1496,15 @@
                 justify-content: center;
             }
 
+            .room-gallery-nav {
+                display: none;
+            }
+
+            .room-image-wrapper {
+                height: 300px;
+                touch-action: pan-y;
+            }
+
             .time-grid,
             .duration-buttons {
                 grid-template-columns: repeat(2, 1fr);
@@ -2201,17 +2216,53 @@
             const prevButton = gallery?.querySelector('[data-room-gallery-prev]');
             const nextButton = gallery?.querySelector('[data-room-gallery-next]');
             const counter = gallery?.querySelector('[data-room-gallery-counter]');
+            const galleryStage = gallery?.querySelector('.room-image-wrapper');
 
             if (!gallery || !mainImage || thumbnailButtons.length === 0) return;
 
+            const AUTO_ADVANCE_MS = 12000;
+            const INTERACTION_ADVANCE_MS = 30000;
+            let autoAdvanceTimer = null;
+            let transitionTimer = null;
+            let pendingImageLoadHandler = null;
+            let pendingImageErrorHandler = null;
             let currentIndex = 0;
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchStarted = false;
 
-            function setActiveImage(nextIndex) {
+            function scheduleAutoAdvance(delay = AUTO_ADVANCE_MS) {
+                if (thumbnailButtons.length <= 1) return;
+
+                window.clearTimeout(autoAdvanceTimer);
+                autoAdvanceTimer = window.setTimeout(() => {
+                    setActiveImage(currentIndex + 1, { source: 'auto' });
+                }, delay);
+            }
+
+            function clearPendingImageListeners() {
+                if (pendingImageLoadHandler) {
+                    mainImage.removeEventListener('load', pendingImageLoadHandler);
+                    pendingImageLoadHandler = null;
+                }
+                if (pendingImageErrorHandler) {
+                    mainImage.removeEventListener('error', pendingImageErrorHandler);
+                    pendingImageErrorHandler = null;
+                }
+            }
+
+            function setActiveImage(nextIndex, options = {}) {
                 const safeIndex = (nextIndex + thumbnailButtons.length) % thumbnailButtons.length;
                 const activeButton = thumbnailButtons[safeIndex];
+                const isAutoChange = options.source === 'auto';
 
-                mainImage.src = activeButton.dataset.imageUrl;
-                mainImage.alt = activeButton.dataset.imageAlt;
+                if (safeIndex === currentIndex && !options.force) {
+                    if (!isAutoChange) {
+                        scheduleAutoAdvance(INTERACTION_ADVANCE_MS);
+                    }
+                    return;
+                }
+
                 currentIndex = safeIndex;
 
                 thumbnailButtons.forEach((button, buttonIndex) => {
@@ -2221,25 +2272,87 @@
                 if (counter) {
                     counter.textContent = `${safeIndex + 1} / ${thumbnailButtons.length}`;
                 }
+
+                window.clearTimeout(transitionTimer);
+                clearPendingImageListeners();
+                mainImage.classList.add('is-transitioning');
+
+                transitionTimer = window.setTimeout(() => {
+                    const finishTransition = () => {
+                        mainImage.classList.remove('is-transitioning');
+                        clearPendingImageListeners();
+                    };
+
+                    pendingImageLoadHandler = finishTransition;
+                    pendingImageErrorHandler = finishTransition;
+                    mainImage.addEventListener('load', pendingImageLoadHandler, { once: true });
+                    mainImage.addEventListener('error', pendingImageErrorHandler, { once: true });
+                    mainImage.src = activeButton.dataset.imageUrl;
+                    mainImage.alt = activeButton.dataset.imageAlt;
+
+                    if (mainImage.complete) {
+                        finishTransition();
+                    }
+                }, 140);
+
+                scheduleAutoAdvance(isAutoChange ? AUTO_ADVANCE_MS : INTERACTION_ADVANCE_MS);
             }
 
             thumbnailButtons.forEach((button, index) => {
                 button.addEventListener('click', function() {
-                    setActiveImage(index);
+                    setActiveImage(index, { source: 'manual' });
                 });
             });
 
             if (prevButton) {
                 prevButton.addEventListener('click', function() {
-                    setActiveImage(currentIndex - 1);
+                    setActiveImage(currentIndex - 1, { source: 'manual' });
                 });
             }
 
             if (nextButton) {
                 nextButton.addEventListener('click', function() {
-                    setActiveImage(currentIndex + 1);
+                    setActiveImage(currentIndex + 1, { source: 'manual' });
                 });
             }
+
+            if (galleryStage) {
+                galleryStage.addEventListener('touchstart', function(event) {
+                    if (!event.changedTouches || !event.changedTouches.length) return;
+                    const touch = event.changedTouches[0];
+                    touchStarted = true;
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                }, { passive: true });
+
+                galleryStage.addEventListener('touchend', function(event) {
+                    if (!touchStarted || !event.changedTouches || !event.changedTouches.length) return;
+                    const touch = event.changedTouches[0];
+                    const deltaX = touch.clientX - touchStartX;
+                    const deltaY = touch.clientY - touchStartY;
+                    touchStarted = false;
+
+                    if (Math.abs(deltaX) < 52 || Math.abs(deltaX) < Math.abs(deltaY)) {
+                        return;
+                    }
+
+                    if (deltaX < 0) {
+                        setActiveImage(currentIndex + 1, { source: 'touch' });
+                    } else {
+                        setActiveImage(currentIndex - 1, { source: 'touch' });
+                    }
+                }, { passive: true });
+            }
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    window.clearTimeout(autoAdvanceTimer);
+                } else {
+                    scheduleAutoAdvance(INTERACTION_ADVANCE_MS);
+                }
+            });
+
+            scheduleAutoAdvance(AUTO_ADVANCE_MS);
         });
     </script>
 

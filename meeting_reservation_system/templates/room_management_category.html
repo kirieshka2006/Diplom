@@ -53,6 +53,14 @@
             gap: 16px;
         }
 
+        .header-actions__right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -97,6 +105,26 @@
         .btn-add:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-directory {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-directory:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
         }
 
         /* Filter Toggle Button */
@@ -517,6 +545,164 @@
             color: var(--text-secondary);
         }
 
+        .equipment-picker {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+        }
+
+        .equipment-picker__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .equipment-picker__title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .equipment-picker__button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(59, 130, 246, 0.16);
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .equipment-picker__summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .equipment-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 30px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .equipment-picker__empty {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .picker-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1400;
+            background: rgba(0, 0, 0, 0.78);
+            backdrop-filter: blur(6px);
+            padding: 24px;
+        }
+
+        .picker-modal.is-open {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .picker-modal__dialog {
+            width: min(720px, 100%);
+            max-height: calc(100vh - 48px);
+            overflow: auto;
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+        }
+
+        .picker-modal__title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .picker-modal__subtitle {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .picker-modal__list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .picker-option {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            cursor: pointer;
+        }
+
+        .picker-option__main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .picker-option__main input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent-primary);
+        }
+
+        .picker-option__meta {
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .picker-modal__empty {
+            padding: 22px 18px;
+            border-radius: var(--radius-md);
+            border: 1px dashed var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .picker-modal__actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
         .pending-gallery-list {
             display: flex;
             flex-wrap: wrap;
@@ -818,13 +1004,16 @@
     </style>
     {% include 'theme_setup.html' %}
 </head>
-<body>
+<body class="room-management-category-page">
 
     <div class="container">
         <div class="header-actions">
             <a href="{% url 'room_management_main' %}" class="back-btn">← Назад к категориям</a>
             <h1 class="page-title">{{ category_display }} комнаты</h1>
-            <button class="btn-add" onclick="showAddRoomForm()">➕ Добавить комнату</button>
+            <div class="header-actions__right">
+                <a href="{% url 'equipment_management' %}" class="btn-directory">🧰 Оборудование</a>
+                <button class="btn-add" onclick="showAddRoomForm()">➕ Добавить комнату</button>
+            </div>
         </div>
 
         <!-- Filter Toggle -->
@@ -996,6 +1185,7 @@
                 <input type="hidden" name="selected_gallery_cover_id" id="selectedGalleryCoverId">
                 <input type="hidden" name="selected_pending_cover_index" id="selectedPendingCoverIndex">
                 <input type="hidden" name="gallery_order" id="galleryOrderInput">
+                <input type="hidden" name="equipment_ids" id="categoryEquipmentIds">
 
                 <div class="form-group">
                     <label>Название комнаты</label>
@@ -1024,7 +1214,15 @@
                 </div>
                 <div class="form-group">
                     <label>Оборудование</label>
-                    <textarea name="equipment" rows="3"></textarea>
+                    <div class="equipment-picker">
+                        <div class="equipment-picker__header">
+                            <div class="equipment-picker__title">Оборудование комнаты</div>
+                            <button type="button" class="equipment-picker__button" id="openCategoryEquipmentPicker">Выбрать оборудование</button>
+                        </div>
+                        <div class="equipment-picker__summary" id="categoryEquipmentSummary">
+                            <span class="equipment-picker__empty">Оборудование пока не выбрано.</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Основное фото</label>
@@ -1070,6 +1268,20 @@
         </div>
     </div>
 
+    <div id="categoryEquipmentPickerModal" class="picker-modal">
+        <div class="picker-modal__dialog">
+            <h3 class="picker-modal__title">Выбор оборудования</h3>
+            <p class="picker-modal__subtitle">Отметь позиции, которые есть в комнате этой категории, и затем нажми сохранить.</p>
+            <div class="picker-modal__list" id="categoryEquipmentPickerList"></div>
+            <div class="picker-modal__actions">
+                <button type="button" class="modal-btn modal-btn--cancel" id="closeCategoryEquipmentPicker">Отмена</button>
+                <button type="button" class="modal-btn modal-btn--save" id="saveCategoryEquipmentPicker">Сохранить выбор</button>
+            </div>
+        </div>
+    </div>
+
+    {{ equipment_catalog|json_script:"categoryEquipmentCatalogData" }}
+
     <script>
         let currentRoomId = null;
         let currentRoomSnapshot = null;
@@ -1077,6 +1289,8 @@
         let selectedCategoryGalleryCoverId = '';
         let selectedCategoryPendingCoverIndex = null;
         let draggedCategoryGalleryCard = null;
+        let selectedCategoryEquipmentIds = [];
+        const categoryEquipmentCatalog = JSON.parse(document.getElementById('categoryEquipmentCatalogData').textContent);
 
         // Filter Toggle
         const filterToggle = document.getElementById('filterToggle');
@@ -1202,6 +1416,67 @@
 
         function getCategoryGalleryOrderInput() {
             return document.getElementById('galleryOrderInput');
+        }
+
+        function getCategoryEquipmentInput() {
+            return document.getElementById('categoryEquipmentIds');
+        }
+
+        function getFilteredCategoryEquipmentCatalog() {
+            return categoryEquipmentCatalog.filter(item => !item.categories?.length || item.categories.includes('{{ category }}'));
+        }
+
+        function syncCategoryEquipmentInput() {
+            getCategoryEquipmentInput().value = selectedCategoryEquipmentIds.join(',');
+        }
+
+        function renderCategoryEquipmentSummary() {
+            const summary = document.getElementById('categoryEquipmentSummary');
+            const selectedItems = categoryEquipmentCatalog.filter(item => selectedCategoryEquipmentIds.includes(item.id));
+
+            if (!selectedItems.length) {
+                summary.innerHTML = '<span class="equipment-picker__empty">Оборудование пока не выбрано.</span>';
+                return;
+            }
+
+            summary.innerHTML = selectedItems
+                .map(item => `<span class="equipment-pill">${item.name}</span>`)
+                .join('');
+        }
+
+        function renderCategoryEquipmentPicker() {
+            const list = document.getElementById('categoryEquipmentPickerList');
+            const filteredCatalog = getFilteredCategoryEquipmentCatalog();
+
+            if (!filteredCatalog.length) {
+                list.innerHTML = `
+                    <div class="picker-modal__empty">
+                        Для этой категории пока нет оборудования в справочнике. Сначала добавь его на странице управления оборудованием.
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filteredCatalog.map(item => `
+                <label class="picker-option">
+                    <div class="picker-option__main">
+                        <input type="checkbox" value="${item.id}" ${selectedCategoryEquipmentIds.includes(item.id) ? 'checked' : ''}>
+                        <span>${item.name}</span>
+                    </div>
+                    <div class="picker-option__meta">
+                        ${item.category_labels?.length ? item.category_labels.join(', ') : 'Все категории'}
+                    </div>
+                </label>
+            `).join('');
+        }
+
+        function openCategoryEquipmentPicker() {
+            renderCategoryEquipmentPicker();
+            document.getElementById('categoryEquipmentPickerModal').classList.add('is-open');
+        }
+
+        function closeCategoryEquipmentPicker() {
+            document.getElementById('categoryEquipmentPickerModal').classList.remove('is-open');
         }
 
         function syncCategoryCoverInputs() {
@@ -1476,6 +1751,9 @@
             document.getElementById('roomForm').reset();
             currentRoomId = null;
             currentRoomSnapshot = null;
+            selectedCategoryEquipmentIds = [];
+            syncCategoryEquipmentInput();
+            renderCategoryEquipmentSummary();
             selectedCategoryGalleryCoverId = '';
             selectedCategoryPendingCoverIndex = null;
             syncCategoryCoverInputs();
@@ -1503,7 +1781,9 @@
                         document.querySelector('input[name="location"]').value = room.location;
                         document.querySelector('input[name="capacity"]').value = room.capacity;
                         document.querySelector('input[name="price_per_hour"]').value = room.price_per_hour;
-                        document.querySelector('textarea[name="equipment"]').value = room.equipment;
+                        selectedCategoryEquipmentIds = room.equipment_ids || [];
+                        syncCategoryEquipmentInput();
+                        renderCategoryEquipmentSummary();
                         document.querySelector('select[name="office"]').value = room.office_id || "";
                         renderRoomImagesPanel(room);
                         updateCategoryRoomUploadStatus();
@@ -1523,6 +1803,7 @@
             e.preventDefault();
 
             syncCategoryGalleryInput();
+            syncCategoryEquipmentInput();
             const formData = new FormData(this);
             let url = '/api/add-room/';
 
@@ -1724,9 +2005,28 @@
 
             updateCategoryRoomUploadStatus();
         });
+        document.getElementById('openCategoryEquipmentPicker').addEventListener('click', openCategoryEquipmentPicker);
+        document.getElementById('closeCategoryEquipmentPicker').addEventListener('click', closeCategoryEquipmentPicker);
+        document.getElementById('saveCategoryEquipmentPicker').addEventListener('click', function() {
+            const checkedIds = Array.from(document.querySelectorAll('#categoryEquipmentPickerList input[type="checkbox"]:checked'))
+                .map(input => Number(input.value))
+                .filter(Number.isFinite);
+
+            selectedCategoryEquipmentIds = checkedIds;
+            syncCategoryEquipmentInput();
+            renderCategoryEquipmentSummary();
+            closeCategoryEquipmentPicker();
+        });
+        document.getElementById('categoryEquipmentPickerModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeCategoryEquipmentPicker();
+            }
+        });
         getCategoryGalleryInput().addEventListener('change', handleCategoryGallerySelection);
 
         syncCategoryCoverInputs();
+        syncCategoryEquipmentInput();
+        renderCategoryEquipmentSummary();
         renderPendingCategoryGalleryFiles();
         updateCategoryRoomUploadStatus();
     </script>

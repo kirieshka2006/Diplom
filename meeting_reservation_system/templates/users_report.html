@@ -381,6 +381,12 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
+        .role-owner {
+            background: rgba(99, 102, 241, 0.14);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.34);
+        }
+
         .role-manager {
             background: rgba(245, 158, 11, 0.1);
             color: var(--accent-warning);
@@ -552,6 +558,7 @@
                             <label>Выберите роль</label>
                             <select name="role">
                                 <option value="">Все роли</option>
+                                <option value="owner" {% if request.GET.role == 'owner' %}selected{% endif %}>Владелец</option>
                                 <option value="admin" {% if request.GET.role == 'admin' %}selected{% endif %}>Администратор</option>
                                 <option value="manager" {% if request.GET.role == 'manager' %}selected{% endif %}>Менеджер</option>
                                 <option value="user" {% if request.GET.role == 'user' %}selected{% endif %}>Пользователь</option>
@@ -637,6 +644,10 @@
                 <div class="label">Обычных пользователей</div>
             </div>
             <div class="stat-card">
+                <div class="value">{{ stats.owners }}</div>
+                <div class="label">Владельцев</div>
+            </div>
+            <div class="stat-card">
                 <div class="value">{{ stats.admins }}</div>
                 <div class="label">Администраторов</div>
             </div>
@@ -700,9 +711,7 @@
                         </td>
                         <td data-label="Дата рождения">{{ user.birth_date|date:"d.m.Y"|default:"—" }}</td>
                         <td data-label="Роль">
-                            <span class="role-badge role-{{ user.role }}">
-                                {% if user.role == 'admin' %}Админ{% elif user.role == 'manager' %}Менеджер{% else %}Пользователь{% endif %}
-                            </span>
+                            <span class="role-badge role-{{ user.role }}">{{ user.get_role_display }}</span>
                         </td>
                         <td data-label="Личные данные">
                             {% if user.first_name or user.last_name or user.phone or user.birth_date %}
